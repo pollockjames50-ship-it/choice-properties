@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "project": "Choice Properties",
+  "project": "Property Rental Platform",
   "type": "static-site",
   "description": "Pure static website. No server. No runtime. Deployed via Cloudflare Pages only.",
 

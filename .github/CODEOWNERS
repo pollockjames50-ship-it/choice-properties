@@ -1,34 +1,5 @@
-# Choice Properties — CODEOWNERS
-#
-# Files listed here require a review from the project owner
-# before any pull request can be merged on GitHub.
-# This protects critical build and security files from
-# accidental or automated modification.
-#
-# Syntax: <file-pattern> <github-username-or-team>
-
-# Build script — generates config.js at Cloudflare Pages deploy time
-p2/generate-config.js @choicepropertyofficial1-collab
-
-# Cloudflare Pages security headers (CSP, HSTS, X-Frame-Options, etc.)
-p2/_headers @choicepropertyofficial1-collab
-
-# Complete database schema — run once in Supabase SQL Editor only
-p2/SETUP.sql @choicepropertyofficial1-collab
-
-# Core Supabase API client — all frontend API calls go through this
-p2/js/cp-api.js @choicepropertyofficial1-collab
-
-# Rental application logic
-p2/js/apply.js @choicepropertyofficial1-collab
-p2/js/apply-files.js @choicepropertyofficial1-collab
-p2/js/apply-property.js @choicepropertyofficial1-collab
-p2/js/apply-submit.js @choicepropertyofficial1-collab
-p2/js/apply-validation.js @choicepropertyofficial1-collab
-p2/js/apply-translations.js @choicepropertyofficial1-collab
-
-# This file itself — prevents bypassing ownership rules
-.github/CODEOWNERS @choicepropertyofficial1-collab
-
-# Agent instruction files — rule changes require owner approval
-p2/.agents/instructions.md @choicepropertyofficial1-collab
+# CODEOWNERS
+# Add your GitHub username or team to protect critical files.
+# Example:
+#   /generate-config.js   @your-github-username
+#   /_headers             @your-github-username

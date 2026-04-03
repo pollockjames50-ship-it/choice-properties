@@ -1,4 +1,4 @@
-# Contributing to Choice Properties
+# Contributing
 
 ## Read Before You Do Anything
 

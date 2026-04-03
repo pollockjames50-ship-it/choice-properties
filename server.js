@@ -1,4 +1,4 @@
-// Choice Properties — Replit Static File Server
+// Replit Static File Server
 // Serves the static site and injects config.js from environment variables.
 
 const http = require('http');
@@ -14,10 +14,10 @@ const config = {
   IMAGEKIT_URL:      process.env.IMAGEKIT_URL        || '',
   IMAGEKIT_PUBLIC_KEY: process.env.IMAGEKIT_PUBLIC_KEY || '',
   GEOAPIFY_API_KEY:  process.env.GEOAPIFY_API_KEY   || '',
-  COMPANY_NAME:      process.env.COMPANY_NAME        || 'Choice Properties',
-  COMPANY_EMAIL:     process.env.COMPANY_EMAIL       || 'hello@choiceproperties.com',
+  COMPANY_NAME:      process.env.COMPANY_NAME        || '',
+  COMPANY_EMAIL:     process.env.COMPANY_EMAIL       || '',
   COMPANY_PHONE:     process.env.COMPANY_PHONE       || '',
-  COMPANY_TAGLINE:   process.env.COMPANY_TAGLINE     || 'Your trust is our standard.',
+  COMPANY_TAGLINE:   process.env.COMPANY_TAGLINE     || '',
   COMPANY_ADDRESS:   process.env.COMPANY_ADDRESS     || '',
   LEASE_DEFAULT_LATE_FEE_FLAT:  Number(process.env.LEASE_DEFAULT_LATE_FEE_FLAT)  || 50,
   LEASE_DEFAULT_LATE_FEE_DAILY: Number(process.env.LEASE_DEFAULT_LATE_FEE_DAILY) || 10,
@@ -136,7 +136,7 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`Choice Properties server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
   console.log(`SUPABASE_URL: ${config.SUPABASE_URL ? '✓ set' : '✗ missing'}`);
   console.log(`SUPABASE_ANON_KEY: ${config.SUPABASE_ANON_KEY ? '✓ set' : '✗ missing'}`);
   console.log(`IMAGEKIT_URL: ${config.IMAGEKIT_URL ? '✓ set' : '✗ missing'}`);

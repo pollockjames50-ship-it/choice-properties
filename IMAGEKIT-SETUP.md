@@ -1,4 +1,4 @@
-# Choice Properties — ImageKit Setup Guide
+# ImageKit Setup Guide
 
 ImageKit handles all property photos and landlord avatars. It's optional for launch — placeholder images show until configured. Everything else (applications, leases, emails, messaging) works without it.
 

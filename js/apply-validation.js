@@ -1,4 +1,4 @@
-// Choice Properties — apply-validation.js
+// apply-validation.js
 // Validation methods for the RentalApplication class.
 // Loaded before apply.js. Applied via Object.assign(RentalApplication.prototype, ...) at end of apply.js.
 //

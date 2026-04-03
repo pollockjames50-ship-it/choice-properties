@@ -1,4 +1,4 @@
-# Choice Properties — System Architecture
+# System Architecture
 
 ---
 
@@ -32,7 +32,7 @@
 
 ## Overview
 
-Choice Properties is a **pure static frontend** connected to fully hosted backend services. There is no application server in this repository. Every component runs either in the browser or on a third-party hosted platform.
+This is a **pure static frontend** connected to fully hosted backend services. There is no application server in this repository. Every component runs either in the browser or on a third-party hosted platform.
 
 ```
 Browser

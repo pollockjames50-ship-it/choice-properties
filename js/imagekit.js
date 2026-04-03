@@ -1,5 +1,5 @@
 // ============================================================
-// Choice Properties — ImageKit Upload Client
+// ImageKit Upload Client
 // js/imagekit.js
 //
 // All photo uploads (property photos, avatars) go through

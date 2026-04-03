@@ -1,8 +1,8 @@
-# Security Policy — Choice Properties
+# Security Policy
 
 ## Architecture Overview
 
-Choice Properties is a **static frontend** connected to Supabase cloud. All security-sensitive logic runs server-side in Supabase Edge Functions (Deno), not in this repository.
+This is a **static frontend** connected to Supabase cloud. All security-sensitive logic runs server-side in Supabase Edge Functions (Deno), not in this repository.
 
 | Layer | Where it runs | Notes |
 |---|---|---|

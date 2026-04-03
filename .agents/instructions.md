@@ -1,5 +1,5 @@
 # ================================================================
-# CHOICE PROPERTIES — AGENT INSTRUCTIONS (READ FIRST, ALWAYS)
+# AGENT INSTRUCTIONS (READ FIRST, ALWAYS)
 # ================================================================
 # This file is read by ALL AI agents and automated tools on Replit.
 # Every rule below is MANDATORY and PERMANENT.

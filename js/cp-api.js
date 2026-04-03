@@ -1,5 +1,5 @@
 // ============================================================
-// Choice Properties — Shared API Client (cp-api.js)
+// Shared API Client (cp-api.js)
 // All pages import this after config.js
 // ============================================================
 

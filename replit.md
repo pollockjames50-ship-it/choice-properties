@@ -1,8 +1,8 @@
-# Choice Properties — Replit Setup
+# Property Rental Platform — Replit Setup
 
 ## Overview
 
-Choice Properties is a nationwide rental marketplace — a static HTML/CSS/JS site with a Supabase cloud backend.
+A static HTML/CSS/JS site with a Supabase cloud backend, served locally via a lightweight Node.js server and deployed to Cloudflare Pages.
 
 ## Architecture
 
@@ -10,7 +10,6 @@ Choice Properties is a nationwide rental marketplace — a static HTML/CSS/JS si
 - **Backend**: Supabase cloud (PostgreSQL + Auth + Storage + Edge Functions)
 - **Image CDN**: ImageKit
 - **Address autocomplete**: Geoapify
-- **Email relay**: GAS (Google Apps Script) + Resend
 
 ## How It Runs on Replit
 
@@ -27,7 +26,7 @@ The server:
 
 ## Environment Variables
 
-Set in Replit's environment (already configured):
+Set in Replit's environment:
 
 | Variable | Purpose |
 |---|---|

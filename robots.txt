@@ -24,4 +24,4 @@ Allow: /landlord/profile.html
 # This placeholder is automatically rewritten at build time by generate-config.js
 # when SITE_URL is set in your Cloudflare Pages environment variables.
 # You do not need to edit this file manually.
-Sitemap: https://choicepropertiesofficial.pages.dev/sitemap.xml
+Sitemap: https://YOUR-DOMAIN.com/sitemap.xml

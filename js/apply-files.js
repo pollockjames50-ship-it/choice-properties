@@ -1,4 +1,4 @@
-// Choice Properties — apply-files.js
+// apply-files.js
 // File upload and payment icon grid setup for the RentalApplication class.
 // Loaded before apply.js. Applied via Object.assign(RentalApplication.prototype, ...) at end of apply.js.
 //

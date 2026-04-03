@@ -1,4 +1,4 @@
-# Choice Properties — Setup Guide
+# Setup Guide
 
 Do these steps in order. Don't skip any.
 
@@ -103,7 +103,7 @@ In Supabase → **Settings → Edge Functions → Environment Variables**, add t
 |---|---|
 | `SUPABASE_URL` | Your Supabase project URL |
 | `SUPABASE_ANON_KEY` | Your Supabase anon public key |
-| `SITE_URL` | Your production domain e.g. `https://choiceproperties.com` (no trailing slash) — rewrites `sitemap.xml` and `robots.txt` at build time |
+| `SITE_URL` | Your production domain e.g. `https://yourdomain.com` (no trailing slash) — rewrites `sitemap.xml` and `robots.txt` at build time |
 | `IMAGEKIT_URL` | `https://ik.imagekit.io/your-id` |
 | `IMAGEKIT_PUBLIC_KEY` | Your ImageKit public key |
 | `GEOAPIFY_API_KEY` | Your Geoapify API key (address autocomplete) |
@@ -111,7 +111,7 @@ In Supabase → **Settings → Edge Functions → Environment Variables**, add t
 | `COMPANY_EMAIL` | Your business email |
 | `COMPANY_PHONE` | Your phone number |
 | `COMPANY_ADDRESS` | Your business address |
-| `COMPANY_TAGLINE` | Your brand tagline e.g. `Your trust is our standard.` |
+| `COMPANY_TAGLINE` | Your brand tagline |
 | `ADMIN_EMAILS` | Comma-separated admin email(s) e.g. `you@email.com` — used for UI display only. For server-side admin notifications, set `ADMIN_EMAIL` (singular) in Supabase Edge Function secrets (Step 4). |
 
 5. Click **Save and Deploy**
@@ -229,4 +229,4 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON saved_properties TO authenticated;
 
 ---
 
-*Choice Properties · Your trust is our standard.*
+*Setup complete — ready to deploy.*

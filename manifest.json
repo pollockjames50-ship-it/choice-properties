@@ -1,7 +1,7 @@
 {
-  "name": "Choice Properties",
-  "short_name": "Choice",
-  "description": "Nationwide property rental marketplace — find, apply, and lease your next home.",
+  "name": "Property Rental Platform",
+  "short_name": "Rentals",
+  "description": "Property rental marketplace — find, apply, and lease your next home.",
   "start_url": "/index.html",
   "scope": "/",
   "display": "standalone",

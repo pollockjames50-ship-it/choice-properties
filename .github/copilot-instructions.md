@@ -1,6 +1,4 @@
-# Choice Properties — GitHub Copilot Instructions
-# Official Copilot instruction file: .github/copilot-instructions.md
-# Full rule set: .agents/instructions.md
+# GitHub Copilot Instructions
 
 ## Project Type
 
