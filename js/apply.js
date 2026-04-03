@@ -679,11 +679,11 @@ class RentalApplication {
         const banner = document.createElement('div');
         banner.id = 'draftResumeBanner';
         banner.style.cssText = [
-            'position:fixed', 'bottom:0', 'left:0', 'right:0', 'z-index:9999',
+            'position:static', 'z-index:9999',
             'background:#0a1628', 'color:#fff', 'padding:14px 20px',
             'display:flex', 'align-items:center', 'justify-content:space-between',
-            'gap:12px', 'flex-wrap:wrap', 'box-shadow:0 -4px 24px rgba(0,0,0,0.25)',
-            'font-family:var(--font-body,sans-serif)', 'font-size:14px'
+            'gap:12px', 'flex-wrap:wrap', 'box-shadow:0 4px 24px rgba(0,0,0,0.25)',
+            'font-family:var(--font-body,sans-serif)', 'font-size:14px', 'margin-bottom:20px'
         ].join(';');
         banner.innerHTML = `
           <span style="display:flex;align-items:center;gap:8px">
@@ -698,7 +698,7 @@ class RentalApplication {
               Resume Draft
             </button>
           </span>`;
-        document.body.appendChild(banner);
+        document.body.insertBefore(banner, document.body.firstChild);
 
         document.getElementById('draftResumeBtn').addEventListener('click', () => {
             this._doRestoreFromDraft(data);
