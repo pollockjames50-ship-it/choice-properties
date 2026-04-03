@@ -40,7 +40,7 @@ channel = "stable-25_05"
 [userenv.shared]
 SUPABASE_URL = "https://tlfmwetmhthpyrytrcfo.supabase.co"
 IMAGEKIT_URL = "https://ik.imagekit.io/Choiceproperties"
-SITE_URL = "https://choicepropertiesofficial.pages.dev"
+SITE_URL = "https://choice-properties-4bi.pages.dev"
 COMPANY_ADDRESS = "2265 Livernois, Suite 500, Troy, MI 48083"
 COMPANY_EMAIL = "choicepropertygroup@hotmail.com"
 COMPANY_PHONE = "7077063137"
