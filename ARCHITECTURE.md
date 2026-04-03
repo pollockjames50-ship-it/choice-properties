@@ -91,7 +91,7 @@ The build step uses only Node.js built-in modules (`fs`, `process.env`). No npm 
 | `imagekit-upload` | Authenticated photo upload to ImageKit | Authenticated user |
 | `get-application-status` | Tenant status check by Application ID | Public (rate-limited) |
 
-**Deployment:** `npx supabase functions deploy --project-ref cfsdhylbwzyuvcvbnrel` (one-time; see SETUP.md → Step 7)
+**Deployment:** `npx supabase functions deploy --project-ref tlfmwetmhthpyrytrcfo` (one-time; see SETUP.md → Step 7)
 
 These functions are NOT part of this repository's local runtime. They run on Deno in Supabase's cloud and never execute locally.
 

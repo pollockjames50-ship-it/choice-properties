@@ -131,7 +131,7 @@ npx supabase login
 ```
 3. Deploy all functions:
 ```
-npx supabase functions deploy --project-ref cfsdhylbwzyuvcvbnrel
+npx supabase functions deploy --project-ref tlfmwetmhthpyrytrcfo
 ```
 4. Go to **Supabase → Edge Functions** — you should see all functions listed and active
 
