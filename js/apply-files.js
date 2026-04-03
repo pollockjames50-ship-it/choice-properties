@@ -24,8 +24,20 @@ window.APPLY_FILES = {
         const ALLOWED  = ['image/jpeg', 'image/png', 'application/pdf'];
 
         const processFile = (file, cfg) => {
-            if (!ALLOWED.includes(file.type)) { CP.UI.toast('Please upload a JPG, PNG, or PDF file.', 'error'); return; }
-            if (file.size > MAX_SIZE)          { CP.UI.toast('File exceeds 10 MB. Please upload a smaller file.', 'error'); return; }
+            if (!ALLOWED.includes(file.type)) { 
+                CP.UI.toast('Please upload a JPG, PNG, or PDF file.', 'error'); 
+                // Clear the input if invalid
+                const input = document.getElementById(cfg.inputId);
+                if (input) input.value = '';
+                return; 
+            }
+            if (file.size > MAX_SIZE) { 
+                CP.UI.toast('File exceeds 10 MB. Please upload a smaller file.', 'error'); 
+                // Clear the input if invalid
+                const input = document.getElementById(cfg.inputId);
+                if (input) input.value = '';
+                return; 
+            }
             this._uploadedDocs[cfg.stateKey] = file;
             const fnEl      = document.getElementById(cfg.filenameId);
             const previewEl = document.getElementById(cfg.previewId);
