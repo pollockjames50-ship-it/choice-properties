@@ -95,6 +95,12 @@ function serveFile(res, filePath, statusCode) {
 const server = http.createServer((req, res) => {
   let urlPath = req.url.split('?')[0];
 
+  // Redirect /favicon.ico to the SVG favicon (browsers always auto-request this)
+  if (urlPath === '/favicon.ico') {
+    res.writeHead(302, { Location: '/assets/favicon.svg' });
+    return res.end();
+  }
+
   // Serve dynamically generated config.js
   if (urlPath === '/config.js') {
     res.writeHead(200, {

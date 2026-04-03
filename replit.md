@@ -7,7 +7,7 @@ A static HTML/CSS/JS property rental platform with a Supabase cloud backend, ser
 ## Architecture
 
 - **Frontend**: Static HTML/CSS/JS site (no frontend framework/bundler)
-- **Backend**: Supabase cloud (PostgreSQL + Auth + Storage + Edge Functions)
+- **Backend**: Supabase cloud (PostgreSQL + Auth + Storage + Edge Functions) — hosted externally, not on Replit
 - **Image CDN**: ImageKit
 - **Address autocomplete**: Geoapify
 - **Server**: Node.js (`server.js`) — serves static files and generates `config.js` from env vars
@@ -20,12 +20,13 @@ The server:
 1. Generates `/config.js` on every request from environment variables (no hardcoded values)
 2. Serves all static files (HTML, CSS, JS, images, fonts) from the project root
 3. Handles directory index resolution and `.html` extension inference
+4. Redirects `/favicon.ico` to `/assets/favicon.svg`
 
 ## Environment Variables & Secrets
 
 All configuration is stored in Replit's Environment Variables and Secrets panels — nothing is hardcoded in source files.
 
-| Variable | Where | Purpose |
+| Variable | Type | Purpose |
 |---|---|---|
 | `SUPABASE_URL` | Env var (shared) | Supabase project URL |
 | `SUPABASE_ANON_KEY` | **Secret** | Supabase anonymous key (public JWT) |
@@ -48,7 +49,7 @@ All configuration is stored in Replit's Environment Variables and Secrets panels
 | `server.js` | Node.js static file server — Replit entry point |
 | `generate-config.js` | Cloudflare Pages build script (not used on Replit) |
 | `js/cp-api.js` | Shared API client — wraps Supabase calls |
-| `supabase/functions/` | Supabase Edge Functions (deployed to Supabase, not run on Replit) |
+| `supabase/functions/` | Supabase Edge Functions (deployed to Supabase cloud, not run on Replit) |
 | `SETUP.sql` | Database schema (applied in Supabase dashboard) |
 
 ## Supabase Edge Functions
