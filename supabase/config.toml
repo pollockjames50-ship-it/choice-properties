@@ -25,8 +25,16 @@ enabled = true
 
 [auth]
 enabled = true
+# IMPORTANT: In Supabase Dashboard → Authentication → URL Configuration,
+# set Site URL to your production domain (e.g. https://yourdomain.com).
+# This local value is only used by the Supabase CLI for local development.
 site_url = "http://localhost:3000"
-additional_redirect_urls = ["https://localhost:3000"]
+# Add your production domain redirect URLs in Supabase Dashboard → Auth → URL Config.
+# These local values are only used by the Supabase CLI for local dev.
+additional_redirect_urls = [
+  "https://localhost:3000",
+  "http://localhost:5000"
+]
 jwt_expiry = 3600
 enable_refresh_token_rotation = true
 refresh_token_reuse_interval = 10
@@ -40,3 +48,50 @@ enable_confirmations = false
 [edge_runtime]
 enabled = true
 policy = "oneshot"
+
+# ── Per-function JWT config ────────────────────────────────────────────────────
+# verify_jwt = false on every function is REQUIRED.
+#
+# WHY: New Supabase projects (created after ~2024) issue ES256 JWTs.
+# The Supabase API gateway's built-in verify_jwt = true validation uses HS256,
+# so it rejects every request with HTTP 401 before the function even runs.
+# All functions perform their own server-side auth via getUser() / requireAuth()
+# which correctly handles both HS256 and ES256 tokens regardless of algorithm.
+# Setting verify_jwt = false bypasses gateway verification and lets our code run.
+#
+# SECURITY: This is safe. All protected functions still enforce auth via
+# requireAuth() / requireAdmin() which calls supabase.auth.getUser(jwt) —
+# a live server-side token verification that cannot be spoofed.
+
+[functions.process-application]
+verify_jwt = false
+
+[functions.get-application-status]
+verify_jwt = false
+
+[functions.update-status]
+verify_jwt = false
+
+[functions.generate-lease]
+verify_jwt = false
+
+[functions.sign-lease]
+verify_jwt = false
+
+[functions.send-message]
+verify_jwt = false
+
+[functions.send-inquiry]
+verify_jwt = false
+
+[functions.mark-paid]
+verify_jwt = false
+
+[functions.mark-movein]
+verify_jwt = false
+
+[functions.imagekit-upload]
+verify_jwt = false
+
+[functions.imagekit-delete]
+verify_jwt = false

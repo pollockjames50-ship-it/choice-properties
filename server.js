@@ -101,6 +101,23 @@ const server = http.createServer((req, res) => {
     return res.end();
   }
 
+  // Health check — shows which env vars are set/missing (no secret values exposed)
+  if (urlPath === '/health') {
+    const checks = {
+      SUPABASE_URL:        !!process.env.SUPABASE_URL,
+      SUPABASE_ANON_KEY:   !!process.env.SUPABASE_ANON_KEY,
+      IMAGEKIT_URL:        !!process.env.IMAGEKIT_URL,
+      IMAGEKIT_PUBLIC_KEY: !!process.env.IMAGEKIT_PUBLIC_KEY,
+      GEOAPIFY_API_KEY:    !!process.env.GEOAPIFY_API_KEY,
+      COMPANY_NAME:        !!process.env.COMPANY_NAME,
+      SITE_URL:            !!process.env.SITE_URL,
+    };
+    const missing = Object.entries(checks).filter(([,v]) => !v).map(([k]) => k);
+    const status = missing.length === 0 ? 'ok' : 'degraded';
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({ status, checks, missing }, null, 2));
+  }
+
   // Serve dynamically generated config.js
   if (urlPath === '/config.js') {
     res.writeHead(200, {
