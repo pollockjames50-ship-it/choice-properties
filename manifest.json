@@ -1,0 +1,49 @@
+{
+  "name": "Choice Properties",
+  "short_name": "Choice",
+  "description": "Nationwide property rental marketplace — find, apply, and lease your next home.",
+  "start_url": "/index.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#006aff",
+  "background_color": "#ffffff",
+  "lang": "en-US",
+  "icons": [
+    {
+      "src": "/assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Browse Listings",
+      "short_name": "Listings",
+      "description": "Search available rental properties",
+      "url": "/listings.html",
+      "icons": [{ "src": "/assets/favicon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Track Application",
+      "short_name": "Track",
+      "description": "Check your application status",
+      "url": "/apply/dashboard.html",
+      "icons": [{ "src": "/assets/favicon.svg", "sizes": "any" }]
+    }
+  ],
+  "categories": ["lifestyle", "utilities"]
+}

@@ -1,0 +1,76 @@
+# ============================================================
+# CHOICE PROPERTIES — GITIGNORE
+# ============================================================
+
+# CRITICAL: config.js is generated at Cloudflare Pages build time ONLY.
+# Never commit — it would leak credentials and break the deployment pipeline.
+config.js
+config.*.js
+
+# CRITICAL: Never commit .env files — secrets belong in Supabase and Cloudflare dashboards.
+.env
+.env.*
+*.env
+.env.local
+.env.*.local
+
+# Node modules — never commit generated/installed files
+node_modules/
+package-lock.json.bak
+
+# ============================================================
+# REPLIT ENVIRONMENT FILES
+#
+# .replit and replit.nix ARE committed so their protections
+# (run = "", editor-only config) travel with the repo to every
+# new Replit account that imports from GitHub.
+#
+# .agents/instructions.md IS committed so the mandatory agent
+# rules travel with the repo and apply in every new Replit account.
+#
+# Only auto-generated Replit runtime/cache files are ignored.
+# ============================================================
+.replit-guard.js
+.replit-cache/
+.replit-backup/
+.upm/
+replit_zip_error_log.txt
+.cache/
+.local/
+.config/
+.npm/
+.nvm/
+
+# Database files (not applicable — DB is Supabase cloud-hosted)
+*.db
+*.sqlite
+*.sqlite3
+*.sql.bak
+migrations/*.sql.bak
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.swp
+.swo
+*~
+*.tmp
+.idea/
+.vscode/settings.json
+launch.json
+
+# Uploaded / temporary assets
+attached_assets/
+uploads/
+downloads/
+temp/
+tmp/
+
+# Build artifacts
+dist/
+build/
+out/
+
+# Logs
+*.log
+logs/

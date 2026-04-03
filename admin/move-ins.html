@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+  <meta name="theme-color" content="#006aff">
+  <link rel="manifest" href="/manifest.json"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Move-Ins — Choice Properties Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <script defer src="/config.js"></script><link rel="preload" href="/css/main.css?v=1775137055043" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/css/main.css?v=1775137055043"></noscript>
+<link rel="stylesheet" href="/assets/fontawesome.css">
+  <link rel="stylesheet" href="/css/admin.css?v=1775137055043">
+  <link rel="preload" href="/css/mobile.css?v=1775137055043" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/css/mobile.css?v=1775137055043"></noscript>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+</head><body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="sidebar" id="adminSidebar"><div class="sidebar-logo"><div class="name">Choice Properties</div><div class="sub">Admin Portal</div></div>
+<nav><div class="nav-section">Overview</div><a class="nav-item" href="dashboard.html"><span class="icon">⊞</span> Dashboard</a>
+<div class="nav-section">Applications</div><a class="nav-item" href="applications.html"><span class="icon">📋</span> All Applications</a>
+<a class="nav-item" href="leases.html"><span class="icon">📄</span> Leases</a>
+<a class="nav-item active" href="move-ins.html"><span class="icon">🏠</span> Move-Ins</a>
+<a class="nav-item" href="messages.html"><span class="icon">💬</span> Messages</a>
+<div class="nav-section">Platform</div><a class="nav-item" href="landlords.html"><span class="icon">👤</span> Landlords</a>
+<a class="nav-item" href="listings.html"><span class="icon">🏢</span> Listings</a>
+<a class="nav-item" href="email-logs.html"><span class="icon">📧</span> Email Logs</a>
+    <a class="nav-item" href="audit-log.html"><span class="icon">🔍</span> Audit Log</a></nav>
+<div class="sidebar-footer"><a href="/index.html" target="_blank" style="display:block;font-size:12px;color:#8892a2;text-decoration:none;margin-bottom:8px;text-align:center"><i class="fas fa-external-link-alt" style="margin-right:4px"></i> View Live Site</a>
+    <div class="admin-name" id="admin-name">Loading…</div>
+    <button class="sign-out" onclick="CP.sb().auth.signOut().then(()=>location.href='login.html')">Sign Out</button></div></aside>
+<div class="main"><div class="topbar">
+    <button class="mobile-menu-btn" id="menuBtn" aria-label="Open menu"><i class="fas fa-bars"></i></button><div><div class="page-title">Move-In Confirmations</div><div class="page-sub">Signed leases ready for move-in confirmation</div></div></div>
+<div class="content">
+<div class="card"><div class="table-wrap"><table>
+<thead><tr><th>App ID</th><th>Tenant</th><th>Property</th><th>Lease Status</th><th>Lease Signed</th><th>Move-In Status</th><th>Move-In Date</th><th>Actions</th></tr></thead>
+<tbody id="tbody"></tbody></table></div></div></div></div>
+<div class="modal-overlay" id="movein-modal"><div class="modal">
+<div class="modal-header"><span class="modal-title">Confirm Move-In</span><button class="modal-close" onclick="closeModal()">✕</button></div>
+<div class="modal-body">
+<div class="form-group"><label class="field-label">Move-In Date</label><input type="date" id="m-date" style="width:100%"></div>
+<div class="form-group"><label class="field-label">Notes</label><textarea id="m-notes" style="width:100%;height:80px"></textarea></div>
+</div>
+<div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="submit()">Confirm Move-In</button></div>
+</div></div>
+<script type="module" src="/js/cp-api.js"></script>
+<script>
+let cur=null;
+document.addEventListener('DOMContentLoaded', async()=>{
+  const ok = await CP.Auth.requireAdmin();
+  if (!ok) return;
+  const user=await CP.Auth.getUser(); document.getElementById('admin-name').textContent=user?.email||'Admin';
+  const tb=document.getElementById('tbody');
+  tb.innerHTML = CP.UI.skeletonRows(5, 8);
+  const {data,error}=await CP.sb().from('applications').select('app_id,first_name,last_name,email,property_address,lease_signed_date,move_in_status,move_in_date_actual,lease_status').or('lease_status.in.(signed,co_signed),move_in_status.eq.pending').neq('move_in_status','completed').order('lease_signed_date',{ascending:false});
+  if(error){ tb.innerHTML = CP.UI.errorState('Failed to load move-ins.', 8); return; }
+  if(!data?.length){tb.innerHTML=CP.UI.emptyState('No signed leases yet','🏠',8);return;}
+  tb.innerHTML=(data||[]).map(a=>`<tr id="row-${a.app_id}">
+    <td class="mono">${a.app_id}</td><td><strong>${a.first_name} ${a.last_name}</strong></td>
+    <td class="truncate">${a.property_address||'—'}</td>
+    <td>${CP.UI.leaseBadge(a.lease_status)}</td>
+    <td>${CP.UI.fmt.date(a.lease_signed_date)}</td>
+    <td>${a.move_in_status?'<span class="badge badge-success">'+a.move_in_status+'</span>':'<span class="badge badge-warning">Pending</span>'}</td>
+    <td>${a.move_in_date_actual?CP.UI.fmt.date(a.move_in_date_actual):'—'}</td>
+    <td>${!a.move_in_status||a.move_in_status==='pending'?`<button class="btn btn-primary btn-sm" onclick="openModal('${a.app_id}')">Confirm Move-In</button>`:'<span class="text-success">✓ Done</span>'}</td>
+  </tr>`).join('');
+
+  // Deep-link: scroll to and highlight a specific application row if ?id= is present
+  const targetId = new URLSearchParams(location.search).get('id');
+  if (targetId) {
+    const row = document.getElementById(`row-${targetId}`);
+    if (row) {
+      row.style.outline = '2px solid var(--color-brand-light)';
+      row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+});
+function openModal(id){cur=id;document.getElementById('m-date').value=new Date().toISOString().split('T')[0];document.getElementById('movein-modal').classList.add('open');}
+function closeModal(){document.getElementById('movein-modal').classList.remove('open');}
+async function submit(){
+  const res=await CP.Applications.markMoveIn(cur,document.getElementById('m-date').value,document.getElementById('m-notes').value);
+  if(res.ok){closeModal();CP.UI.toast('Move-in confirmed! Email sent to tenant.','success');location.reload();}
+  else CP.UI.toast('Error: '+res.error,'error');
+}
+</script>
+<script>
+// Mobile sidebar toggle
+(function(){
+  var btn = document.getElementById('menuBtn');
+  var sidebar = document.getElementById('adminSidebar');
+  var overlay = document.getElementById('sidebarOverlay');
+  if(!btn) return;
+  function open(){ sidebar.classList.add('open'); overlay.classList.add('open'); }
+  function close(){ sidebar.classList.remove('open'); overlay.classList.remove('open'); }
+  btn.addEventListener('click', open);
+  overlay.addEventListener('click', close);
+  // sidebarToggle marker
+})();
+</script>
+</body></html>

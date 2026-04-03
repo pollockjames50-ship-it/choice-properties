@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+  <meta name="theme-color" content="#006aff">
+  <link rel="manifest" href="/manifest.json">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Choice Properties — Rental Application</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+      <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+    <link rel="preload" href="/css/main.css?v=1775137055043" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/css/main.css?v=1775137055043"></noscript>
+    <link rel="stylesheet" href="/assets/fontawesome.css">
+      <link rel="stylesheet" href="/css/apply.css?v=1775137055043">
+    <!-- config.js must load first — sets window.CONFIG used by apply.js -->
+    <script defer src="/config.js"></script>
+    <!-- Supabase UMD — defer so it doesn't block first paint; loads before cp-api.js (module) -->
+    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+    <!-- cp-api.js — sets window.CP (Supabase helpers) used by apply.js -->
+    <script type="module" src="/js/cp-api.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script defer src="/js/components.js"></script>
+</head>
+<body>
+
+<div class="modal-backdrop" id="modalBackdrop"></div>
+
+<!-- Site nav bar -->
+<div id="site-nav"></div>
+
+<div class="container">
+
+    <!-- ── PROGRESS BAR (7-step) ───────────────────────────────── -->
+    <div class="progress-container" data-progress-text="Step 1 of 7: Property &amp; Basics" role="progressbar" aria-valuemin="0" aria-valuemax="7" aria-valuenow="1" aria-label="Application progress">
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+            <div class="progress-step active" id="step1">
+                <div class="step-number">1</div>
+                <div class="step-label" data-i18n="step1Label">Property &amp; Basics</div>
+            </div>
+            <div class="progress-step" id="step2">
+                <div class="step-number">2</div>
+                <div class="step-label" data-i18n="step2Label">Residency</div>
+            </div>
+            <div class="progress-step" id="step3">
+                <div class="step-number">3</div>
+                <div class="step-label" data-i18n="step3Label">Employment</div>
+            </div>
+            <div class="progress-step" id="step4">
+                <div class="step-number">4</div>
+                <div class="step-label" data-i18n="step4Label">Documents</div>
+            </div>
+            <div class="progress-step" id="step5">
+                <div class="step-number">5</div>
+                <div class="step-label" data-i18n="step5Label">References</div>
+            </div>
+            <div class="progress-step" id="step6">
+                <div class="step-number">6</div>
+                <div class="step-label" data-i18n="step6Label">Payment</div>
+            </div>
+            <div class="progress-step" id="step7">
+                <div class="step-number">7</div>
+                <div class="step-label" data-i18n="step7Label">Review</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Persistent property context banner (shown after Step 1) -->
+    <div class="property-confirm-banner" id="propertyContextBanner" style="display:none;">
+        <div class="pcb-icon"><i class="fas fa-building"></i></div>
+        <div class="pcb-body">
+            <div style="font-size:11px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">Applying for</div>
+            <div class="pcb-title" id="pcbContextTitle"></div>
+            <div class="pcb-meta" id="pcbContextMeta"></div>
+        </div>
+        <div class="pcb-badge">Selected</div>
+    </div>
+
+    <!-- Submission progress overlay -->
+    <div class="submission-progress" id="submissionProgress">
+        <div class="progress-bar-segments">
+            <div class="progress-segment" id="progressSegment1"></div>
+            <div class="progress-segment" id="progressSegment2"></div>
+            <div class="progress-segment" id="progressSegment3"></div>
+            <div class="progress-segment" id="progressSegment4"></div>
+        </div>
+        <div class="step-icons">
+            <div class="step-item" id="stepItem1">
+                <i class="fas fa-file-alt"></i>
+                <span class="step-label" data-i18n="processing">Processing</span>
+            </div>
+            <div class="step-item" id="stepItem2">
+                <i class="fas fa-search"></i>
+                <span class="step-label" data-i18n="validating">Validating</span>
+            </div>
+            <div class="step-item" id="stepItem3">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <span class="step-label" data-i18n="submitting">Submitting</span>
+            </div>
+            <div class="step-item" id="stepItem4">
+                <i class="fas fa-check-circle"></i>
+                <span class="step-label" data-i18n="complete">Complete</span>
+            </div>
+        </div>
+        <div class="status-area" id="statusArea" aria-live="polite" aria-atomic="true">
+            <i class="fas fa-spinner fa-pulse" id="submissionSpinner"></i>
+            <span id="submissionMessage">Processing your application...</span>
+        </div>
+        <div class="submission-note" data-i18n="submissionMessage">Please don't close this window. This may take a few moments...</div>
+    </div>
+
+    <form id="rentalApplication" enctype="multipart/form-data">
+        <input type="hidden" name="Application ID" id="formApplicationId">
+
+        <!-- ═══════════════════════════════════════════════════════
+             STEP 1 — Property & Basics
+        ═══════════════════════════════════════════════════════ -->
+        <div class="form-section active" id="section1">
+
+            <!-- How it works explainer -->
+            <div class="process-explainer">
+                <div class="explainer-card">
+                    <div class="explainer-icon">📋</div>
+                    <div class="explainer-content">
+                        <h4 data-i18n="step1YouSubmit">1. You Submit</h4>
+                        <p data-i18n="step1Desc">Fill out your application completely</p>
+                    </div>
+                </div>
+                <div class="explainer-arrow">→</div>
+                <div class="explainer-card">
+                    <div class="explainer-icon">💰</div>
+                    <div class="explainer-content">
+                        <h4 data-i18n="step2PaymentArranged">2. Fee Arranged</h4>
+                        <p data-i18n="step2Desc">Our team contacts you to arrange the fee</p>
+                    </div>
+                </div>
+                <div class="explainer-arrow">→</div>
+                <div class="explainer-card">
+                    <div class="explainer-icon">✅</div>
+                    <div class="explainer-content">
+                        <h4 data-i18n="step3ReviewBegins">3. Review Begins</h4>
+                        <p data-i18n="step3Desc">After payment, we review your application</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Property confirmation banner — shown when arriving from a listing -->
+            <div id="propertyConfirmBanner" style="display:none;" class="property-confirm-banner">
+                <div class="pcb-icon"><i class="fas fa-building"></i></div>
+                <div class="pcb-body">
+                    <div class="pcb-title" id="pcbTitle">Loading property…</div>
+                    <div class="pcb-meta" id="pcbMeta"></div>
+                </div>
+                <div class="pcb-badge"><i class="fas fa-check-circle"></i> Confirmed</div>
+            </div>
+
+            <h2><i class="fas fa-home"></i> <span data-i18n="propertyHeader">Property &amp; Applicant Details</span></h2>
+            <p style="font-size:12px;color:#6b7280;margin:0 0 16px;"><span style="color:#dc2626;font-weight:700;">*</span> <span data-i18n="requiredFieldLegend">Required field</span></p>
+
+            <h3 data-i18n="propertyInfo">Property Information</h3>
+
+            <!-- Property selector — hidden by default; applicants always arrive via a listing URL -->
+            <div class="form-group" id="propertySelectGroup" style="display:none">
+                <label class="required" for="propertySelect" data-i18n="propertySelectLabel">Select Property You Are Applying For</label>
+                <select id="propertySelect" required aria-required="true" aria-describedby="propertySelectError" style="width:100%;padding:12px 16px;border:1.5px solid #dde1e8;border-radius:8px;font-size:15px;background:#fff;color:#1a2233;appearance:auto">
+                    <option value="">Loading available properties…</option>
+                </select>
+                <div class="error-message" id="propertySelectError">Please select a property to apply for</div>
+            </div>
+
+            <!-- Locked property card — shown when arriving from a listing -->
+            <div id="propertyLockedCard" style="display:none;background:#f0f7ff;border:1.5px solid #bfdbfe;border-radius:8px;padding:14px 18px;align-items:center;gap:14px;margin-bottom:4px">
+                <i class="fas fa-building" style="color:#2563eb;font-size:20px;flex-shrink:0"></i>
+                <div style="flex:1;min-width:0">
+                    <div style="font-weight:700;font-size:14px;color:#1e40af;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="lockedCardTitle"></div>
+                    <div style="font-size:12px;color:#374151;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="lockedCardMeta"></div>
+                </div>
+                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">
+                    <span style="background:#dbeafe;color:#1e40af;font-size:11px;font-weight:700;padding:3px 9px;border-radius:4px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap">
+                        <i class="fas fa-lock" style="font-size:9px;margin-right:3px"></i>Locked
+                    </span>
+                    <button type="button" id="propertyLockEscape" style="background:none;border:none;color:#6b7280;font-size:11px;cursor:pointer;text-decoration:underline;padding:0;line-height:1">Not this property?</button>
+                </div>
+            </div>
+
+            <!-- Fee banner — shown after property is selected -->
+            <div id="propertyFeeBar" style="display:none;background:#f0f7ff;border:1.5px solid #bfdbfe;border-radius:8px;padding:14px 18px;margin-top:4px;margin-bottom:16px;align-items:center;gap:14px">
+                <i class="fas fa-info-circle" style="color:#2563eb;font-size:18px;flex-shrink:0"></i>
+                <div>
+                    <div style="font-weight:600;font-size:14px;color:#1e40af" id="feeBarTitle">Application Fee</div>
+                    <div style="font-size:13px;color:#374151;margin-top:2px" id="feeBarDesc">No payment today — our team will contact you after submission.</div>
+                </div>
+                <div style="margin-left:auto;font-size:22px;font-weight:700;color:#1e40af;white-space:nowrap" id="feeBarAmount"></div>
+            </div>
+
+            <!-- Hidden fields populated from selected property -->
+            <input type="hidden" id="propertyAddress" name="Property Address">
+            <input type="hidden" id="selectedPropertyFee" name="Application Fee Amount" value="0">
+
+            <div class="form-row">
+                <div class="form-col">
+                    <div class="form-group">
+                        <label class="required" for="requestedMoveIn" data-i18n="moveInLabel">Requested Move-in Date</label>
+                        <input type="date" id="requestedMoveIn" name="Requested Move-in Date" required aria-required="true" aria-describedby="requestedMoveInError">
+                        <div class="error-message" id="requestedMoveInError" data-i18n="errRequired">Required</div>
+                    </div>
+                </div>
+                <div class="form-col">
+                    <div class="form-group">
+                        <label class="required" for="desiredLeaseTerm" data-i18n="leaseTermLabel">Desired Lease Term</label>
+                        <select id="desiredLeaseTerm" name="Desired Lease Term" required aria-required="true" aria-describedby="desiredLeaseTermError">
+                            <option value="" data-i18n="selectTerm">Select term...</option>
+                            <option value="6 months" data-i18n="months6">6 Months</option>
+                            <option value="12 months" data-i18n="months12">12 Months</option>
+                            <option value="18 months" data-i18n="months18">18 Months</option>
+                            <option value="24 months" data-i18n="months24">24 Months</option>
+                            <option value="Month-to-month" data-i18n="monthToMonth">Month-to-month</option>
+                        </select>
+                        <div class="error-message" id="desiredLeaseTermError" data-i18n="errRequired">Required</div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 data-i18n="primaryApplicantInfo">Primary Applicant Information</h3>
+
+            <div class="form-row">
+                <div class="form-col">
+                    <div class="form-group">
+                        <label class="required" for="firstName" data-i18n="firstNameLabel">First Name</label>
+                        <input type="text" id="firstName" name="First Name" required aria-required="true" aria-describedby="firstNameError" maxlength="100">
+                        <div class="error-message" id="firstNameError" data-i18n="errRequired">Required</div>
+                    </div>
+                </div>
+                <div class="form-col">
+                    <div class="form-group">
+                        <label class="required" for="lastName" data-i18n="lastNameLabel">Last Name</label>
+                        <input type="text" id="lastName" name="Last Name" required aria-required="true" aria-describedby="lastNameError" maxlength="100">
+                        <div class="error-message" id="lastNameError" data-i18n="errRequired">Required</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-col">
+                    <div class="form-group">
+                        <label class="required" for="email" data-i18n="emailLabel">Email Address</label>
+                        <input type="email" id="email" name="Email" required aria-required="true" aria-describedby="emailError" placeholder="email@example.com" data-i18n="emailPlaceholder">
+                        <div class="field-hint" data-i18n="emailHint">
+                            <i class="fas fa-info-circle"></i>
+                            Make sure the provided email is correct and accessible. Confirmation and updates sent here.
+                        </div>
+                        <div class="error-message" id="emailError" data-i18n="errEmail">Invalid email</div>
+                    </div>
+                </div>
+                <div class="form-col">
+                    <div class="form-group">
+                        <label class="required" for="phone" data-i18n="phoneLabel">Phone Number</label>
+                        <input type="tel" id="phone" name="Phone" required aria-required="true" aria-describedby="phoneError" placeholder="(555) 000-0000" data-i18n="phonePlaceholder">
+                        <div class="field-hint" data-i18n="phoneHint">
+                            <i class="fas fa-info-circle"></i>
+                            Our team will contact you here.
+                        </div>
+                        <div class="error-message" id="phoneError" data-i18n="errPhone">Invalid phone</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-col">
+                    <div class="form-group">
+                        <label class="required" for="dob" data-i18n="dobLabel">Date of Birth</label>
+                        <input type="date" id="dob" name="DOB" required aria-required="true" aria-describedby="dobError">
+                        <div class="error-message" id="dobError" data-i18n="errRequired">Required</div>
+                    </div>
+                </div>
+                <div class="form-col"></div>
+            </div>
+
+            <div class="btn-container">
+                <div></div>
+                <button type="button" class="btn-next"><span data-i18n="nextStep">Next Step</span> <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════
+             STEP 2 — Residency & Household
+        ═══════════════════════════════════════════════════════ -->
+        <div class="form-section" id="section2">
+            <h2><i class="fas fa-map-marker-alt"></i> <span data-i18n="residencyHeader">Residency &amp; Household</span></h2>
+
+            <h3 data-i18n="currentResidence">Current Residence</h3>
+            <div class="form-group">
+                <label class="required" for="currentAddress" data-i18n="currentAddressLabel">Current Address</label>
+                <input type="text" id="currentAddress" name="Current Address" required aria-required="true" aria-describedby="currentAddressError" placeholder="Street, Unit #, City, State, Zip" data-i18n="currentAddressPlaceholder" maxlength="200">
+                <div class="error-message" id="currentAddressError" data-i18n="errRequired">Required</div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-col">
+                    <div class="form-group">
+                        <label class="required" for="residencyStart" data-i18n="residencyStartLabel">How long at this address?</label>
+                        <input type="text" id="residencyStart" name="Residency Duration" required aria-required="true" aria-describedby="residencyStartError" placeholder="e.g., 2 years 3 months" data-i18n="residencyStartPlaceholder" maxlength="100">
+                        <div class="error-message" id="residencyStartError" data-i18n="errRequired">Required</div>
+                    </div>
+                </div>
+                <div class="form-col">
+                    <div class="form-group">
+                        <label class="required" for="rentAmount" data-i18n="rentAmountLabel">Current Rent/Mortgage Amount</label>
+                        <input type="text" id="rentAmount" name="Current Rent Amount" required aria-required="true" aria-describedby="rentAmountError" placeholder="$" data-i18n="rentAmountPlaceholder" maxlength="20">
+                        <div class="error-message" id="rentAmountError" data-i18n="errRequired">Required</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="required" for="reasonLeaving" data-i18n="reasonLeavingLabel">Reason for leaving</label>
+                <textarea id="reasonLeaving" name="Reason for leaving" required aria-required="true" aria-describedby="reasonLeavingError" rows="2" maxlength="500"></textarea>
+                <div class="error-message" id="reasonLeavingError" data-i18n="errRequired">Required</div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-col">
+                    <div class="form-group">
+                        <label class="required" for="landlordName" data-i18n="landlordNameLabel">Current Landlord/Property Manager Name</label>
+                        <input type="text" id="landlordName" name="Current Landlord Name" required aria-required="true" aria-describedby="landlordNameError" maxlength="100">
+                        <div class="error-message" id="landlordNameError" data-i18n="errRequired">Required</div>
+                    </div>
+                </div>
+                <div class="form-col">
+                    <div class="form-group">
+                        <label class="required" for="landlordPhone" data-i18n="landlordPhoneLabel">Landlord/Property Manager Phone</label>
+                        <input type="tel" id="landlordPhone" name="Landlord Phone" required aria-required="true" aria-describedby="landlordPhoneError">
+                        <div class="error-message" id="landlordPhoneError" data-i18n="errRequired">Required</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="landlordEmail" data-i18n="landlordEmailLabel">Landlord Email <span style="font-weight:400;color:#888;">(Optional)</span></label>
+                        <input type="email" id="landlordEmail" name="Landlord Email" autocomplete="off">
+                    </div>
+                </div>
+                <div class="form-col"></div>
+            </div>
+
+            <p class="field-hint" data-i18n="landlordContactNote" style="margin-bottom:16px;">
+                <i class="fas fa-info-circle"></i> We may contact your current landlord to verify your tenancy as part of the application review process.
+            </p>
+
+            <h3 data-i18n="governmentIdHeader">Government-Issued ID</h3>
+            <div class="form-row">
+                <div class="form-col">
+                    <div class="form-group">
+                        <label class="required" for="govIdType" data-i18n="govIdTypeLabel">ID Type</label>
+                        <select id="govIdType" name="Government ID Type" required aria-required="true" aria-describedby="govIdTypeError">
+                            <option value="" data-i18n="selectGovIdType">— Select ID type —</option>
+                            <option value="Driver's License" data-i18n="idDriverLicense">Driver's License</option>
+                            <option value="State ID" data-i18n="idStateID">State ID</option>
+                            <option value="Passport" data-i18n="idPassport">Passport</option>
+                            <option value="Military ID" data-i18n="idMilitaryID">Military ID</option>
+                            <option value="ITIN Card" data-i18n="idITIN">ITIN Card</option>
+                            <option value="Other" data-i18n="other">Other</option>
+                        </select>
+                        <div class="error-message" id="govIdTypeError" data-i18n="errRequired">Required</div>
+                    </div>
+                </div>
+                <div class="form-col">
+                    <div class="form-group">
+                        <label class="required" for="govIdNumber" data-i18n="govIdNumberLabel">ID Number</label>
+                        <input type="text" id="govIdNumber" name="Government ID Number" required aria-required="true" aria-describedby="govIdNumberError" maxlength="50" placeholder="As shown on your ID" data-i18n="govIdNumberPlaceholder">
+                        <p class="field-hint" style="font-size:12px;" data-i18n="govIdNumberHint">Stored securely and used only for identity verification.</p>
+                        <div class="error-message" id="govIdNumberError" data-i18n="errRequired">Required</div>
+                    </div>
+                </div>
+            </div>
+
+            <p class="field-hint" style="margin-bottom:16px;font-size:12px;">
+                <i class="fas fa-upload" style="color:var(--color-brand);"></i>
+                You'll have the option to upload a photo of your ID in Step 4 to speed up verification.
+            </p>
+
+            <!-- Prior Residence (shown conditionally when < 2 years at current address) -->
+            <div id="priorResidenceGroup" style="display:none">
+                <h3 data-i18n="priorResidenceHeader">Prior Residence <span style="font-weight:400;font-size:14px;color:#888;">(if applicable)</span></h3>
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="previousAddress" data-i18n="previousAddressLabel">Previous Address</label>
+                            <input type="text" id="previousAddress" name="Previous Address" placeholder="Street, City, State, Zip" data-i18n="previousAddressPlaceholder" maxlength="200">
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="previousResidencyDuration" data-i18n="previousDurationLabel">How Long Did You Live There?</label>
+                            <input type="text" id="previousResidencyDuration" name="Previous Residency Duration" placeholder="e.g., 2 years" data-i18n="previousDurationPlaceholder" maxlength="100">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="previousLandlordName" data-i18n="previousLandlordNameLabel">Prior Landlord Name</label>
+                            <input type="text" id="previousLandlordName" name="Previous Landlord Name" maxlength="100">
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="previousLandlordPhone" data-i18n="previousLandlordPhoneLabel">Prior Landlord Phone</label>
+                            <input type="tel" id="previousLandlordPhone" name="Previous Landlord Phone">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 data-i18n="occupantsPets">Household &amp; Occupants</h3>
+            <div class="form-group">
+                <label for="totalOccupants" data-i18n="totalOccupantsLabel">Number of total occupants (including children)</label>
+                <input type="number" id="totalOccupants" name="Total Occupants" min="1" value="1">
+            </div>
+
+            <div class="form-group">
+                <label for="occupantNames" data-i18n="occupantNamesLabel">Names and ages of all other occupants</label>
+                <textarea id="occupantNames" name="Additional Occupants" rows="2" maxlength="300"
+                          placeholder="List names, ages, and relationship (e.g., Jane Doe, 7, daughter)" data-i18n="occupantNamesPlaceholder"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label data-i18n="hasPetsLabel">Do you have any pets?</label>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="radio" id="petsYes" name="Has Pets" value="Yes">
+                        <label for="petsYes" data-i18n="yes">Yes</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="radio" id="petsNo" name="Has Pets" value="No" checked>
+                        <label for="petsNo" data-i18n="no">No</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group" id="petDetailsGroup" style="display:none;">
+                <label for="petDetails" data-i18n="petDetailsLabel">Pet details (type, breed, weight)</label>
+                <textarea id="petDetails" name="Pet Details" rows="2" maxlength="300" placeholder="Describe your pets..." data-i18n="petDetailsPlaceholder"></textarea>
+            </div>
+
+            <!-- Vehicle Information -->
+            <div id="vehicleInfoFeature">
+                <h3 data-i18n="vehicleInfo">Vehicle Information</h3>
+                <div class="form-group">
+                    <label data-i18n="hasVehicleLabel">Do you have a vehicle?</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="radio" id="vehicleYes" name="Has Vehicle" value="Yes">
+                            <label for="vehicleYes" data-i18n="yes">Yes</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="radio" id="vehicleNo" name="Has Vehicle" value="No" checked>
+                            <label for="vehicleNo" data-i18n="no">No</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="vehicleDetailsSection" style="display:none;">
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="vehicleMake" data-i18n="vehicleMakeLabel">Make</label>
+                                <input type="text" id="vehicleMake" name="Vehicle Make" maxlength="50">
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="vehicleModel" data-i18n="vehicleModelLabel">Model</label>
+                                <input type="text" id="vehicleModel" name="Vehicle Model" maxlength="50">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="vehicleYear" data-i18n="vehicleYearLabel">Year</label>
+                                <input type="text" id="vehicleYear" name="Vehicle Year" placeholder="e.g., 2020" data-i18n="vehicleYearPlaceholder" maxlength="10">
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="vehiclePlate" data-i18n="vehiclePlateLabel">License Plate (Optional)</label>
+                                <input type="text" id="vehiclePlate" name="Vehicle License Plate" maxlength="20">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="btn-container">
+                <button type="button" class="btn-prev"><i class="fas fa-arrow-left"></i> <span data-i18n="prevStep">Previous</span></button>
+                <button type="button" class="btn-next"><span data-i18n="nextStep">Next Step</span> <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════
+             STEP 3 — Employment & Income
+        ═══════════════════════════════════════════════════════ -->
+        <div class="form-section" id="section3">
+            <h2><i class="fas fa-briefcase"></i> <span data-i18n="employmentHeader">Employment &amp; Income</span></h2>
+
+            <h3 data-i18n="currentEmployment">Current Employment</h3>
+            <div class="form-row">
+                <div class="form-col">
+                    <div class="form-group">
+                        <label class="required" for="employmentStatus" data-i18n="employmentStatusLabel">Employment Status</label>
+                        <select id="employmentStatus" name="Employment Status" required aria-required="true" aria-describedby="employmentStatusError">
+                            <option value="" data-i18n="selectStatus">Select status...</option>
+                            <option value="Full-time" data-i18n="fullTime">Full-time</option>
+                            <option value="Part-time" data-i18n="partTime">Part-time</option>
+                            <option value="Self-employed" data-i18n="selfEmployed">Self-employed</option>
+                            <option value="Student" data-i18n="student">Student</option>
+                            <option value="Retired" data-i18n="retired">Retired</option>
+                            <option value="Unemployed" data-i18n="unemployed">Unemployed</option>
+                        </select>
+                        <div class="error-message" id="employmentStatusError" data-i18n="errRequired">Required</div>
+                    </div>
+                </div>
+                <div class="form-col" id="employerCol">
+                    <div class="form-group">
+                        <label class="required" id="employerLabel" for="employer" data-i18n="employerLabel">Employer</label>
+                        <input type="text" id="employer" name="Employer" required aria-required="true" aria-describedby="employerError" maxlength="100">
+                        <div class="error-message" id="employerError" data-i18n="errRequired">Required</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fields shown only when employed -->
+            <div id="employedFieldsGroup">
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label class="required" for="jobTitle" data-i18n="jobTitleLabel">Job Title</label>
+                            <input type="text" id="jobTitle" name="Job Title" required aria-required="true" aria-describedby="jobTitleError" maxlength="100">
+                            <div class="error-message" id="jobTitleError" data-i18n="errRequired">Required</div>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label class="required" for="employmentDuration" data-i18n="employmentDurationLabel">How long at this job?</label>
+                            <input type="text" id="employmentDuration" name="Employment Duration" required aria-required="true" aria-describedby="employmentDurationError" placeholder="e.g., 3 years" data-i18n="employmentDurationPlaceholder" maxlength="100">
+                            <div class="error-message" id="employmentDurationError" data-i18n="errRequired">Required</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label class="required" for="supervisorName" data-i18n="supervisorNameLabel">Supervisor Name</label>
+                            <input type="text" id="supervisorName" name="Supervisor Name" required aria-required="true" aria-describedby="supervisorNameError" maxlength="100">
+                            <div class="error-message" id="supervisorNameError" data-i18n="errRequired">Required</div>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label class="required" for="supervisorPhone" data-i18n="supervisorPhoneLabel">Supervisor Phone</label>
+                            <input type="tel" id="supervisorPhone" name="Supervisor Phone" required aria-required="true" aria-describedby="supervisorPhoneError">
+                            <div class="error-message" id="supervisorPhoneError" data-i18n="errRequired">Required</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="employmentStartDate" data-i18n="employmentStartDateLabel">Employment Start Date</label>
+                            <input type="date" id="employmentStartDate" name="Employment Start Date">
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="employerAddress" data-i18n="employerAddressLabel">Employer Address <span style="font-weight:400;color:#888;">(Optional)</span></label>
+                            <input type="text" id="employerAddress" name="Employer Address" placeholder="Street, City, State" data-i18n="employerAddressPlaceholder" maxlength="200">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alternative income source for non-employed -->
+            <div id="altIncomeSourceGroup" style="display:none;">
+                <div class="form-group">
+                    <label for="altIncomeSource" id="altIncomeSourceLabel">Income / Support Source <span style="font-weight:400;color:#888;">(Optional)</span></label>
+                    <input type="text" id="altIncomeSource" name="Alt Income Source" placeholder="e.g., Savings, Social Security, Financial Aid, Spouse income…" maxlength="100">
+                    <div class="field-hint"><i class="fas fa-info-circle"></i> Briefly describe how you plan to cover rent obligations.</div>
+                </div>
+            </div>
+
+            <h3 data-i18n="incomeVerification">Income Information</h3>
+            <div class="form-row">
+                <div class="form-col">
+                    <div class="form-group">
+                        <label class="required" for="monthlyIncome" data-i18n="monthlyIncomeLabel">Gross Monthly Income</label>
+                        <input type="text" id="monthlyIncome" name="Monthly Income" required aria-required="true" aria-describedby="monthlyIncomeError" placeholder="$" data-i18n="monthlyIncomePlaceholder" maxlength="20">
+                        <div class="field-hint" data-i18n="incomeHint">Before taxes and deductions</div>
+                        <div class="error-message" id="monthlyIncomeError" data-i18n="errRequired">Required</div>
+                    </div>
+                </div>
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="otherIncome" data-i18n="otherIncomeLabel">Additional Monthly Income (Optional)</label>
+                        <input type="text" id="otherIncome" name="Other Income" placeholder="$" data-i18n="otherIncomePlaceholder" maxlength="20">
+                        <div class="field-hint" data-i18n="otherIncomeHint">Child support, disability, etc.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="btn-container">
+                <button type="button" class="btn-prev"><i class="fas fa-arrow-left"></i> <span data-i18n="prevStep">Previous</span></button>
+                <button type="button" class="btn-next"><span data-i18n="nextStep">Next Step</span> <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════
+             STEP 4 — Documents & Verification (NEW)
+        ═══════════════════════════════════════════════════════ -->
+        <div class="form-section" id="section4">
+            <h2><i class="fas fa-file-upload"></i> <span data-i18n="documentsHeader">Documents &amp; Verification</span></h2>
+
+            <!-- Upload intro banner -->
+            <div class="upload-intro-banner">
+                <div class="upload-intro-icon"><i class="fas fa-bolt"></i></div>
+                <div class="upload-intro-body">
+                    <strong data-i18n="uploadIntroTitle">Speed up your review</strong>
+                    <p data-i18n="uploadIntroDesc">Uploading your documents now helps our team begin reviewing your application sooner. All uploads are optional — you can skip and submit, and our team may request documents during the review process.</p>
+                </div>
+            </div>
+
+            <!-- Government Photo ID Upload -->
+            <h3 data-i18n="docIdHeader">Government-Issued Photo ID</h3>
+            <p class="section-desc" data-i18n="docIdDesc">A clear photo or scan of the front of your ID (Driver's License, State ID, Passport, or Military ID).</p>
+
+            <div class="upload-zone" id="idUploadZone">
+                <input type="file" id="docIdUpload" name="Document: Photo ID" accept=".jpg,.jpeg,.png,.pdf" style="display:none">
+                <div class="upload-zone-content" id="idUploadTrigger">
+                    <div class="upload-zone-icon"><i class="fas fa-id-card"></i></div>
+                    <div class="upload-zone-text">
+                        <strong data-i18n="uploadIdLabel">Photo ID</strong>
+                        <span data-i18n="uploadDragDrop">Drag &amp; drop or <span class="upload-link">browse</span></span>
+                        <small data-i18n="uploadFormats">JPG, PNG, or PDF · Max 10 MB</small>
+                    </div>
+                </div>
+                <div class="upload-preview" id="idUploadPreview" style="display:none">
+                    <div class="upload-preview-inner">
+                        <i class="fas fa-check-circle upload-check"></i>
+                        <span class="upload-filename" id="idUploadFilename"></span>
+                        <button type="button" class="upload-remove-btn" id="idUploadRemove"><i class="fas fa-times"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Proof of Income Upload -->
+            <h3 data-i18n="docIncomeHeader" style="margin-top:var(--space-8);">Proof of Income</h3>
+            <p class="section-desc" data-i18n="docIncomeDesc">Most recent pay stub, bank statement (last 30 days), offer letter, SSA benefit letter, or tax return (self-employed).</p>
+
+            <div class="upload-zone" id="incomeUploadZone">
+                <input type="file" id="docIncomeUpload" name="Document: Proof of Income" accept=".jpg,.jpeg,.png,.pdf" style="display:none">
+                <div class="upload-zone-content" id="incomeUploadTrigger">
+                    <div class="upload-zone-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+                    <div class="upload-zone-text">
+                        <strong data-i18n="uploadIncomeLabel">Proof of Income</strong>
+                        <span data-i18n="uploadDragDrop">Drag &amp; drop or <span class="upload-link">browse</span></span>
+                        <small data-i18n="uploadFormats">JPG, PNG, or PDF · Max 10 MB</small>
+                    </div>
+                </div>
+                <div class="upload-preview" id="incomeUploadPreview" style="display:none">
+                    <div class="upload-preview-inner">
+                        <i class="fas fa-check-circle upload-check"></i>
+                        <span class="upload-filename" id="incomeUploadFilename"></span>
+                        <button type="button" class="upload-remove-btn" id="incomeUploadRemove"><i class="fas fa-times"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Document Upload (Optional) -->
+            <h3 data-i18n="docAdditionalHeader" style="margin-top:var(--space-8);">Additional Document <span style="font-weight:400;font-size:14px;color:#888;">(Optional)</span></h3>
+            <p class="section-desc" data-i18n="docAdditionalDesc">Any supporting document that helps your application — second job income, rental history, recommendation letter, etc.</p>
+
+            <div class="upload-zone upload-zone-optional" id="additionalUploadZone">
+                <input type="file" id="docAdditionalUpload" name="Document: Additional" accept=".jpg,.jpeg,.png,.pdf" style="display:none">
+                <div class="upload-zone-content" id="additionalUploadTrigger">
+                    <div class="upload-zone-icon"><i class="fas fa-paperclip"></i></div>
+                    <div class="upload-zone-text">
+                        <strong data-i18n="uploadAdditionalLabel">Additional Document</strong>
+                        <span data-i18n="uploadDragDrop">Drag &amp; drop or <span class="upload-link">browse</span></span>
+                        <small data-i18n="uploadFormats">JPG, PNG, or PDF · Max 10 MB</small>
+                    </div>
+                </div>
+                <div class="upload-preview" id="additionalUploadPreview" style="display:none">
+                    <div class="upload-preview-inner">
+                        <i class="fas fa-check-circle upload-check"></i>
+                        <span class="upload-filename" id="additionalUploadFilename"></span>
+                        <button type="button" class="upload-remove-btn" id="additionalUploadRemove"><i class="fas fa-times"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Skip note -->
+            <div class="upload-skip-note">
+                <i class="fas fa-info-circle"></i>
+                <span data-i18n="uploadSkipNote">Document uploads are optional at this stage. You can proceed without uploading — our team will request any missing documents during review.</span>
+            </div>
+
+            <div class="btn-container">
+                <button type="button" class="btn-prev"><i class="fas fa-arrow-left"></i> <span data-i18n="prevStep">Previous</span></button>
+                <button type="button" class="btn-next"><span data-i18n="nextStep">Next Step</span> <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════
+             STEP 5 — References & Background
+             (was Step 4, co-applicant moved to Step 6)
+        ═══════════════════════════════════════════════════════ -->
+        <div class="form-section" id="section5">
+            <h2><i class="fas fa-users"></i> <span data-i18n="referencesHeader">References &amp; Background</span></h2>
+
+            <h3 data-i18n="personalReferences">Personal References</h3>
+            <p class="field-hint" data-i18n="referencesHint" style="margin-bottom:12px;">Please provide two references who are not relatives</p>
+
+            <div class="form-row">
+                <div class="form-col">
+                    <div class="form-group">
+                        <label class="required" for="ref1Name" data-i18n="ref1NameLabel">Reference 1 Name</label>
+                        <input type="text" id="ref1Name" name="Reference 1 Name" required aria-required="true" aria-describedby="ref1NameError" maxlength="100">
+                        <div class="error-message" id="ref1NameError" data-i18n="errRequired">Required</div>
+                    </div>
+                </div>
+                <div class="form-col">
+                    <div class="form-group">
+                        <label class="required" for="ref1Phone" data-i18n="ref1PhoneLabel">Reference 1 Phone</label>
+                        <input type="tel" id="ref1Phone" name="Reference 1 Phone" required aria-required="true" aria-describedby="ref1PhoneError">
+                        <div class="error-message" id="ref1PhoneError" data-i18n="errRequired">Required</div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="ref1Email" data-i18n="ref1EmailLabel">Reference 1 Email <span style="font-weight:400;color:#888;">(Optional)</span></label>
+                        <input type="email" id="ref1Email" name="Reference 1 Email" placeholder="email@example.com">
+                    </div>
+                </div>
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="ref1Relationship" data-i18n="ref1RelationshipLabel">Relationship <span style="font-weight:400;color:#888;">(Optional)</span></label>
+                        <input type="text" id="ref1Relationship" name="Reference 1 Relationship" placeholder="e.g., Former Landlord, Employer, Friend" maxlength="100">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="ref2Name" data-i18n="ref2NameLabel">Reference 2 Name <span style="font-weight:400;color:#888;">(Optional)</span></label>
+                        <input type="text" id="ref2Name" name="Reference 2 Name" maxlength="100">
+                    </div>
+                </div>
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="ref2Phone" data-i18n="ref2PhoneLabel">Reference 2 Phone <span style="font-weight:400;color:#888;">(Optional)</span></label>
+                        <input type="tel" id="ref2Phone" name="Reference 2 Phone">
+                    </div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="ref2Email" data-i18n="ref2EmailLabel">Reference 2 Email <span style="font-weight:400;color:#888;">(Optional)</span></label>
+                        <input type="email" id="ref2Email" name="Reference 2 Email" placeholder="email@example.com">
+                    </div>
+                </div>
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="ref2Relationship" data-i18n="ref2RelationshipLabel">Relationship <span style="font-weight:400;color:#888;">(Optional)</span></label>
+                        <input type="text" id="ref2Relationship" name="Reference 2 Relationship" placeholder="e.g., Neighbor, Colleague" maxlength="100">
+                    </div>
+                </div>
+            </div>
+
+            <h3 data-i18n="emergencyInfo">Emergency Contact</h3>
+            <div class="form-row">
+                <div class="form-col">
+                    <div class="form-group">
+                        <label class="required" for="emergencyName" data-i18n="emergencyNameLabel">Emergency Contact Name</label>
+                        <input type="text" id="emergencyName" name="Emergency Contact Name" required aria-required="true" aria-describedby="emergencyNameError" maxlength="100">
+                        <div class="error-message" id="emergencyNameError" data-i18n="errRequired">Required</div>
+                    </div>
+                </div>
+                <div class="form-col">
+                    <div class="form-group">
+                        <label class="required" for="emergencyPhone" data-i18n="emergencyPhoneLabel">Emergency Contact Phone</label>
+                        <input type="tel" id="emergencyPhone" name="Emergency Contact Phone" required aria-required="true" aria-describedby="emergencyPhoneError">
+                        <div class="error-message" id="emergencyPhoneError" data-i18n="errRequired">Required</div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="emergencyRelationship" data-i18n="emergencyRelationshipLabel">Relationship to you</label>
+                <input type="text" id="emergencyRelationship" name="Emergency Contact Relationship" placeholder="e.g., Spouse, Parent, Friend" data-i18n="emergencyRelationshipPlaceholder" maxlength="100">
+            </div>
+
+            <h3 data-i18n="additionalInfo">Background Questions</h3>
+            <p class="field-hint" style="margin-bottom:16px;"><i class="fas fa-info-circle"></i> Each situation is reviewed fairly and on a case-by-case basis in accordance with fair chance housing guidelines.</p>
+
+            <div class="form-group">
+                <label data-i18n="evictedLabel">Have you ever been evicted?</label>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="radio" id="evictedYes" name="Ever Evicted" value="Yes">
+                        <label for="evictedYes" data-i18n="yes">Yes</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="radio" id="evictedNo" name="Ever Evicted" value="No" checked>
+                        <label for="evictedNo" data-i18n="no">No</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group" id="evictionExplainGroup" style="display:none;">
+                <label for="evictionExplain" data-i18n="evictionExplainLabel">Please provide context <span style="font-weight:400;color:#888;">(Optional but helpful)</span></label>
+                <textarea id="evictionExplain" name="Eviction Explanation" rows="3" maxlength="500"
+                    placeholder="e.g., No-fault eviction during COVID, dispute resolved, etc."
+                    data-i18n="evictionExplainPlaceholder"></textarea>
+                <div class="field-hint"><i class="fas fa-info-circle"></i> This information is treated confidentially and reviewed fairly.</div>
+            </div>
+
+            <div class="form-group">
+                <label data-i18n="bankruptcyLabel">Have you filed for bankruptcy in the past 7 years?</label>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="radio" id="bankruptcyYes" name="Has Bankruptcy" value="Yes">
+                        <label for="bankruptcyYes" data-i18n="yes">Yes</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="radio" id="bankruptcyNo" name="Has Bankruptcy" value="No" checked>
+                        <label for="bankruptcyNo" data-i18n="no">No</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group" id="bankruptcyExplainGroup" style="display:none;">
+                <label for="bankruptcyExplain" data-i18n="bankruptcyExplainLabel">Please provide context <span style="font-weight:400;color:#888;">(Optional but helpful)</span></label>
+                <textarea id="bankruptcyExplain" name="Bankruptcy Explanation" rows="3" maxlength="500"
+                    placeholder="e.g., Chapter 7 discharged 2018, finances now stable"
+                    data-i18n="bankruptcyExplainPlaceholder"></textarea>
+                <div class="field-hint"><i class="fas fa-info-circle"></i> This information is treated confidentially and reviewed fairly.</div>
+            </div>
+
+            <div class="form-group">
+                <label data-i18n="criminalLabel">Have you been convicted of a felony in the past 7 years?</label>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="radio" id="criminalYes" name="Has Criminal History" value="Yes">
+                        <label for="criminalYes" data-i18n="yes">Yes</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="radio" id="criminalNo" name="Has Criminal History" value="No" checked>
+                        <label for="criminalNo" data-i18n="no">No</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group" id="criminalExplainGroup" style="display:none;">
+                <label for="criminalExplain" data-i18n="criminalExplainLabel">Please provide context <span style="font-weight:400;color:#888;">(Optional but helpful)</span></label>
+                <textarea id="criminalExplain" name="Criminal History Explanation" rows="3" maxlength="500"
+                    placeholder="e.g., Non-violent offense, sentence completed, rehabilitation program"
+                    data-i18n="criminalExplainPlaceholder"></textarea>
+                <div class="field-hint"><i class="fas fa-info-circle"></i> Each situation is reviewed on a case-by-case basis in accordance with fair chance housing guidelines.</div>
+            </div>
+
+            <div class="form-group">
+                <label data-i18n="smokerLabel">Do you smoke?</label>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="radio" id="smokeYes" name="Smoker" value="Yes">
+                        <label for="smokeYes" data-i18n="yes">Yes</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="radio" id="smokeNo" name="Smoker" value="No" checked>
+                        <label for="smokeNo" data-i18n="no">No</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="btn-container">
+                <button type="button" class="btn-prev"><i class="fas fa-arrow-left"></i> <span data-i18n="prevStep">Previous</span></button>
+                <button type="button" class="btn-next"><span data-i18n="nextStep">Next Step</span> <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════
+             STEP 6 — Payment & Co-Applicant
+             (was Step 5, + co-applicant moved here from old Step 4)
+        ═══════════════════════════════════════════════════════ -->
+        <div class="form-section" id="section6">
+            <h2><i class="fas fa-credit-card"></i> <span data-i18n="paymentHeader">Payment &amp; Co-Applicant</span></h2>
+
+            <!-- No-charge callout (M-08) -->
+            <div class="no-charge-callout" style="display:flex;align-items:center;gap:10px;background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:14px 18px;margin-bottom:var(--space-4);">
+                <i class="fas fa-circle-check" style="color:#16a34a;font-size:18px;flex-shrink:0;"></i>
+                <span style="font-size:14px;color:#15803d;font-weight:600;" data-i18n="noChargeCallout">You will <u>not</u> be charged today. Submit your application first — if selected, our team will contact you to complete payment before your application is reviewed.</span>
+            </div>
+
+            <!-- Fee display card -->
+            <div class="fee-display" id="feeDisplay" style="display:none">
+                <div class="fee-info">
+                    <h4 id="feeTitleText">Application Fee</h4>
+                    <p data-i18n="feeDesc">This fee is required before your review can begin.</p>
+                </div>
+                <div class="fee-amount" id="feeAmountDisplay">—</div>
+            </div>
+
+            <!-- Redesigned payment intro -->
+            <div class="payment-process-card">
+                <div class="ppc-header">
+                    <i class="fas fa-shield-check"></i>
+                    <strong data-i18n="paymentProcessTitle">How the Application Fee Works</strong>
+                </div>
+                <div class="ppc-steps">
+                    <div class="ppc-step">
+                        <div class="ppc-step-num">1</div>
+                        <div class="ppc-step-body">
+                            <strong data-i18n="ppcStep1Title">You submit this application</strong>
+                            <span data-i18n="ppcStep1Desc">No payment is taken online. Your application is submitted first.</span>
+                        </div>
+                    </div>
+                    <div class="ppc-step">
+                        <div class="ppc-step-num">2</div>
+                        <div class="ppc-step-body">
+                            <strong data-i18n="ppcStep2Title">Our team contacts you within 1 business day</strong>
+                            <span data-i18n="ppcStep2Desc">A verified member of our leasing team will reach out to arrange payment.</span>
+                        </div>
+                    </div>
+                    <div class="ppc-step">
+                        <div class="ppc-step-num">3</div>
+                        <div class="ppc-step-body">
+                            <strong data-i18n="ppcStep3Title">Review begins after payment is confirmed</strong>
+                            <span data-i18n="ppcStep3Desc">Once the fee is paid, your full application enters formal review.</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="ppc-trust-note">
+                    <i class="fas fa-lock"></i>
+                    <span data-i18n="ppcTrustNote">Never send money before speaking with our verified team. Our staff will always contact you from an official Choice Properties email or phone number.</span>
+                </div>
+            </div>
+
+            <!-- Payment preference section -->
+            <div class="payment-section-intro" style="margin-top:var(--space-6);">
+                <p data-i18n="paymentIntro">Tell us which payment services you're familiar with. When our team contacts you, we'll use a method that's convenient for you.</p>
+                <div class="important">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span data-i18n="paymentImportant">Payment must be completed before your application can be reviewed. Our team will contact you promptly after submission to arrange this.</span>
+                </div>
+            </div>
+
+            <!-- Payment icon-card grid -->
+            <h3 data-i18n="mainPaymentMethod" style="margin-bottom:var(--space-2);">Your Main Payment Method</h3>
+            <p style="color:var(--color-text-secondary);font-size:14px;margin-bottom:var(--space-4);" data-i18n="mainPaymentDesc">Tap your preferred service. Tap a second card to add a backup.</p>
+
+            <div class="payment-icon-grid" id="paymentIconGrid">
+                <div class="payment-icon-card" data-method="Venmo">
+                    <span class="pic-icon">💙</span>
+                    <span class="pic-label">Venmo</span>
+                    <span class="pic-badge" style="display:none"></span>
+                </div>
+                <div class="payment-icon-card" data-method="PayPal">
+                    <span class="pic-icon">🅿️</span>
+                    <span class="pic-label">PayPal</span>
+                    <span class="pic-badge" style="display:none"></span>
+                </div>
+                <div class="payment-icon-card" data-method="Cash App">
+                    <span class="pic-icon">💵</span>
+                    <span class="pic-label">Cash App</span>
+                    <span class="pic-badge" style="display:none"></span>
+                </div>
+                <div class="payment-icon-card" data-method="Apple Pay">
+                    <span class="pic-icon">🍎</span>
+                    <span class="pic-label">Apple Pay</span>
+                    <span class="pic-badge" style="display:none"></span>
+                </div>
+                <div class="payment-icon-card" data-method="Zelle">
+                    <span class="pic-icon">⚡</span>
+                    <span class="pic-label">Zelle</span>
+                    <span class="pic-badge" style="display:none"></span>
+                </div>
+                <div class="payment-icon-card" data-method="Chime">
+                    <span class="pic-icon">🏦</span>
+                    <span class="pic-label">Chime</span>
+                    <span class="pic-badge" style="display:none"></span>
+                </div>
+                <div class="payment-icon-card" data-method="Credit / Debit Card">
+                    <span class="pic-icon">💳</span>
+                    <span class="pic-label">Credit / Debit</span>
+                    <span class="pic-badge" style="display:none"></span>
+                </div>
+                <div class="payment-icon-card" data-method="Cryptocurrency">
+                    <span class="pic-icon">🪙</span>
+                    <span class="pic-label">Crypto</span>
+                    <span class="pic-badge" style="display:none"></span>
+                </div>
+                <div class="payment-icon-card" data-method="Other">
+                    <span class="pic-icon">✏️</span>
+                    <span class="pic-label">Other</span>
+                    <span class="pic-badge" style="display:none"></span>
+                </div>
+                <!-- Inline "Other" text box — revealed by JS when Other is selected -->
+                <div class="payment-other-inline" id="paymentOtherInline">
+                    <label>Please specify:</label>
+                    <input type="text" id="paymentOtherText" name="Payment Method Other" placeholder="Enter payment method" maxlength="100">
+                </div>
+            </div>
+
+            <div class="payment-icon-legend">
+                <span><span class="leg-primary"></span> Primary (required)</span>
+                <span><span class="leg-backup"></span> Backup (optional)</span>
+            </div>
+
+            <!-- Hidden inputs maintain backward compat with form data collection -->
+            <input type="hidden" id="primaryPayment"   name="Primary Payment Method"       value="">
+            <input type="hidden" id="secondaryPayment" name="Alternative Payment Method"    value="">
+            <input type="hidden" id="thirdPayment"     name="Third Choice Payment Method"   value="">
+            <div class="error-message" id="primaryPaymentError" data-i18n="errRequired" style="margin-top:var(--space-2);">Please select a payment method.</div>
+
+            <!-- Contact Preferences -->
+            <div class="contact-preferences">
+                <h4><i class="fas fa-phone-alt"></i> <span data-i18n="contactPrefsHeader">How Should We Reach You?</span></h4>
+
+                <div class="form-group">
+                    <label class="required" data-i18n="prefContactMethod">Preferred Contact Method</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="contactMethodText" name="Preferred Contact Method" value="Text Message">
+                            <label for="contactMethodText" data-i18n="contactMethodText">Text Message</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="contactMethodEmail" name="Preferred Contact Method" value="Email">
+                            <label for="contactMethodEmail" data-i18n="contactMethodEmail">Email</label>
+                        </div>
+                    </div>
+                    <div class="field-hint" data-i18n="contactMethodHint">Select at least one — you can choose both</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="contactTimeSpecific" data-i18n="additionalNotesLabel">Additional Notes <span style="font-weight:400;color:#888;">(Optional)</span></label>
+                    <input type="text" id="contactTimeSpecific" name="Preferred Time Specific" maxlength="200"
+                           placeholder="e.g., Best after 7pm, avoid Wednesdays" data-i18n="additionalNotesPlaceholder">
+                </div>
+
+                <div class="note">
+                    <i class="fas fa-info-circle"></i>
+                    <span data-i18n="preferencesNote">These preferences are for follow-up after your application is submitted. Your information is kept strictly confidential.</span>
+                </div>
+            </div>
+
+            <!-- Co-Applicant / Guarantor (moved here from old Step 4) -->
+            <div id="coApplicantFeature" style="margin-top:var(--space-6);">
+                <h3 data-i18n="coApplicantSectionHeader">Co-Applicant / Guarantor</h3>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="hasCoApplicant" name="Has Co-Applicant" value="Yes">
+                        <span data-i18n="coApplicantCheckbox">I have a co-applicant or guarantor</span>
+                    </label>
+                </div>
+
+                <div id="coApplicantSection" style="display:none;">
+                    <h4 data-i18n="coApplicantInfo">Additional Person Information</h4>
+
+                    <div class="form-group">
+                        <label data-i18n="coRoleLabel">Role <span class="field-hint">(Select one)</span></label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="radio" id="roleCoApplicant" name="Additional Person Role" value="Co-applicant" checked>
+                                <label for="roleCoApplicant" data-i18n="roleCoApplicant">Co-applicant (will live in the unit)</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="radio" id="roleGuarantor" name="Additional Person Role" value="Guarantor">
+                                <label for="roleGuarantor" data-i18n="roleGuarantor">Guarantor (financial backup only)</label>
+                            </div>
+                        </div>
+                        <div class="error-message"></div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="coFirstName" data-i18n="coFirstNameLabel">First Name</label>
+                                <input type="text" id="coFirstName" name="Co-Applicant First Name" maxlength="100">
+                                <div class="error-message"></div>
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="coLastName" data-i18n="coLastNameLabel">Last Name</label>
+                                <input type="text" id="coLastName" name="Co-Applicant Last Name" maxlength="100">
+                                <div class="error-message"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="coEmail" data-i18n="coEmailLabel">Email</label>
+                                <input type="email" id="coEmail" name="Co-Applicant Email">
+                                <div class="error-message"></div>
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="coPhone" data-i18n="coPhoneLabel">Phone</label>
+                                <input type="tel" id="coPhone" name="Co-Applicant Phone">
+                                <div class="error-message"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="coDob" data-i18n="coDobLabel">Date of Birth</label>
+                                <input type="date" id="coDob" name="Co-Applicant DOB">
+                                <div class="error-message"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5 data-i18n="employmentIncome">Employment &amp; Income</h5>
+                    <div class="form-group">
+                        <label for="coEmploymentStatus" data-i18n="coEmploymentStatusLabel">Employment Status</label>
+                        <select id="coEmploymentStatus" name="Co-Applicant Employment Status">
+                            <option value="" data-i18n="selectStatus">— Select —</option>
+                            <option value="Full-time" data-i18n="empFullTime">Full-time Employed</option>
+                            <option value="Part-time" data-i18n="empPartTime">Part-time Employed</option>
+                            <option value="Self-employed" data-i18n="empSelfEmployed">Self-employed</option>
+                            <option value="Retired" data-i18n="empRetired">Retired</option>
+                            <option value="Student" data-i18n="empStudent">Student</option>
+                            <option value="Unemployed" data-i18n="empUnemployed">Unemployed / Other</option>
+                        </select>
+                    </div>
+                    <div id="coEmployedFieldsGroup" style="display:none">
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="coEmployer" data-i18n="coEmployerLabel">Employer</label>
+                                    <input type="text" id="coEmployer" name="Co-Applicant Employer" maxlength="100">
+                                    <div class="error-message"></div>
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="coJobTitle" data-i18n="coJobTitleLabel">Job Title</label>
+                                    <input type="text" id="coJobTitle" name="Co-Applicant Job Title" maxlength="100">
+                                    <div class="error-message"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="coMonthlyIncome" data-i18n="coMonthlyIncomeLabel">Gross Monthly Income ($)</label>
+                                <input type="text" id="coMonthlyIncome" name="Co-Applicant Monthly Income" placeholder="e.g., 4000" data-i18n="coMonthlyIncomePlaceholder" maxlength="20">
+                                <div class="error-message"></div>
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="coEmploymentDuration" data-i18n="coEmploymentDurationLabel">Length of Employment</label>
+                                <input type="text" id="coEmploymentDuration" name="Co-Applicant Employment Duration" placeholder="e.g., 2 years" data-i18n="coEmploymentDurationPlaceholder" maxlength="100">
+                                <div class="error-message"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="custom-checkbox">
+                            <input type="checkbox" id="coConsent" name="Co-Applicant Consent">
+                            <label for="coConsent" data-i18n="coConsentLabel">I authorise verification of the information provided for this additional person, including credit and background check.</label>
+                        </div>
+                        <div class="error-message"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="btn-container">
+                <button type="button" class="btn-prev"><i class="fas fa-arrow-left"></i> <span data-i18n="prevStep">Previous</span></button>
+                <button type="button" class="btn-next"><span data-i18n="nextStep">Next Step</span> <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════
+             STEP 7 — Review & Submit
+             (was Step 6)
+        ═══════════════════════════════════════════════════════ -->
+        <div class="form-section" id="section7">
+            <h2><i class="fas fa-check-double"></i> <span data-i18n="reviewHeader">Review &amp; Submit</span></h2>
+
+            <div id="summaryContainer" class="summary-section">
+                <div class="summary-grid" id="applicationSummary">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+
+            <div class="payment-reminder" id="paymentReminder" style="display:none">
+                <i class="fas fa-clock"></i>
+                <div>
+                    <strong data-i18n="paymentReminderTitle">Payment Required Before Review</strong>
+                    <p data-i18n="paymentReminderDesc">Your application is not complete until the application fee has been paid. Our team will contact you shortly after submission to arrange this.</p>
+                </div>
+            </div>
+
+            <div class="verification-reminder">
+                <i class="fas fa-phone-alt"></i>
+                <div>
+                    <strong data-i18n="verificationTitle">Verify Your Contact Information</strong>
+                    <p data-i18n="verificationDesc">Please confirm your email and phone number are correct. This is how our team will reach you regarding your application.</p>
+                </div>
+            </div>
+
+            <div class="policy-reminder">
+                <i class="fas fa-info-circle"></i>
+                <span><strong data-i18n="reapplicationPolicyTitle">Reapplication Protection:</strong> <span data-i18n="reapplicationPolicyTextShort">If denied, apply again within 30 days with no new fee. Screening results valid for 60 days.</span></span>
+            </div>
+
+            <!-- FCRA disclosure -->
+            <div class="form-section-block" id="fcraSection" style="margin-bottom:24px;background:#f8faff;border:1.5px solid #bfdbfe;border-radius:10px;padding:20px;">
+                <h3 style="font-size:16px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+                    <i class="fas fa-file-contract" style="color:var(--color-brand-light,#2563eb)"></i>
+                    <span data-i18n="fcraTitle">Background &amp; Credit Check Authorization</span>
+                </h3>
+                <p style="font-size:13px;color:#4b5563;line-height:1.7;margin-bottom:14px;" data-i18n="fcraDisclosureText">In connection with your rental application, Choice Properties may obtain a consumer report (including a background check and/or credit report) from a consumer reporting agency. This report may include information about your character, general reputation, personal characteristics, and mode of living. You have the right to request disclosure of the nature and scope of any such investigation, and to receive a free copy of the report within 60 days of any adverse action decision.</p>
+                <div class="custom-checkbox">
+                    <input type="checkbox" id="fcraConsent" required aria-required="true">
+                    <label for="fcraConsent" data-i18n="fcraConsentLabel">I have read and understand the above disclosure, and I authorize Choice Properties to obtain a consumer report in connection with my rental application.</label>
+                </div>
+                <div class="error-message" id="fcraConsentError" style="display:none;" data-i18n="errFcraRequired">You must authorize the background &amp; credit check to proceed.</div>
+            </div>
+
+            <!-- SSN collected after FCRA authorization -->
+            <div class="form-section-block" id="ssnSection6" style="margin-bottom:24px">
+                <h3 style="font-size:16px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px">
+                    <i class="fas fa-lock" style="color:var(--color-brand-light,#006AFF)"></i>
+                    <span data-i18n="ssnLabel">Social Security Number (Last 4 Digits)</span>
+                </h3>
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label class="required" for="ssn" data-i18n="ssnLabel">Your SSN (Last 4 Digits)</label>
+                            <div class="field-hint ssn-hint" data-i18n="ssnHint">
+                                <i class="fas fa-lock"></i> Only last 4 digits required
+                            </div>
+                            <div class="ssn-container">
+                                <input type="password" id="ssn" name="SSN" placeholder="1234" maxlength="4" inputmode="numeric" autocomplete="off" required aria-required="true" aria-describedby="ssnError" data-i18n="ssnPlaceholder">
+                            </div>
+                            <p class="field-hint" data-i18n="ssnPrivacyNote" data-i18n-html style="margin-top:8px;font-size:12px;">
+                                <i class="fas fa-shield-alt"></i> Encrypted in transit and stored in masked format (e.g., XXX-XX-1234). Used only for identity verification — never shared with third parties.
+                            </p>
+                            <div class="error-message" id="ssnError"></div>
+                        </div>
+                    </div>
+                    <div class="form-col" id="coSsnCol" style="display:none">
+                        <div class="form-group">
+                            <label for="coSsn" data-i18n="coSsnLabel">Co-Applicant SSN (Last 4)</label>
+                            <div class="ssn-container">
+                                <input type="password" id="coSsn" name="Co-Applicant SSN" placeholder="1234" maxlength="4" inputmode="numeric" autocomplete="off">
+                            </div>
+                            <div class="error-message"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Legal declaration -->
+            <div class="legal-section">
+                <h3 data-i18n="legalDeclaration">Legal Declaration</h3>
+
+                <div class="legal-checkbox-group">
+                    <div class="custom-checkbox">
+                        <input type="checkbox" id="certifyCorrect" required aria-required="true">
+                        <label for="certifyCorrect" data-i18n="legalCertify">I certify that the information provided in this application is true and correct to the best of my knowledge.</label>
+                    </div>
+
+                    <div class="custom-checkbox">
+                        <input type="checkbox" id="authorizeVerify" required aria-required="true">
+                        <label for="authorizeVerify" data-i18n="legalAuthorize">I authorize verification of the information provided, including employment, income, and references.</label>
+                    </div>
+
+                    <div class="custom-checkbox">
+                        <input type="checkbox" id="termsAgree" required aria-required="true">
+                        <label for="termsAgree" data-i18n="termsAgreeLabel" data-i18n-html>I agree to the <a href="/terms.html" target="_blank" style="color:var(--secondary,#2563eb);text-decoration:underline;">Terms and Conditions</a></label>
+                    </div>
+                </div>
+                <p class="field-hint" data-i18n="dataRetentionNote" data-i18n-html style="margin-top:14px;font-size:12px;">
+                    <i class="fas fa-info-circle"></i> Application data is retained in accordance with our <a href="/privacy.html" target="_blank" style="color:inherit;text-decoration:underline;">Privacy Policy</a>. You may request deletion at any time by contacting support.
+                </p>
+            </div>
+
+            <div class="btn-container">
+                <button type="button" class="btn-prev"><i class="fas fa-arrow-left"></i> <span data-i18n="prevStep">Previous</span></button>
+                <button type="submit" class="btn-submit" id="mainSubmitBtn">
+                    <span data-i18n="submitBtn">Submit Application</span> <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+            <p class="submit-disclaimer" data-i18n="submitDisclaimer">By clicking submit, your application will be securely transmitted to Choice Properties.</p>
+        </div>
+    </form>
+</div>
+
+<!-- Footer -->
+<footer>
+    <div class="footer-content">
+        <div class="footer-logo">
+            <i class="fas fa-building"></i> <span data-i18n="logoText">Choice Properties</span>
+        </div>
+        <p>&copy; 2026 Choice Properties. All rights reserved.</p>
+        <div class="footer-links">
+            <a href="/privacy.html"><i class="fas fa-shield-alt"></i> <span data-i18n="privacyPolicy">Privacy Policy</span></a>
+            <a href="/terms.html"><i class="fas fa-file-contract"></i> <span data-i18n="termsOfService">Terms of Service</span></a>
+            <a href="#" id="footerEmailLink"><i class="fas fa-envelope"></i> <span data-i18n="contactSupport">Contact Support</span></a>
+        </div>
+        <div class="security-badges">
+            <i class="fas fa-lock" title="SSL Secured"></i>
+            <i class="fas fa-user-lock" title="Data Encrypted"></i>
+            <i class="fas fa-shield-alt" title="Secure Transmission"></i>
+        </div>
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.08);font-size:11px;color:#9ca3af;display:flex;align-items:flex-start;justify-content:center;gap:7px;max-width:620px;margin-left:auto;margin-right:auto;text-align:center;line-height:1.6;">
+            <i class="fas fa-balance-scale" style="margin-top:2px;flex-shrink:0;"></i>
+            <span>We are an Equal Opportunity Housing Provider. We do not discriminate on the basis of race, color, national origin, religion, sex, familial status, or disability (Fair Housing Act).</span>
+        </div>
+        <div class="contact-info">
+            <p id="footerContactLine"><i class="fas fa-phone"></i> — | <i class="fas fa-envelope"></i> —</p>
+            <p id="footerAddressLine" style="display:none"></p>
+        </div>
+    </div>
+</footer>
+
+<div class="auto-save-indicator" id="autoSaveIndicator" aria-live="polite" aria-atomic="true">
+    <i class="fas fa-save"></i> <span data-i18n="progressSaved">Progress Saved</span>
+</div>
+
+<div class="offline-indicator" id="offlineIndicator" aria-live="assertive" aria-atomic="true">
+    <i class="fas fa-wifi-slash"></i> <span data-i18n="offlineMessage">You are currently offline. Progress will be saved locally.</span>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const footerLine = document.getElementById('footerContactLine');
+        if (footerLine && window.CONFIG) {
+            footerLine.innerHTML = `<i class="fas fa-phone"></i> ${CONFIG.COMPANY_PHONE} | <i class="fas fa-envelope"></i> ${CONFIG.COMPANY_EMAIL}`;
+        }
+        const footerEmail = document.getElementById('footerEmailLink');
+        if (footerEmail && window.CONFIG) footerEmail.href = `mailto:${CONFIG.COMPANY_EMAIL}`;
+        const footerAddr = document.getElementById('footerAddressLine');
+        if (footerAddr && window.CONFIG && CONFIG.COMPANY_ADDRESS) {
+            footerAddr.textContent = CONFIG.COMPANY_ADDRESS;
+            footerAddr.style.display = '';
+        }
+
+        // ── Document upload zone wiring (Session 1 — basic file select/preview) ──
+        const uploads = [
+            { zoneId: 'idUploadZone',         triggerId: 'idUploadTrigger',         inputId: 'docIdUpload',         previewId: 'idUploadPreview',         filenameId: 'idUploadFilename',         removeId: 'idUploadRemove' },
+            { zoneId: 'incomeUploadZone',      triggerId: 'incomeUploadTrigger',     inputId: 'docIncomeUpload',     previewId: 'incomeUploadPreview',     filenameId: 'incomeUploadFilename',     removeId: 'incomeUploadRemove' },
+            { zoneId: 'additionalUploadZone',  triggerId: 'additionalUploadTrigger', inputId: 'docAdditionalUpload', previewId: 'additionalUploadPreview', filenameId: 'additionalUploadFilename', removeId: 'additionalUploadRemove' }
+        ];
+
+        uploads.forEach(({ zoneId, triggerId, inputId, previewId, filenameId, removeId }) => {
+            const zone     = document.getElementById(zoneId);
+            const trigger  = document.getElementById(triggerId);
+            const input    = document.getElementById(inputId);
+            const preview  = document.getElementById(previewId);
+            const filename = document.getElementById(filenameId);
+            const removeBtn = document.getElementById(removeId);
+            if (!zone || !trigger || !input || !preview) return;
+
+            const MAX_BYTES = 10 * 1024 * 1024;
+            const ALLOWED   = ['image/jpeg', 'image/png', 'application/pdf'];
+
+            const showFile = (file) => {
+                if (!ALLOWED.includes(file.type)) {
+                    CP.UI.toast('Only JPG, PNG, or PDF files are accepted.', 'error');
+                    input.value = '';
+                    return;
+                }
+                if (file.size > MAX_BYTES) {
+                    CP.UI.toast('File must be 10 MB or smaller.', 'error');
+                    input.value = '';
+                    return;
+                }
+                if (filename) filename.textContent = file.name;
+                trigger.style.display = 'none';
+                preview.style.display = '';
+                zone.classList.add('upload-zone-done');
+            };
+
+            const clearFile = () => {
+                input.value = '';
+                trigger.style.display = '';
+                preview.style.display = 'none';
+                zone.classList.remove('upload-zone-done');
+            };
+
+            trigger.addEventListener('click', () => input.click());
+
+            input.addEventListener('change', (e) => {
+                if (e.target.files && e.target.files[0]) showFile(e.target.files[0]);
+            });
+
+            if (removeBtn) removeBtn.addEventListener('click', clearFile);
+
+            // Drag and drop
+            zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('upload-zone-drag'); });
+            zone.addEventListener('dragleave', () => zone.classList.remove('upload-zone-drag'));
+            zone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                zone.classList.remove('upload-zone-drag');
+                const file = e.dataTransfer?.files?.[0];
+                if (file) { input.files = e.dataTransfer.files; showFile(file); }
+            });
+        });
+    });
+</script>
+<script defer src="/js/apply-property.js"></script>
+<script defer src="/js/apply-translations.js"></script>
+<script defer src="/js/apply-validation.js"></script>
+<script defer src="/js/apply-files.js"></script>
+<script defer src="/js/apply-submit.js"></script>
+<script defer src="/js/apply.js"></script>
+
+<!-- Test Fill Button (localhost only — shown via JS) -->
+<div class="test-button-container" id="testButtonContainer" style="display:none;">
+    <button id="testFillBtn" class="test-fill-btn">
+        <i class="fas fa-flask"></i>
+        <span>🧪 Fill Test Data</span>
+    </button>
+</div>
+</body>
+</html>

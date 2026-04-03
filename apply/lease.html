@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+  <meta name="theme-color" content="#006aff">
+  <link rel="manifest" href="/manifest.json"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<title>Sign Your Lease — Choice Properties</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <script defer src="/config.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<link rel="preload" href="/css/main.css?v=1775137055043" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/css/main.css?v=1775137055043"></noscript>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/apply.css?v=1775137055043">
+  <link rel="preload" href="/css/mobile.css?v=1775137055043" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/css/mobile.css?v=1775137055043"></noscript>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family: var(--font-base);background:#f5f6fa;color:#1a1a1a;min-height:100vh}
+.topbar{background:rgba(255,255,255,0.97);backdrop-filter:blur(12px);border-bottom:1px solid #e4e7ef;padding:0 24px;height:54px;display:flex;align-items:center;position:sticky;top:0;z-index:100;}
+.topbar-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.topbar-logo-mark{width:30px;height:30px;background:#0f1117;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.topbar-logo-text{font-family: var(--font-base);font-weight:700;font-size:14.5px;color:#0f1117;letter-spacing:-0.01em;}
+.container{max-width:720px;margin:0 auto;padding:28px 16px}
+.card{background:#fff;border:1px solid #e0e0e0;border-radius:10px;overflow:hidden;margin-bottom:16px}
+.card-header{padding:18px 24px;border-bottom:1px solid #e0e0e0;display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:.9rem;font-weight:700;color:#0a1628;text-transform:uppercase;letter-spacing:.06em}
+.card-body{padding:24px}
+.info-table{width:100%;border-collapse:collapse;font-size:.85rem}
+.info-table tr td{padding:9px 0;border-bottom:1px solid #f0f0f0;vertical-align:top}
+.info-table tr:last-child td{border-bottom:none}
+.info-table td:first-child{width:40%;color:#666;font-weight:600;padding-right:12px}
+.financial-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #f0f0f0;font-size:.85rem}
+.financial-row:last-child{border-bottom:none}
+.financial-row.total{font-weight:700;font-size:.95rem;padding-top:12px}
+.f-label{color:#555}.f-value{font-weight:600}
+.lease-text{font-size:.75rem;line-height:1.8;color:#333;max-height:600px;overflow-y:auto;border:1px solid #e0e0e0;border-radius:6px;padding:16px;background:#fafafa;font-family:Georgia,serif}
+.lease-text h4{font-size:.82rem;font-weight:700;color:#0a1628;margin:16px 0 8px;text-transform:uppercase;letter-spacing:.04em}
+.lease-text h4:first-child{margin-top:0}
+.cb-row{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;padding:12px 14px;border:1px solid #e0e0e0;border-radius:6px;transition:background .15s}
+.cb-row:hover{background:#f8f9fa}
+.cb-row input[type=checkbox]{margin-top:2px;width:16px;height:16px;flex-shrink:0;accent-color:#0a1628}
+.cb-label{font-size:.8rem;color:#333;line-height:1.6}
+.sig-input{width:100%;border:1px solid #e0e0e0;border-radius:6px;padding:14px 16px;font-size:1rem;font-family:'Georgia',serif;font-style:italic;outline:none;transition:border-color .2s;color:#0a1628}
+.sig-input:focus{border-color:#0a1628}
+.sig-preview{font-family:'Georgia',serif;font-style:italic;font-size:1.4rem;color:#0a1628;min-height:40px;margin-top:8px;padding:8px 0;border-bottom:2px solid #0a1628}
+.btn{background:linear-gradient(135deg,#0a1628,#1d3a6e);color:#fff;border:none;border-radius:6px;padding:14px 32px;font-size:.9rem;font-weight:700;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;width:100%;margin-top:8px;transition:opacity .2s}
+.btn:hover{opacity:.88}.btn:disabled{opacity:.4;cursor:not-allowed}
+.alert{border-radius:6px;padding:14px 16px;font-size:.82rem;margin-bottom:16px}
+.alert-err{background:#fee2e2;border:1px solid #fca5a5;color:#991b1b}
+.alert-success{background:#d1fae5;border:1px solid #6ee7b7;color:#065f46;text-align:center;padding:32px;font-size:1rem}
+.alert-info{background:#dbeafe;border:1px solid #93c5fd;color:#1e40af}
+.loading-state{text-align:center;padding:48px;color:#666}
+.expired-state{text-align:center;padding:48px}
+.expired-state h2{color:#991b1b;margin-bottom:12px}
+.co-badge{display:inline-block;background:#dbeafe;color:#1e40af;border:1px solid #93c5fd;border-radius:4px;padding:2px 8px;font-size:.7rem;font-weight:700;letter-spacing:.05em;margin-left:8px;vertical-align:middle}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a class="topbar-logo" href="../index.html">
+    <div class="topbar-logo-mark">
+      <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="M3 9.5L12 3L21 9.5V20C21 20.55 20.55 21 20 21H15V15H9V21H4C3.45 21 3 20.55 3 20V9.5Z" fill="white" opacity="0.9"/><circle cx="12" cy="11" r="2.5" fill="rgba(37,99,235,0.9)"/></svg>
+    </div>
+    <span class="topbar-logo-text">Choice Properties</span>
+  </a>
+</div>
+<div class="container" id="main">
+  <div class="loading-state">Loading your lease agreement…</div>
+</div>
+
+<script type="module" src="/js/cp-api.js"></script>
+<script type="module">
+const params      = new URLSearchParams(location.search);
+const appId       = params.get('id');
+const signToken   = params.get('token');     // primary tenant signing token (Fix Group 5)
+const coToken     = params.get('co_token');  // present only for co-applicant links
+const isCoLink    = !!coToken;               // true = this is a co-applicant signing URL
+
+// Module-level application object — set after loading so doSign/doCoSign
+// can validate the typed signature against the applicant name on record.
+let currentApp = null;
+
+if (!appId) {
+  document.getElementById('main').innerHTML = err('Invalid Link', 'This lease link is invalid or missing. Please check your email for the correct link.');
+} else {
+  loadLease();
+}
+
+function err(title, msg) {
+  return `<div class="card"><div class="card-body"><div class="expired-state"><h2>${title}</h2><p>${msg}</p></div></div></div>`;
+}
+
+async function loadLease() {
+  const result = await CP.Applications.getStatus(appId);
+  if (!result?.ok) {
+    document.getElementById('main').innerHTML = err('Not Found', result?.error || 'Application not found.');
+    return;
+  }
+  const app = result.data.application;
+
+  // ── Non-financial early exits (no financial data needed) ──
+  if (app.lease_status === 'voided') {
+    document.getElementById('main').innerHTML = err('Lease Voided', 'This lease agreement has been voided. Please contact your leasing team.');
+    return;
+  }
+  if (app.lease_status === 'expired' || (app.lease_expiry_date && new Date(app.lease_expiry_date) < new Date())) {
+    document.getElementById('main').innerHTML = err('Link Expired', 'This lease link has expired. Please contact your leasing team to request a new link.');
+    return;
+  }
+  if (app.lease_status === 'co_signed') {
+    document.getElementById('main').innerHTML = `<div class="card"><div class="card-body"><div class="alert alert-success">✓ This lease has been fully executed by all parties. <a href="dashboard.html?id=${appId}" style="color:#065f46;font-weight:700">View your dashboard →</a></div></div></div>`;
+    return;
+  }
+
+  // ── Co-applicant flow non-financial exits ───────────────
+  if (isCoLink) {
+    if (!app.has_co_applicant) {
+      document.getElementById('main').innerHTML = err('Invalid Link', 'This co-applicant link is not valid for this application.');
+      return;
+    }
+    if (app.co_applicant_signature) {
+      document.getElementById('main').innerHTML = `<div class="card"><div class="card-body"><div class="alert alert-success">✓ Your co-applicant signature has already been recorded. <a href="dashboard.html?id=${appId}" style="color:#065f46;font-weight:700">View your dashboard →</a></div></div></div>`;
+      return;
+    }
+    if (app.lease_status === 'sent') {
+      document.getElementById('main').innerHTML = `<div class="card"><div class="card-body"><div class="alert alert-info" style="padding:24px;text-align:center">⏳ <strong>Waiting for Primary Applicant</strong><br><br>The primary applicant has not yet signed the lease. Once they sign, you will be notified to add your co-applicant signature.</div></div></div>`;
+      return;
+    }
+  }
+
+  // ── Primary flow non-financial exit ─────────────────────
+  if (app.lease_status === 'signed' && !app.has_co_applicant) {
+    document.getElementById('main').innerHTML = `<div class="card"><div class="card-body"><div class="alert alert-success">✓ This lease has already been signed. <a href="dashboard.html?id=${appId}" style="color:#065f46;font-weight:700">View your dashboard →</a></div></div></div>`;
+    return;
+  }
+
+  // ── Fetch financial data (required for all remaining states) ──
+  // get_application_status() intentionally omits financial fields for security.
+  // get_lease_financials() requires both app_id AND last_name to return data.
+  const { data: fin, error: finErr } = await CP.sb().rpc('get_lease_financials', {
+    p_app_id:    appId,
+    p_last_name: app.last_name
+  });
+
+  if (finErr || !fin) {
+    document.getElementById('main').innerHTML = err(
+      'Financial Data Unavailable',
+      'Your lease financial details could not be loaded. This may be a temporary issue. Please contact your leasing team or try again shortly.'
+    );
+    return;
+  }
+
+  // Merge financial fields into the app object
+  Object.assign(app, fin);
+
+  // ── Co-applicant signing flow ────────────────────────────
+  if (isCoLink && app.lease_status === 'awaiting_co_sign') {
+    renderCoSignPage(app);
+    initScrollGates();
+    return;
+  }
+
+  // ── Primary: already signed, awaiting co-applicant ──────
+  if (app.lease_status === 'awaiting_co_sign' && !isCoLink) {
+    document.getElementById('main').innerHTML = `<div class="card"><div class="card-body">
+      <div class="alert alert-success" style="margin-bottom:16px">✓ Your signature has been recorded.</div>
+      <div class="alert alert-info">⏳ <strong>Awaiting Co-Applicant Signature</strong><br><br>Your co-applicant (${app.co_applicant_email || 'co-applicant'}) has been sent their own signing link. Once they sign, the lease will be fully executed and you will both receive a confirmation email.</div>
+      <p style="margin-top:16px;text-align:center"><a href="dashboard.html?id=${appId}" style="color:#0a1628;font-weight:700">← View your dashboard</a></p>
+    </div></div>`;
+    return;
+  }
+
+  // ── Primary signing flow ─────────────────────────────────
+  renderLease(app);
+  initScrollGates();
+}
+
+function fmt(n) { return parseFloat(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function fmtDate(d) { return d ? new Date(d).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}) : '—'; }
+
+function buildLeaseText(app) {
+  const tenantName    = `${app.first_name} ${app.last_name}`;
+  const today         = new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  const landlordName  = app.lease_landlord_name    || 'Choice Properties';
+  const landlordAddr  = app.lease_landlord_address || 'Nationwide';
+  const lateFeeFlat   = fmt(app.lease_late_fee_flat  || 50);
+  const lateFeeDaily  = fmt(app.lease_late_fee_daily || 10);
+  const petPolicy     = app.lease_pets_policy    || 'No pets permitted without prior written consent.';
+  const smokingPolicy = app.lease_smoking_policy || 'Smoking strictly prohibited on Premises.';
+
+  let compliance = {};
+  try { compliance = JSON.parse(app.lease_compliance_snapshot || '{}'); } catch(_) {}
+  const eSignLaw      = compliance.eSignLaw    || 'E-SIGN Act (15 U.S.C. §7001)';
+  const depositReturn = compliance.depositReturn || 30;
+  const noticeDays    = compliance.noticeToVacate || 30;
+  const gracePeriod   = compliance.gracePeriod ?? 5;
+  const disclosures   = compliance.disclosures || ['Lead paint disclosure for pre-1978 properties'];
+
+  const isMtM = (app.desired_lease_term || '').toLowerCase().includes('month-to-month')
+             || (app.desired_lease_term || '').toLowerCase() === 'month to month';
+  const endDateDisplay = isMtM ? 'Month-to-Month (no fixed end date)' : fmtDate(app.lease_end_date);
+  const termNarrative  = isMtM
+    ? `This tenancy shall commence on <strong>${fmtDate(app.lease_start_date)}</strong> and shall continue on a month-to-month basis, terminable by either party upon <strong>${noticeDays} days</strong> written notice. There is no fixed end date.`
+    : `The tenancy shall commence on <strong>${fmtDate(app.lease_start_date)}</strong> and terminate on <strong>${fmtDate(app.lease_end_date)}</strong>. This Agreement shall not automatically convert to a month-to-month tenancy after the Termination Date without express written agreement by both parties.`;
+
+  return `
+    <h4>Article 1 — Parties and Premises</h4>
+    <p>This Residential Lease Agreement ("Agreement") is entered into as of ${today}, between <strong>${landlordName}</strong> ("Landlord"), located at ${landlordAddr}, and <strong>${tenantName}</strong> ("Tenant"). Landlord hereby leases to Tenant the residential premises located at <strong>${app.property_address || '[Property Address]'}</strong> ("Premises").</p>
+
+    <h4>Article 2 — Lease Term</h4>
+    <p><strong>Termination Date:</strong> ${endDateDisplay}</p>
+    <p>${termNarrative}</p>
+
+    <h4>Article 3 — Rent</h4>
+    <p>Tenant agrees to pay Landlord monthly rent of <strong>$${fmt(app.monthly_rent)}</strong>, due on the first (1st) day of each calendar month via a payment method agreed with Landlord's leasing team.</p>
+
+    <h4>Article 4 — Late Fees</h4>
+    <p>Rent not received within <strong>${gracePeriod} days</strong> of the due date (as permitted by applicable state law) shall be subject to a flat late fee of <strong>$${lateFeeFlat}</strong>, plus <strong>$${lateFeeDaily} per day</strong> for each additional day rent remains unpaid thereafter. Time is of the essence with respect to rent payment.</p>
+
+    <h4>Article 5 — Security Deposit</h4>
+    <p>Tenant shall pay a security deposit of <strong>$${fmt(app.security_deposit)}</strong> held by Landlord and returned within <strong>${depositReturn} days</strong> of lease termination as required by applicable state law, less any deductions itemized in writing for damages beyond normal wear and tear or unpaid rent.</p>
+
+    <h4>Article 6 — Move-In Costs</h4>
+    <p>Prior to possession, Tenant shall pay the total move-in amount of <strong>$${fmt(app.move_in_costs)}</strong> (first month's rent of $${fmt(app.monthly_rent)} + security deposit of $${fmt(app.security_deposit)}). Possession is not delivered until all funds are confirmed received.</p>
+
+    <h4>Article 7 — Utilities</h4>
+    <p>Unless otherwise specified in a separate written addendum signed by both parties, Tenant shall be solely responsible for establishing service accounts and paying all costs for utilities serving the Premises, including but not limited to electricity, natural gas, water, sewer, trash collection, telephone, internet, and cable or streaming services. Landlord shall not be liable for any interruption, failure, or reduction in utility service not caused by Landlord's direct action.</p>
+
+    <h4>Article 8 — Use of Premises</h4>
+    <p>The Premises shall be used solely as a private residential dwelling by the named Tenant(s) and approved occupants listed in the application. No commercial activity, subletting, or assignment of this Agreement is permitted without the prior written consent of Landlord. Tenant shall comply with all applicable laws, ordinances, homeowner association rules, and community guidelines.</p>
+
+    <h4>Article 9 — Maintenance and Repairs</h4>
+    <p>Tenant shall maintain the Premises in a clean, sanitary, and habitable condition. Tenant shall promptly notify Landlord in writing of any damage or required repairs. Tenant is responsible for all damage caused by negligence or intentional acts of Tenant, guests, or occupants. No structural or cosmetic alterations shall be made to the Premises without prior written consent of Landlord.</p>
+
+    <h4>Article 10 — Entry by Landlord</h4>
+    <p>Landlord or Landlord's authorized agents may enter the Premises at reasonable times with advance notice as required by applicable state law for purposes including inspection, repairs, or showing the Premises to prospective tenants or purchasers. In cases of emergency, Landlord may enter without prior notice.</p>
+
+    <h4>Article 11 — Pets and Smoking</h4>
+    <p><strong>Pets:</strong> ${petPolicy}</p>
+    <p><strong>Smoking:</strong> ${smokingPolicy}</p>
+
+    <h4>Article 12 — Default and Termination</h4>
+    <p>A material breach of this Agreement — including but not limited to non-payment of rent after the <strong>${gracePeriod}-day</strong> grace period, unauthorized subletting, or violation of community rules — entitles Landlord to deliver written notice of termination as required by applicable state law (minimum <strong>${noticeDays} days</strong> written notice for this jurisdiction). Holdover tenancy without Landlord's written consent shall result in Tenant's liability for double rent and all damages caused thereby.</p>
+
+    <h4>Article 13 — Early Termination</h4>
+    <p>If Tenant wishes to terminate this Agreement before the Termination Date, Tenant shall provide Landlord with written notice as required under Article 14 and shall remain obligated for all rent and charges through the earlier of: (i) the Termination Date, or (ii) the date a qualified replacement tenant, approved by Landlord, takes possession of the Premises. Landlord shall make commercially reasonable efforts to re-let the Premises to mitigate Tenant's continuing liability. Tenant's early termination obligations are governed by applicable state law.</p>
+
+    <h4>Article 14 — Notice to Vacate</h4>
+    <p>Either party may terminate this Agreement at the end of the lease term upon written notice delivered to the other party as required by applicable state law. For this jurisdiction, a minimum of <strong>${noticeDays} days</strong> written notice is required prior to the intended move-out date.</p>
+
+    <h4>Article 15 — Governing Law</h4>
+    <p>This Agreement is governed by the laws of the state in which the Premises is located. Any dispute arising under this Agreement shall be resolved in the appropriate courts of that jurisdiction.</p>
+
+    <h4>Article 16 — Electronic Signature</h4>
+    <p>This Agreement may be executed by electronic signature, legally binding pursuant to the <strong>${eSignLaw}</strong> and applicable state law. Each party's electronic signature constitutes their original signature for all purposes.</p>
+
+    <h4>Article 17 — Entire Agreement</h4>
+    <p>This Agreement, together with any written addenda signed by both parties, constitutes the entire agreement between the parties and supersedes all prior oral or written agreements, understandings, or representations. It may only be modified by a written instrument signed by both Landlord and Tenant.</p>
+
+    <h4>Article 18 — Required Disclosures</h4>
+    ${disclosures.map(d => `<p>⚠️ ${d}</p>`).join('')}
+    <p>⚠️ EQUAL HOUSING OPPORTUNITY: This property is offered in compliance with all applicable federal, state, and local fair housing laws.</p>`;
+}
+
+function renderLease(app) {
+  currentApp = app; // expose for name validation in doSign()
+  const tenantName = `${app.first_name} ${app.last_name}`;
+  const today = new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+
+  document.getElementById('main').innerHTML = `
+    <div class="card">
+      <div class="card-header"><span class="card-title">Residential Lease Agreement</span><span style="font-size:.72rem;color:#666;font-family:monospace">${appId}</span></div>
+      <div class="card-body">
+        ${(() => {
+          if (!app.lease_expiry_date) return `<div style="background:#fff3cd;border:1px solid #ffc107;border-radius:6px;padding:12px 16px;font-size:.8rem;color:#856404;margin-bottom:16px">⏰ Please review and sign this lease. Your signature is legally binding under applicable state and federal electronic signature law.</div>`;
+          const exp = new Date(app.lease_expiry_date);
+          const diffMs = exp - new Date();
+          const diffHrs = Math.floor(diffMs / 3600000);
+          const diffDays = Math.ceil(diffMs / 86400000);
+          const urgency = diffHrs < 24 ? 'background:#fee2e2;border-color:#fca5a5;color:#991b1b' : diffDays <= 2 ? 'background:#fff3cd;border-color:#ffc107;color:#856404' : 'background:#fff3cd;border-color:#ffc107;color:#856404';
+          const timeText = diffHrs < 1 ? 'less than 1 hour' : diffHrs < 24 ? `${diffHrs} hour${diffHrs !== 1 ? 's' : ''}` : `${diffDays} day${diffDays !== 1 ? 's' : ''}`;
+          const expDate = exp.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+          return `<div style="${urgency};border:1px solid;border-radius:6px;padding:12px 16px;font-size:.8rem;margin-bottom:16px">⏰ <strong>Signing deadline: ${timeText} remaining</strong> — This link expires on <strong>${expDate}</strong>. Your signature is legally binding under applicable e-signature law.</div>`;
+        })()}
+        <table class="info-table">
+          <tr><td>Tenant Name</td><td><strong>${tenantName}</strong></td></tr>
+          <tr><td>Property Address</td><td><strong>${app.property_address || '—'}</strong></td></tr>
+          <tr><td>Lease Start Date</td><td>${fmtDate(app.lease_start_date)}</td></tr>
+          <tr><td>Lease End Date</td><td>${fmtDate(app.lease_end_date)}</td></tr>
+          <tr><td>Application Reference</td><td style="font-family:monospace">${appId}</td></tr>
+          <tr><td>Date of Execution</td><td>${today}</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title">Financial Terms</span></div>
+      <div class="card-body">
+        <div class="financial-row"><span class="f-label">Monthly Rent</span><span class="f-value">$${fmt(app.monthly_rent)}</span></div>
+        <div class="financial-row"><span class="f-label">Security Deposit</span><span class="f-value">$${fmt(app.security_deposit)}</span></div>
+        <div class="financial-row total"><span class="f-label">Total Due at Move-In</span><span class="f-value" style="color:#c9a84c">$${fmt(app.move_in_costs)}</span></div>
+        <div style="margin-top:12px;font-size:.75rem;color:#666;line-height:1.6">
+          Late fee: <strong>$${fmt(app.lease_late_fee_flat||50)}</strong> flat + <strong>$${fmt(app.lease_late_fee_daily||10)}/day</strong> after applicable grace period.
+          Security deposit returned within the period required by state law, less any itemized deductions.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title">Lease Agreement Terms</span></div>
+      <div class="card-body">
+        <div class="lease-text">${buildLeaseText(app)}</div>
+      </div>
+    </div>
+
+    <div class="card" id="sign-section">
+      <div class="card-header"><span class="card-title">Electronic Signature — Primary Applicant</span></div>
+      <div class="card-body">
+        <div id="alert-area"></div>
+        <div class="cb-row"><input type="checkbox" id="cb1"><label class="cb-label" for="cb1">I have read, understand, and agree to all terms and conditions of this Residential Lease Agreement in its entirety.</label></div>
+        <div class="cb-row"><input type="checkbox" id="cb2"><label class="cb-label" for="cb2">I understand that my electronic signature is legally binding under the E-SIGN Act (15 U.S.C. §7001) and applicable state electronic signature law, and carries the same legal weight as a handwritten signature.</label></div>
+        <div class="cb-row"><input type="checkbox" id="cb3"><label class="cb-label" for="cb3">I certify that the information I provided in my application is true and accurate, and I authorize Choice Properties to conduct any screening or verification as described in the application.</label></div>
+        <div class="cb-row"><input type="checkbox" id="cb4"><label class="cb-label" for="cb4">I agree to pay the total move-in amount of <strong>$${fmt(app.move_in_costs)}</strong> (first month's rent of $${fmt(app.monthly_rent)} + security deposit of $${fmt(app.security_deposit)}) prior to taking possession of the Premises.</label></div>
+
+        <div style="margin:20px 0">
+          <label style="display:block;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#666;margin-bottom:8px">Type Your Full Legal Name as Signature</label>
+          <input type="text" class="sig-input" id="sig-input" placeholder="Your Full Legal Name" oninput="document.getElementById('sig-preview').textContent=this.value||'Your signature will appear here'">
+          <div class="sig-preview" id="sig-preview">Your signature will appear here</div>
+          <div style="font-size:.68rem;color:#999;margin-top:6px">Signed electronically on ${today} · IP address recorded</div>
+        </div>
+
+        <button class="btn" id="sign-btn" onclick="doSign()" disabled style="opacity:.4;cursor:not-allowed" title="Please read the full lease agreement above before signing">Sign Lease Agreement</button>
+        <div style="text-align:center;font-size:.7rem;color:#999;margin-top:10px" id="scroll-hint">📖 Please scroll through the lease agreement above to enable signing.</div>
+        <div style="text-align:center;font-size:.7rem;color:#999;margin-top:4px;display:none" id="sign-note">This action is permanent and legally binding.</div>
+
+        ${app.has_co_applicant ? `
+        <div style="margin-top:20px;padding:16px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:6px;font-size:.8rem;color:#0369a1">
+          ℹ️ <strong>Co-Applicant:</strong> ${app.co_applicant_email || 'your co-applicant'} will receive a separate signing link at their own email address once you sign. They cannot sign on this page.
+        </div>` : ''}
+      </div>
+    </div>`;
+}
+
+function renderCoSignPage(app) {
+  currentApp = app; // expose for name validation in doCoSign()
+  const coName = app.co_applicant_first_name
+    ? `${app.co_applicant_first_name} ${app.co_applicant_last_name || ''}`.trim()
+    : 'Co-Applicant';
+  const today = new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+
+  document.getElementById('main').innerHTML = `
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Co-Applicant Lease Signature <span class="co-badge">CO-APPLICANT</span></span>
+        <span style="font-size:.72rem;color:#666;font-family:monospace">${appId}</span>
+      </div>
+      <div class="card-body">
+        <div class="alert alert-info" style="margin-bottom:16px">
+          ℹ️ The primary applicant has signed. Please review the lease terms and add your co-applicant signature below. You are jointly and severally liable for all obligations in this Agreement.
+        </div>
+        <table class="info-table">
+          <tr><td>Co-Applicant</td><td><strong>${coName}</strong></td></tr>
+          <tr><td>Property</td><td><strong>${app.property_address || '—'}</strong></td></tr>
+          <tr><td>Lease Term</td><td>${fmtDate(app.lease_start_date)} — ${fmtDate(app.lease_end_date)}</td></tr>
+          <tr><td>Monthly Rent</td><td><strong>$${fmt(app.monthly_rent)}</strong></td></tr>
+          <tr><td>Application Reference</td><td style="font-family:monospace">${appId}</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title">Lease Agreement Terms</span></div>
+      <div class="card-body">
+        <div class="lease-text">${buildLeaseText(app)}</div>
+      </div>
+    </div>
+
+    <div class="card" id="co-sign-section">
+      <div class="card-header"><span class="card-title">Co-Applicant Electronic Signature</span></div>
+      <div class="card-body">
+        <div id="co-alert"></div>
+        <div class="cb-row"><input type="checkbox" id="co-cb1"><label class="cb-label" for="co-cb1">As co-applicant, I have read and agree to all terms of this Residential Lease Agreement and am jointly and severally liable for all obligations herein.</label></div>
+        <div class="cb-row"><input type="checkbox" id="co-cb2"><label class="cb-label" for="co-cb2">I understand my electronic signature is legally binding under applicable e-signature law and carries the same weight as a handwritten signature.</label></div>
+        <div class="cb-row"><input type="checkbox" id="co-cb3"><label class="cb-label" for="co-cb3">I agree to the financial terms including monthly rent of <strong>$${fmt(app.monthly_rent)}</strong> and my joint liability for the total move-in amount of <strong>$${fmt(app.move_in_costs)}</strong>.</label></div>
+
+        <div style="margin:16px 0">
+          <label style="display:block;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#666;margin-bottom:8px">Co-Applicant Full Legal Name</label>
+          <input type="text" class="sig-input" id="co-sig-input" placeholder="Your Full Legal Name" oninput="document.getElementById('co-sig-preview').textContent=this.value||'Co-applicant signature will appear here'">
+          <div class="sig-preview" id="co-sig-preview">Co-applicant signature will appear here</div>
+          <div style="font-size:.68rem;color:#999;margin-top:6px">Signed electronically on ${today} · IP address recorded</div>
+        </div>
+        <button class="btn" id="co-sign-btn" onclick="doCoSign()" disabled style="opacity:.4;cursor:not-allowed" title="Please read the full lease agreement above before signing">Co-Sign Lease Agreement</button>
+        <div style="text-align:center;font-size:.7rem;color:#999;margin-top:10px" id="co-scroll-hint">📖 Please scroll through the lease agreement above to enable signing.</div>
+        <div style="text-align:center;font-size:.7rem;color:#999;margin-top:4px" id="co-sign-note" style="display:none">This action is permanent and legally binding.</div>
+      </div>
+    </div>`;
+}
+
+// ── Soft name match helper ──────────────────────────────────
+// Returns true if the typed signature plausibly matches the applicant's
+// recorded name (case-insensitive, partial-match on last name).
+function nameMatchesApplicant(typedSig, app) {
+  if (!app) return true; // can't validate, allow
+  const norm = s => s.toLowerCase().replace(/[^a-z\s]/g, '').trim();
+  const typed = norm(typedSig);
+  const last  = norm(app.last_name  || '');
+  const first = norm(app.first_name || '');
+  return typed.includes(last) || typed.includes(first);
+}
+
+// ── Primary applicant sign ──────────────────────────────────
+async function doSign() {
+  const cbs = ['cb1','cb2','cb3','cb4'];
+  for (const id of cbs) {
+    if (!document.getElementById(id)?.checked) { showAlert('Please confirm all checkboxes before signing.','err'); return; }
+  }
+  const sig = document.getElementById('sig-input').value.trim();
+  if (!sig || sig.length < 3) { showAlert('Please enter your full legal name as your signature.','err'); return; }
+
+  // Soft name match — warn but do not block (allows legal name variations)
+  // Fix 2: Use the custom in-page modal instead of the native browser confirm() dialog.
+  if (currentApp && !nameMatchesApplicant(sig, currentApp)) {
+    const proceed = await CP.UI.cpConfirm(
+      `The name you entered ("<strong>${sig}</strong>") does not appear to match the name on the application ("<strong>${currentApp.first_name} ${currentApp.last_name}</strong>").<br><br>If this is your legal name, click Confirm to continue. Otherwise click Cancel to correct it.`,
+      { confirmLabel: 'Yes, Continue', cancelLabel: 'Cancel', danger: false }
+    );
+    if (!proceed) return;
+  }
+
+  const btn = document.getElementById('sign-btn');
+  btn.disabled = true; btn.textContent = 'Processing…';
+
+  // IP is recorded server-side from the request — no client-side IP lookup needed
+  const res = await CP.Applications.signLease(appId, sig, '', signToken);
+
+  if (res.ok) {
+    // Fix 8: If the lease is fully executed (solo applicant), show an immediate
+    // download link on the confirmation page rather than forcing a dashboard visit.
+    if (res.data?.pdf_url) {
+      const section = document.getElementById('sign-section');
+      if (section) {
+        section.innerHTML = `<div class="card-body">
+          <div class="alert alert-success">
+            ✓ Your lease has been signed and your tenancy is confirmed. A confirmation email is on its way to your inbox.
+            <br><br>
+            <a href="${res.data?.pdf_url}" target="_blank" style="color:#065f46;font-weight:700;display:inline-block;margin-top:4px">📄 Download Signed Lease</a>
+            <br><br>
+            <a href="dashboard.html?id=${appId}" style="color:#065f46;font-weight:700">← View your dashboard</a>
+          </div>
+        </div>`;
+      }
+    } else {
+      // Has co-applicant — reload to show the "awaiting co-applicant" state
+      loadLease();
+    }
+  } else {
+    showAlert(res.error || 'An error occurred. Please try again.', 'err');
+    btn.disabled = false; btn.textContent = 'Sign Lease Agreement';
+  }
+}
+
+// ── Co-applicant sign (only works with valid co_token) ──────
+async function doCoSign() {
+  const cbs = ['co-cb1','co-cb2','co-cb3'];
+  for (const id of cbs) {
+    if (!document.getElementById(id)?.checked) { showCoAlert('Please confirm all checkboxes before signing.'); return; }
+  }
+  const sig = document.getElementById('co-sig-input').value.trim();
+  if (!sig || sig.length < 3) { showCoAlert('Please enter your full legal name as your signature.'); return; }
+
+  // Soft name match for co-applicant
+  // Fix 2: Use the custom in-page modal instead of the native browser confirm() dialog.
+  if (currentApp && currentApp.co_applicant_last_name && !nameMatchesApplicant(sig, { first_name: currentApp.co_applicant_first_name, last_name: currentApp.co_applicant_last_name })) {
+    const coFullName = `${currentApp.co_applicant_first_name || ''} ${currentApp.co_applicant_last_name || ''}`.trim();
+    const proceed = await CP.UI.cpConfirm(
+      `The name you entered ("<strong>${sig}</strong>") does not appear to match the co-applicant name on the application ("<strong>${coFullName}</strong>").<br><br>If this is your legal name, click Confirm to continue. Otherwise click Cancel to correct it.`,
+      { confirmLabel: 'Yes, Continue', cancelLabel: 'Cancel', danger: false }
+    );
+    if (!proceed) return;
+  }
+
+  const btn = document.getElementById('co-sign-btn');
+  btn.disabled = true; btn.textContent = 'Processing…';
+
+  // Fix 5: Use CP.Applications.signLeaseCoApplicant() which picks up the session JWT
+  // (via callEdgeFunction) instead of hardcoding the anon key in the Authorization header.
+  // co_token is passed for server-side co-applicant identity validation.
+  const res = await CP.Applications.signLeaseCoApplicant(appId, sig, '', coToken);
+
+  if (res.ok) {
+    document.getElementById('co-sign-section').innerHTML = `<div class="card-body"><div class="alert alert-success">
+      ✓ Co-applicant signature recorded. The lease is now fully executed. A confirmation email has been sent to your inbox.
+      <br><br><a href="dashboard.html?id=${appId}" style="color:#065f46;font-weight:700">View your dashboard →</a>
+      ${res.data?.pdf_url ? `<br><br><a href="${res.data?.pdf_url}" target="_blank" style="color:#065f46;font-weight:700">📄 Download Signed Lease</a>` : ''}
+    </div></div>`;
+  } else {
+    showCoAlert(res.error || 'An error occurred. Please try again.');
+    btn.disabled = false; btn.textContent = 'Co-Sign Lease Agreement';
+  }
+}
+
+// Fix 7: Use textContent for server-provided error messages to prevent XSS.
+// The alert wrapper is set via innerHTML for structure; the message is inserted safely.
+function showAlert(msg, type) {
+  const el = document.getElementById('alert-area');
+  if (!el) return;
+  const div = document.createElement('div');
+  div.className = `alert alert-${type === 'err' ? 'err' : 'info'}`;
+  div.textContent = msg;
+  el.innerHTML = '';
+  el.appendChild(div);
+}
+function showCoAlert(msg) {
+  const el = document.getElementById('co-alert');
+  if (!el) return;
+  const div = document.createElement('div');
+  div.className = 'alert alert-err';
+  div.textContent = msg;
+  el.innerHTML = '';
+  el.appendChild(div);
+}
+
+function attachScrollGate(leaseTextEl, btnId, hintId, noteId) {
+  if (!leaseTextEl || !document.getElementById(btnId)) return;
+  function check() {
+    const el = leaseTextEl;
+    const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 24;
+    const btn = document.getElementById(btnId);
+    const hint = document.getElementById(hintId);
+    const note = document.getElementById(noteId);
+    if (atBottom && btn) {
+      btn.disabled = false;
+      btn.style.opacity = '';
+      btn.style.cursor = '';
+      btn.removeAttribute('title');
+      if (hint) hint.style.display = 'none';
+      if (note) note.style.display = 'block';
+    }
+  }
+  leaseTextEl.addEventListener('scroll', check);
+  // Also fire on keyboard navigation (End, Ctrl+End, etc.) within the div
+  leaseTextEl.addEventListener('keyup', check);
+  // Also check immediately in case content is short enough to not need scrolling
+  check();
+}
+
+// Called after renderLease/renderCoSignPage inject the DOM
+function initScrollGates() {
+  const leaseTexts = document.querySelectorAll('.lease-text');
+  if (leaseTexts[0]) attachScrollGate(leaseTexts[0], 'sign-btn', 'scroll-hint', 'sign-note');
+  if (leaseTexts[1]) attachScrollGate(leaseTexts[1], 'co-sign-btn', 'co-scroll-hint', 'co-sign-note');
+}
+
+window.doSign   = doSign;
+window.doCoSign = doCoSign;
+</script>
+</body>
+</html>

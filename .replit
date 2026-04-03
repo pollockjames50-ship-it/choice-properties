@@ -1,0 +1,85 @@
+# ============================================================
+# CHOICE PROPERTIES — REPLIT SAFETY CONFIGURATION
+# ============================================================
+# ⚠️  WARNING: This is a STATIC SITE project, NOT a Node.js server.
+# 
+# This project:
+#   ✅ Used ONLY for editing HTML, CSS, JavaScript files
+#   ✅ Deployed to Cloudflare Pages (not Replit server)
+#   ✅ Backend is Supabase (NOT local database)
+#   ✅ Does NOT require npm install, migrations, or auto-run
+#
+# If Replit tries to auto-run, migrate, or configure:
+#   → This is WRONG and will cause errors
+#   → DO NOT proceed
+#   → Close Replit and re-import from GitHub
+#
+# See: REPLIT_SAFETY.md for detailed instructions
+# ============================================================
+
+# Disable auto-run completely (CRITICAL)
+run = ""
+
+# Disable auto-deployment
+autoDeploy = false
+modules = ["web", "nodejs-18"]
+
+# Disable workflows/run button (CRITICAL)
+# This prevents Replit from auto-executing Node.js
+
+[nix]
+channel = "stable-25_05"
+
+# Minimal dependencies only (unzip for file handling)
+# ✅ NO Node.js, NO databases, NO ORMs, NO package managers
+
+[userenv]
+# Store secrets here for LOCAL editing only
+# These are NOT pushed to GitHub
+
+[userenv.shared]
+SUPABASE_URL = "https://cfsdhylbwzyuvcvbnrel.supabase.co"
+IMAGEKIT_URL = "https://ik.imagekit.io/Choiceproperties"
+SITE_URL = "https://choicepropertiesofficial.pages.dev"
+COMPANY_ADDRESS = "2265 Livernois, Suite 500, Troy, MI 48083"
+COMPANY_EMAIL = "choicepropertygroup@hotmail.com"
+COMPANY_PHONE = "7077063137"
+SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNmc2RoeWxid3p5dXZjdmJucmVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5MjQ3NDEsImV4cCI6MjA5MDUwMDc0MX0.qhH8TdymTHzPDjayejLEB7K-Sw144dGuOjzovlzojoQ"
+IMAGEKIT_PUBLIC_KEY = "public_2M5keEeL0Sj3J6m3Z1T1qLLtypE="
+GEOAPIFY_API_KEY = "bea2afb13c904abea5cb2c2693541dcf"
+COMPANY_NAME = "Choice Properties"
+COMPANY_TAGLINE = "Your trust is our standard."
+ADMIN_EMAILS = "choicepropertygroup@hotmail.com"
+PORT = "5000"
+
+[agent]
+expertMode = true
+integrations = ["javascript_database:1.0.0"]
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Start application"
+
+[[workflows.workflow]]
+name = "Start application"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node server.js"
+waitForPort = 5000
+
+[[ports]]
+localPort = 5000
+externalPort = 80

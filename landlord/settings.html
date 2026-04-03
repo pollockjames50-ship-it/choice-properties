@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="theme-color" content="#006aff">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="preconnect" id="sb-preconnect"><!-- set by config.js -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Settings — Choice Properties</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="stylesheet" href="/assets/fontawesome.css">
+    <link rel="preload" href="/css/main.css?v=1775137055043" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/css/main.css?v=1775137055043"></noscript>
+  <link rel="stylesheet" href="/css/landlord.css?v=1775137055043">
+  <link rel="stylesheet" href="/css/admin.css?v=1775137055043">
+  <link rel="preload" href="/css/mobile.css?v=1775137055043" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/css/mobile.css?v=1775137055043"></noscript>
+  <style>
+    .avatar-upload-wrap {
+      display: flex;
+      align-items: center;
+      gap: var(--space-6);
+      padding: var(--space-6);
+      background: var(--color-surface-page);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--slate-pale);
+      margin-bottom: var(--space-6);
+    }
+
+    .avatar-preview {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border: 3px solid var(--color-brand-light);
+      object-fit: cover;
+      background: linear-gradient(135deg, var(--color-ink), rgba(14,14,15,0.7));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-base);
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--gold-bright);
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .avatar-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .avatar-upload-info { flex: 1; }
+    .avatar-upload-info h4 { font-size: 16px; font-weight: 600; color: var(--color-ink); margin-bottom: 4px; }
+    .avatar-upload-info p  { font-size: 13px; color: var(--slate-light); margin-bottom: var(--space-4); line-height: 1.5; }
+
+    .avatar-upload-input { display: none; }
+
+    .avatar-upload-btn {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: var(--color-surface-raised);
+      border: 1.5px solid var(--slate-pale);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-ink);
+      cursor: pointer;
+      transition: all 200ms;
+    }
+    .avatar-upload-btn:hover { border-color: var(--color-brand-light); color: var(--color-brand-light); }
+
+    .avatar-progress {
+      height: 3px;
+      background: var(--slate-pale);
+      border-radius: 2px;
+      margin-top: 12px;
+      overflow: hidden;
+      display: none;
+    }
+    .avatar-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--color-brand-light), var(--gold-bright));
+      transition: width 300ms;
+      width: 0%;
+    }
+
+    .profile-preview-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--color-brand-light);
+      text-decoration: none;
+      font-weight: 500;
+      padding: 8px 14px;
+      border: 1px solid rgba(200,146,42,0.3);
+      border-radius: var(--radius-sm);
+      background: var(--gold-pale);
+      transition: all 200ms;
+    }
+    .profile-preview-link:hover { background: var(--color-brand-light); color: var(--color-ink); }
+
+    .pw-strength-bar  { height: 4px; border-radius: 2px; background: var(--slate-pale); margin-top: 8px; overflow: hidden; }
+    .pw-strength-fill { height: 100%; border-radius: 2px; transition: width 300ms, background 300ms; width: 0%; }
+    .pw-strength-label { font-size: 12px; margin-top: 4px; font-weight: 500; }
+
+    .notif-toggle { position:relative; display:inline-block; width:44px; height:24px; flex-shrink:0; }
+    .notif-toggle input { opacity:0; width:0; height:0; }
+    .notif-slider { position:absolute; cursor:pointer; inset:0; background:#e5e7eb; border-radius:24px; transition:background 200ms; }
+    .notif-slider:before { content:''; position:absolute; width:18px; height:18px; left:3px; bottom:3px; background:#fff; border-radius:50%; transition:transform 200ms; }
+    .notif-toggle input:checked + .notif-slider { background:var(--color-brand,#006AFF); }
+    .notif-toggle input:checked + .notif-slider:before { transform:translateX(20px); }
+  </style>
+<script defer src="/config.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script type="module" src="/js/cp-api.js"></script>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/index.html" class="nav-logo">
+      <div class="nav-logo-mark">C</div>
+      <div>
+        <div class="nav-logo-text">Choice Properties</div>
+        <div class="nav-logo-sub">Landlord Portal</div>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a href="/index.html" class="nav-link">View Listings →</a>
+      <button class="btn btn-ghost btn-sm" id="signOutBtn"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+    </div>
+  </div>
+</nav>
+
+<div class="dashboard-layout">
+    <aside class="dashboard-sidebar">
+    <div class="sidebar-section-label">Menu</div>
+    <a href="/landlord/dashboard.html" class="sidebar-nav-item"><i class="fas fa-th-large"></i> Dashboard</a>
+    <a href="/landlord/new-listing.html" class="sidebar-nav-item"><i class="fas fa-plus-circle"></i> Add Listing</a>
+    <a href="/landlord/applications.html" class="sidebar-nav-item"><i class="fas fa-file-alt"></i> Applications</a>
+    <a href="/landlord/inquiries.html" class="sidebar-nav-item"><i class="fas fa-envelope"></i> Inquiries</a>
+    <div class="sidebar-section-label" style="margin-top:var(--s-4)">Account</div>
+    <a href="/landlord/settings.html" class="sidebar-nav-item active"><i class="fas fa-cog"></i> Settings</a>
+    <a href="#" class="sidebar-nav-item" id="viewProfileSide"><i class="fas fa-id-badge"></i> My Profile</a>
+    <a href="#" class="sidebar-nav-item" id="sideSignOut"><i class="fas fa-sign-out-alt"></i> Sign Out</a>
+    <div style="flex:1"></div>
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar" id="userAvatar">?</div>
+      <div>
+        <div class="sidebar-user-name" id="userName">Loading…</div>
+        <div class="sidebar-user-email" id="userEmail"></div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="dashboard-main">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--s-4);flex-wrap:wrap;gap:var(--s-4)">
+      <div>
+        <div class="section-eyebrow">Account</div>
+        <h1 class="section-title" style="font-size:28px">Profile & Settings</h1>
+      </div>
+      <a href="#" class="profile-preview-link" id="viewProfileBtn" target="_blank">
+        <i class="fas fa-external-link-alt"></i> View My Public Profile
+      </a>
+    </div>
+
+    <!-- Tab navigation (P2-G) — 4 tabs -->
+    <div id="settingsTabNav" style="display:flex;gap:0;border-bottom:2px solid var(--slate-pale);margin-bottom:var(--s-8);overflow-x:auto">
+      <button class="settings-tab-btn active" data-tab="profile" style="padding:10px 22px;font-size:14px;font-weight:700;color:var(--color-brand,#006AFF);border:none;border-bottom:2px solid var(--color-brand,#006AFF);margin-bottom:-2px;background:none;cursor:pointer;white-space:nowrap;transition:color 150ms">
+        <i class="fas fa-id-badge" style="margin-right:6px"></i>Profile
+      </button>
+      <button class="settings-tab-btn" data-tab="notifications" style="padding:10px 22px;font-size:14px;font-weight:600;color:var(--slate);border:none;border-bottom:2px solid transparent;margin-bottom:-2px;background:none;cursor:pointer;white-space:nowrap;transition:color 150ms">
+        <i class="fas fa-bell" style="margin-right:6px"></i>Notifications
+      </button>
+      <button class="settings-tab-btn" data-tab="account" style="padding:10px 22px;font-size:14px;font-weight:600;color:var(--slate);border:none;border-bottom:2px solid transparent;margin-bottom:-2px;background:none;cursor:pointer;white-space:nowrap;transition:color 150ms">
+        <i class="fas fa-user-circle" style="margin-right:6px"></i>Account
+      </button>
+      <button class="settings-tab-btn" data-tab="security" style="padding:10px 22px;font-size:14px;font-weight:600;color:var(--slate);border:none;border-bottom:2px solid transparent;margin-bottom:-2px;background:none;cursor:pointer;white-space:nowrap;transition:color 150ms">
+        <i class="fas fa-lock" style="margin-right:6px"></i>Security
+      </button>
+    </div>
+
+    <!-- ═══════════════════ PROFILE TAB ═══════════════════ -->
+    <div id="panel-profile" class="settings-panel">
+
+      <!-- Profile Picture -->
+      <div class="dashboard-section" style="margin-bottom:var(--s-6)">
+        <div class="dashboard-section-header">
+          <div class="dashboard-section-title">Profile Picture</div>
+        </div>
+        <div style="padding:var(--s-6)">
+          <div class="avatar-upload-wrap">
+            <div class="avatar-preview" id="avatarPreview">?</div>
+            <div class="avatar-upload-info">
+              <h4>Your profile photo</h4>
+              <p>This appears on your public profile and on every property you list. Use a professional headshot or your company logo. JPG, PNG up to 5MB.</p>
+              <label class="avatar-upload-btn">
+                <i class="fas fa-camera"></i> Choose Photo
+                <input type="file" class="avatar-upload-input" id="avatarInput" accept="image/jpeg,image/png,image/webp">
+              </label>
+              <div class="avatar-progress" id="avatarProgress">
+                <div class="avatar-progress-fill" id="avatarProgressFill"></div>
+              </div>
+              <div id="avatarStatus" style="font-size:13px;margin-top:8px;color:#8892a2"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Brand Identity -->
+      <div class="dashboard-section" style="margin-bottom:var(--s-6)">
+        <div class="dashboard-section-header">
+          <div class="dashboard-section-title">Brand Identity</div>
+          <span style="font-size:13px;color:#8892a2">Appears on your profile and all property listings</span>
+        </div>
+        <div style="padding:var(--s-6)">
+          <div class="form-grid-2" style="margin-bottom:var(--s-5)">
+            <div class="form-group">
+              <label class="form-label">Full Name *</label>
+              <input type="text" class="form-input" id="contactName" placeholder="Jane Smith">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Business / Brokerage Name</label>
+              <input type="text" class="form-input" id="businessName" placeholder="Smith Realty Group LLC">
+              <div class="form-hint">This is your primary brand name shown on listings.</div>
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:var(--s-5)">
+            <label class="form-label">Account Type</label>
+            <select class="form-select" id="accountType">
+              <option value="landlord">Landlord</option>
+              <option value="property_owner">Property Owner</option>
+              <option value="realtor">Realtor</option>
+              <option value="brokerage">Brokerage</option>
+              <option value="agency">Agency</option>
+              <option value="llc">LLC</option>
+              <option value="property_management">Property Management Company</option>
+            </select>
+            <div class="form-hint">Your account type is shown as a badge on your public profile and listings.</div>
+          </div>
+          <div class="form-group" style="margin-bottom:var(--s-5)">
+            <label class="form-label">Professional Tagline</label>
+            <input type="text" class="form-input" id="tagline" placeholder="Nationwide's Trusted Property Management Experts" maxlength="100">
+            <div class="form-hint">A short phrase that defines your brand. Shows under your name on your profile.</div>
+          </div>
+          <div class="form-group" style="margin-bottom:var(--s-6)">
+            <label class="form-label">About / Bio</label>
+            <textarea class="form-textarea" id="bio" rows="5" placeholder="Tell tenants about yourself, your experience, and what makes your properties great…" maxlength="600"></textarea>
+            <div class="form-hint" id="bioCount">0 / 600 characters</div>
+          </div>
+          <div class="form-grid-2" style="margin-bottom:var(--s-5)">
+            <div class="form-group">
+              <label class="form-label">License Number <span style="font-weight:400;color:#8892a2">(optional)</span></label>
+              <input type="text" class="form-input" id="licenseNumber" placeholder="MI-12345678">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Years of Experience <span style="font-weight:400;color:#8892a2">(optional)</span></label>
+              <input type="number" class="form-input" id="yearsExp" placeholder="5" min="0" max="60">
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:var(--s-6)">
+            <label class="form-label">Specialties</label>
+            <div class="checkbox-group" id="specialtiesGroup">
+              <label class="checkbox-pill"><input type="checkbox" value="Single Family Homes"> Single Family Homes</label>
+              <label class="checkbox-pill"><input type="checkbox" value="Multi-Family"> Multi-Family</label>
+              <label class="checkbox-pill"><input type="checkbox" value="Apartments"> Apartments</label>
+              <label class="checkbox-pill"><input type="checkbox" value="Condos"> Condos</label>
+              <label class="checkbox-pill"><input type="checkbox" value="Townhomes"> Townhomes</label>
+              <label class="checkbox-pill"><input type="checkbox" value="Commercial"> Commercial</label>
+              <label class="checkbox-pill"><input type="checkbox" value="Luxury"> Luxury</label>
+              <label class="checkbox-pill"><input type="checkbox" value="Section 8"> Section 8</label>
+              <label class="checkbox-pill"><input type="checkbox" value="Pet Friendly"> Pet Friendly</label>
+              <label class="checkbox-pill"><input type="checkbox" value="Student Housing"> Student Housing</label>
+            </div>
+          </div>
+          <button class="btn btn-primary" id="saveBrandBtn">
+            <i class="fas fa-save"></i> Save Brand Profile
+          </button>
+        </div>
+      </div>
+
+      <!-- Contact & Online Presence -->
+      <div class="dashboard-section" style="margin-bottom:var(--s-6)">
+        <div class="dashboard-section-header">
+          <div class="dashboard-section-title">Contact & Online Presence</div>
+        </div>
+        <div style="padding:var(--s-6)">
+          <div class="form-grid-2" style="margin-bottom:var(--s-5)">
+            <div class="form-group">
+              <label class="form-label">Phone Number *</label>
+              <input type="tel" class="form-input" id="phone" placeholder="(555) 000-0000">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email Address</label>
+              <input type="email" class="form-input" id="emailDisplay" disabled style="background:var(--surface);color:#8892a2">
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:var(--s-5)">
+            <label class="form-label">Business Address <span style="font-weight:400;color:#8892a2">(optional)</span></label>
+            <input type="text" class="form-input" id="address" placeholder="Nationwide Rental Marketplace">
+          </div>
+          <div class="form-group" style="margin-bottom:var(--s-5)">
+            <label class="form-label">Website <span style="font-weight:400;color:#8892a2">(optional)</span></label>
+            <input type="url" class="form-input" id="website" placeholder="https://yourwebsite.com">
+          </div>
+          <div style="margin-bottom:var(--s-5)">
+            <label class="form-label" style="margin-bottom:var(--s-3)">Social Media <span style="font-weight:400;color:#8892a2">(optional)</span></label>
+            <div style="display:flex;flex-direction:column;gap:var(--s-3)">
+              <div style="display:flex;align-items:center;gap:var(--s-3)">
+                <span style="width:32px;text-align:center;color:#1877f2;font-size:18px"><i class="fab fa-facebook-f"></i></span>
+                <input type="url" class="form-input" id="socialFacebook" placeholder="https://facebook.com/yourpage">
+              </div>
+              <div style="display:flex;align-items:center;gap:var(--s-3)">
+                <span style="width:32px;text-align:center;color:#e1306c;font-size:18px"><i class="fab fa-instagram"></i></span>
+                <input type="url" class="form-input" id="socialInstagram" placeholder="https://instagram.com/yourhandle">
+              </div>
+              <div style="display:flex;align-items:center;gap:var(--s-3)">
+                <span style="width:32px;text-align:center;color:#0a66c2;font-size:18px"><i class="fab fa-linkedin-in"></i></span>
+                <input type="url" class="form-input" id="socialLinkedin" placeholder="https://linkedin.com/in/yourprofile">
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-primary" id="saveContactBtn">
+            <i class="fas fa-save"></i> Save Contact Info
+          </button>
+        </div>
+      </div>
+
+    </div><!-- /panel-profile -->
+
+    <!-- ═══════════════════ NOTIFICATIONS TAB ═══════════════════ -->
+    <div id="panel-notifications" class="settings-panel" style="display:none">
+
+      <div class="dashboard-section" style="margin-bottom:var(--s-6)">
+        <div class="dashboard-section-header">
+          <div class="dashboard-section-title">Email Notifications</div>
+          <span style="font-size:13px;color:#8892a2">Control which emails you receive from Choice Properties</span>
+        </div>
+        <div style="padding:var(--s-6)">
+          <div style="display:flex;flex-direction:column;gap:var(--s-5)">
+
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:var(--s-4);padding:var(--s-4);background:var(--color-surface-page);border-radius:var(--radius-sm);border:1px solid var(--slate-pale)">
+              <div>
+                <div style="font-weight:600;color:#0e0e0f;margin-bottom:3px">New Application Submitted</div>
+                <div style="font-size:13px;color:var(--slate-light)">Get notified when a tenant submits an application for one of your listings.</div>
+              </div>
+              <label class="notif-toggle">
+                <input type="checkbox" id="notifNewApplication" checked>
+                <span class="notif-slider"></span>
+              </label>
+            </div>
+
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:var(--s-4);padding:var(--s-4);background:var(--color-surface-page);border-radius:var(--radius-sm);border:1px solid var(--slate-pale)">
+              <div>
+                <div style="font-weight:600;color:#0e0e0f;margin-bottom:3px">Application Status Updates</div>
+                <div style="font-size:13px;color:var(--slate-light)">Receive a summary when application statuses change (approved, denied, withdrawn).</div>
+              </div>
+              <label class="notif-toggle">
+                <input type="checkbox" id="notifStatusUpdate" checked>
+                <span class="notif-slider"></span>
+              </label>
+            </div>
+
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:var(--s-4);padding:var(--s-4);background:var(--color-surface-page);border-radius:var(--radius-sm);border:1px solid var(--slate-pale)">
+              <div>
+                <div style="font-weight:600;color:#0e0e0f;margin-bottom:3px">New Inquiry Received</div>
+                <div style="font-size:13px;color:var(--slate-light)">Get notified when a prospective tenant sends an inquiry about your property.</div>
+              </div>
+              <label class="notif-toggle">
+                <input type="checkbox" id="notifNewInquiry" checked>
+                <span class="notif-slider"></span>
+              </label>
+            </div>
+
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:var(--s-4);padding:var(--s-4);background:var(--color-surface-page);border-radius:var(--radius-sm);border:1px solid var(--slate-pale)">
+              <div>
+                <div style="font-weight:600;color:#0e0e0f;margin-bottom:3px">New Message from Tenant</div>
+                <div style="font-size:13px;color:var(--slate-light)">Get notified when an applicant replies to a message thread.</div>
+              </div>
+              <label class="notif-toggle">
+                <input type="checkbox" id="notifNewMessage" checked>
+                <span class="notif-slider"></span>
+              </label>
+            </div>
+
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:var(--s-4);padding:var(--s-4);background:var(--color-surface-page);border-radius:var(--radius-sm);border:1px solid var(--slate-pale)">
+              <div>
+                <div style="font-weight:600;color:#0e0e0f;margin-bottom:3px">Lease Signed by Tenant</div>
+                <div style="font-size:13px;color:var(--slate-light)">Get notified when an approved applicant signs their lease agreement.</div>
+              </div>
+              <label class="notif-toggle">
+                <input type="checkbox" id="notifLeaseSigned" checked>
+                <span class="notif-slider"></span>
+              </label>
+            </div>
+
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:var(--s-4);padding:var(--s-4);background:var(--color-surface-page);border-radius:var(--radius-sm);border:1px solid var(--slate-pale)">
+              <div>
+                <div style="font-weight:600;color:#0e0e0f;margin-bottom:3px">Platform Updates & Tips</div>
+                <div style="font-size:13px;color:var(--slate-light)">Occasional emails about new features, tips for landlords, and platform news.</div>
+              </div>
+              <label class="notif-toggle">
+                <input type="checkbox" id="notifPlatformUpdates">
+                <span class="notif-slider"></span>
+              </label>
+            </div>
+
+          </div>
+
+          <div style="margin-top:var(--s-6)">
+            <button class="btn btn-primary" id="saveNotifBtn">
+              <i class="fas fa-save"></i> Save Preferences
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /panel-notifications -->
+
+    <!-- ═══════════════════ ACCOUNT TAB ═══════════════════ -->
+    <div id="panel-account" class="settings-panel" style="display:none">
+
+      <div class="dashboard-section" style="margin-bottom:var(--s-6)">
+        <div class="dashboard-section-header">
+          <div class="dashboard-section-title">Account Information</div>
+          <span style="font-size:13px;color:#8892a2">Your account details and membership info</span>
+        </div>
+        <div style="padding:var(--s-6)">
+          <div class="form-grid-2" style="margin-bottom:var(--s-5)">
+            <div class="form-group">
+              <label class="form-label">Email Address</label>
+              <input type="email" class="form-input" id="accountEmail" disabled style="background:var(--surface);color:#8892a2">
+              <div class="form-hint">To change your email, contact support.</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Account Type</label>
+              <select class="form-select" id="accountTypeAlt">
+                <option value="landlord">Landlord</option>
+                <option value="property_owner">Property Owner</option>
+                <option value="realtor">Realtor</option>
+                <option value="brokerage">Brokerage</option>
+                <option value="agency">Agency</option>
+                <option value="llc">LLC</option>
+                <option value="property_management">Property Management Company</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-grid-2" style="margin-bottom:var(--s-6)">
+            <div class="form-group">
+              <label class="form-label">Account ID</label>
+              <input type="text" class="form-input" id="accountId" disabled style="background:var(--surface);color:#8892a2;font-family:monospace">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Member Since</label>
+              <input type="text" class="form-input" id="accountCreated" disabled style="background:var(--surface);color:#8892a2">
+            </div>
+          </div>
+          <button class="btn btn-primary" id="saveAccountTypeBtn">
+            <i class="fas fa-save"></i> Save Account Type
+          </button>
+        </div>
+      </div>
+
+    </div><!-- /panel-account -->
+
+    <!-- ═══════════════════ SECURITY TAB ═══════════════════ -->
+    <div id="panel-security" class="settings-panel" style="display:none">
+
+      <!-- Change Password -->
+      <div class="dashboard-section" style="margin-bottom:var(--s-6)">
+        <div class="dashboard-section-header">
+          <div class="dashboard-section-title">Change Password</div>
+        </div>
+        <div style="padding:var(--s-6)">
+          <div class="form-group" style="max-width:420px;margin-bottom:var(--s-5);position:relative">
+            <label class="form-label">New Password</label>
+            <input type="password" class="form-input" id="newPassword" placeholder="At least 8 characters">
+            <button type="button" id="togglePw" style="position:absolute;right:14px;top:38px;background:none;border:none;color:#8892a2;cursor:pointer;font-size:15px"><i class="fas fa-eye"></i></button>
+            <div class="pw-strength-bar"><div class="pw-strength-fill" id="strengthFill"></div></div>
+            <div class="pw-strength-label" id="strengthLabel" style="color:var(--slate-light)"></div>
+          </div>
+          <div class="form-group" style="max-width:420px;margin-bottom:var(--s-6);position:relative">
+            <label class="form-label">Confirm New Password</label>
+            <input type="password" class="form-input" id="confirmPassword" placeholder="Re-enter new password">
+            <button type="button" id="togglePw2" style="position:absolute;right:14px;top:38px;background:none;border:none;color:#8892a2;cursor:pointer;font-size:15px"><i class="fas fa-eye"></i></button>
+            <div id="matchMsg" style="font-size:12px;margin-top:4px;font-weight:500"></div>
+          </div>
+          <button class="btn btn-outline" id="savePasswordBtn">
+            <i class="fas fa-lock"></i> Update Password
+          </button>
+        </div>
+      </div>
+
+      <!-- Danger Zone -->
+      <div class="dashboard-section" style="border-color:#fecaca">
+        <div class="dashboard-section-header" style="border-color:#fecaca;background:#fef2f2">
+          <div class="dashboard-section-title" style="color:var(--crimson)">Danger Zone</div>
+        </div>
+        <div style="padding:var(--s-6);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--s-4)">
+          <div>
+            <div style="font-weight:600;color:#0e0e0f;margin-bottom:4px">Delete Account</div>
+            <div style="font-size:14px;color:var(--slate)">Permanently delete your account and all listings. This cannot be undone.</div>
+          </div>
+          <button class="btn" style="background:#fef2f2;color:var(--crimson);border:1px solid #fecaca" id="deleteAccountBtn">
+            <i class="fas fa-trash"></i> Delete My Account
+          </button>
+        </div>
+      </div>
+
+    </div><!-- /panel-security -->
+
+  </main>
+</div>
+
+
+<script type="module">
+  import { supabase } from '../js/cp-api.js';
+  import { requireAuth, getLandlordProfile, signOut } from '../js/cp-api.js';
+  import { uploadToImageKit } from '../js/imagekit.js';
+
+  const session = await requireAuth('/landlord/login.html');
+  if (!session) throw new Error();
+  const profile = await getLandlordProfile();
+  if (!profile) { window.location.href = '/landlord/login.html'; throw new Error(); }
+
+  // Sidebar
+  document.getElementById('userName').textContent   = profile.business_name || profile.contact_name;
+  document.getElementById('userEmail').textContent  = profile.email;
+  document.getElementById('userAvatar').textContent = profile.contact_name.charAt(0).toUpperCase();
+  document.getElementById('viewProfileSide').href = `/landlord/profile.html?id=${profile.id}`;
+  [document.getElementById('signOutBtn'), document.getElementById('sideSignOut')].forEach(b => b?.addEventListener('click', signOut));
+
+  // Public profile link
+  document.getElementById('viewProfileBtn').href = `/landlord/profile.html?id=${profile.id}`;
+
+  // ── Tab switching (P2-G) ────────────────────────────────
+  const TABS = ['profile', 'notifications', 'account', 'security'];
+  function activateTab(name) {
+    if (!TABS.includes(name)) name = 'profile';
+    TABS.forEach(t => {
+      const panel = document.getElementById(`panel-${t}`);
+      const btn   = document.querySelector(`.settings-tab-btn[data-tab="${t}"]`);
+      const isActive = t === name;
+      if (panel) panel.style.display = isActive ? '' : 'none';
+      if (btn) {
+        btn.style.fontWeight   = isActive ? '700' : '600';
+        btn.style.color        = isActive ? 'var(--color-brand,#006AFF)' : 'var(--slate)';
+        btn.style.borderBottom = isActive ? '2px solid var(--color-brand,#006AFF)' : '2px solid transparent';
+      }
+    });
+    // Sync URL without reloading
+    const url = new URL(window.location);
+    url.searchParams.set('tab', name);
+    history.replaceState(null, '', url);
+  }
+  document.querySelectorAll('.settings-tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => activateTab(btn.dataset.tab));
+  });
+  // Activate from URL param on load (supports ?tab=profile redirect from profile.html)
+  const initTab = new URLSearchParams(window.location.search).get('tab') || 'profile';
+  activateTab(initTab);
+
+  // ── Populate all fields ───────────────────────────────────
+  document.getElementById('contactName').value    = profile.contact_name || '';
+  document.getElementById('businessName').value   = profile.business_name || '';
+  document.getElementById('tagline').value        = profile.tagline || '';
+  if (profile.account_type) { const el = document.getElementById('accountType'); if (el) el.value = profile.account_type; }
+  document.getElementById('bio').value            = profile.bio || '';
+  document.getElementById('licenseNumber').value  = profile.license_number || '';
+  document.getElementById('yearsExp').value       = profile.years_experience || '';
+  document.getElementById('phone').value          = profile.phone || '';
+  document.getElementById('emailDisplay').value   = profile.email || '';
+  document.getElementById('address').value        = profile.address || '';
+  document.getElementById('website').value        = profile.website || '';
+  document.getElementById('socialFacebook').value = profile.social_facebook || '';
+  document.getElementById('socialInstagram').value= profile.social_instagram || '';
+  document.getElementById('socialLinkedin').value = profile.social_linkedin || '';
+
+  // ── Account tab fields ────────────────────────────────────
+  document.getElementById('accountEmail').value   = profile.email || '';
+  document.getElementById('accountId').value      = profile.id || '';
+  if (profile.account_type) {
+    const altSel = document.getElementById('accountTypeAlt');
+    if (altSel) altSel.value = profile.account_type;
+  }
+  if (profile.created_at) {
+    const d = new Date(profile.created_at);
+    document.getElementById('accountCreated').value = d.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+  }
+
+  // ── Notification preferences (stored in localStorage) ─────
+  const NOTIF_KEY = `cp_notif_prefs_${profile.id}`;
+  try {
+    const saved = JSON.parse(localStorage.getItem(NOTIF_KEY) || '{}');
+    ['notifNewApplication','notifStatusUpdate','notifNewInquiry','notifNewMessage','notifLeaseSigned','notifPlatformUpdates'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && saved[id] !== undefined) el.checked = saved[id];
+    });
+  } catch(e) {}
+
+  document.getElementById('saveNotifBtn').addEventListener('click', () => {
+    const prefs = {};
+    ['notifNewApplication','notifStatusUpdate','notifNewInquiry','notifNewMessage','notifLeaseSigned','notifPlatformUpdates'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) prefs[id] = el.checked;
+    });
+    localStorage.setItem(NOTIF_KEY, JSON.stringify(prefs));
+    CP.UI.toast('Notification preferences saved!', 'success');
+  });
+
+  // ── Save Account Type (Account tab) ───────────────────────
+  document.getElementById('saveAccountTypeBtn').addEventListener('click', async () => {
+    const newType = document.getElementById('accountTypeAlt').value;
+    const btn = document.getElementById('saveAccountTypeBtn');
+    btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Saving…';
+    const { error } = await supabase.from('landlords').update({ account_type: newType }).eq('id', profile.id);
+    btn.disabled = false; btn.innerHTML = '<i class="fas fa-save"></i> Save Account Type';
+    if (error) return CP.UI.toast('Failed to save: ' + error.message, 'error');
+    // Keep Profile tab in sync
+    const profileSel = document.getElementById('accountType');
+    if (profileSel) profileSel.value = newType;
+    CP.UI.toast('Account type updated!', 'success');
+  });
+
+  updateBioCount();
+
+  // Specialties checkboxes
+  if (profile.specialties?.length) {
+    document.querySelectorAll('#specialtiesGroup input').forEach(cb => {
+      if (profile.specialties.includes(cb.value)) cb.checked = true;
+    });
+  }
+
+  // Avatar preview
+  renderAvatarPreview(profile);
+
+  function renderAvatarPreview(p) {
+    const wrap = document.getElementById('avatarPreview');
+    if (p.avatar_url) {
+      wrap.innerHTML = `<img src="${CONFIG.img(p.avatar_url,'avatar_lg')}" alt="Avatar" onerror="this.parentElement.textContent='${(p.business_name||p.contact_name).charAt(0).toUpperCase()}'" loading="lazy">`;
+    } else {
+      wrap.textContent = (p.business_name || p.contact_name).charAt(0).toUpperCase();
+    }
+    // Also update sidebar avatar
+    document.getElementById('userAvatar').textContent = (p.business_name || p.contact_name).charAt(0).toUpperCase();
+  }
+
+  // ── Avatar Upload ──────────────────────────────────────────
+  document.getElementById('avatarInput').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 20 * 1024 * 1024) {
+      CP.UI.toast('File too large. Maximum 20MB.', 'error');
+      return;
+    }
+
+    const statusEl   = document.getElementById('avatarStatus');
+    const progressEl = document.getElementById('avatarProgress');
+    const fillEl     = document.getElementById('avatarProgressFill');
+
+    statusEl.textContent     = 'Uploading…';
+    progressEl.style.display = 'block';
+    fillEl.style.width       = '10%';
+
+    let avatarUrl;
+    try {
+      avatarUrl = await uploadToImageKit(file, {
+        folder:      `/avatars/${profile.id}`,
+        supabaseUrl: CONFIG.SUPABASE_URL,
+        anonKey:     CONFIG.SUPABASE_ANON_KEY,
+        onProgress:  (pct) => { fillEl.style.width = pct + '%'; },
+      });
+    } catch (uploadErr) {
+      CP.UI.toast('Upload failed: ' + uploadErr.message, 'error');
+      statusEl.textContent     = 'Upload failed.';
+      progressEl.style.display = 'none';
+      return;
+    }
+
+    const { error: updateError } = await supabase
+      .from('landlords')
+      .update({ avatar_url: avatarUrl })
+      .eq('id', profile.id);
+
+    fillEl.style.width = '100%';
+
+    if (updateError) {
+      CP.UI.toast('Failed to save avatar URL.', 'error');
+      statusEl.textContent = 'Save failed.';
+    } else {
+      profile.avatar_url = avatarUrl;
+      renderAvatarPreview(profile);
+      CP.UI.toast('Profile photo updated!', 'success');
+      statusEl.textContent = '✓ Photo saved';
+      statusEl.style.color = 'var(--emerald)';
+    }
+
+    setTimeout(() => { progressEl.style.display = 'none'; fillEl.style.width = '0%'; }, 1000);
+  });
+
+  // ── Bio character count ────────────────────────────────────
+  function updateBioCount() {
+    const len = document.getElementById('bio').value.length;
+    document.getElementById('bioCount').textContent = `${len} / 600 characters`;
+  }
+  document.getElementById('bio').addEventListener('input', updateBioCount);
+
+  // ── Save Brand Profile ─────────────────────────────────────
+  document.getElementById('saveBrandBtn').addEventListener('click', async () => {
+    const contactName  = document.getElementById('contactName').value.trim();
+    const businessName = document.getElementById('businessName').value.trim();
+    const tagline      = document.getElementById('tagline').value.trim();
+    const bio          = document.getElementById('bio').value.trim();
+    const licenseNum   = document.getElementById('licenseNumber').value.trim();
+    const yearsExp     = parseInt(document.getElementById('yearsExp').value) || null;
+    const specialties  = [...document.querySelectorAll('#specialtiesGroup input:checked')].map(cb => cb.value);
+
+    if (!contactName) return CP.UI.toast('Full name is required.', 'error');
+
+    const btn = document.getElementById('saveBrandBtn');
+    btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Saving…';
+
+    const { error } = await supabase.from('landlords').update({
+      contact_name    : contactName,
+      business_name   : businessName || null,
+      account_type    : document.getElementById('accountType')?.value || 'landlord',
+      tagline         : tagline || null,
+      bio             : bio || null,
+      license_number  : licenseNum || null,
+      years_experience: yearsExp,
+      specialties     : specialties.length ? specialties : null
+    }).eq('id', profile.id);
+
+    btn.disabled = false; btn.innerHTML = '<i class="fas fa-save"></i> Save Brand Profile';
+
+    if (error) return CP.UI.toast('Failed to save: ' + error.message, 'error');
+    profile.business_name = businessName;
+    profile.contact_name  = contactName;
+    document.getElementById('userName').textContent = businessName || contactName;
+    CP.UI.toast('Brand profile saved!', 'success');
+  });
+
+  // ── Save Contact Info ──────────────────────────────────────
+  document.getElementById('saveContactBtn').addEventListener('click', async () => {
+    const phone    = document.getElementById('phone').value.trim();
+    const address  = document.getElementById('address').value.trim();
+    const website  = document.getElementById('website').value.trim();
+    const facebook = document.getElementById('socialFacebook').value.trim();
+    const instagram= document.getElementById('socialInstagram').value.trim();
+    const linkedin = document.getElementById('socialLinkedin').value.trim();
+
+    if (!phone) return CP.UI.toast('Phone number is required.', 'error');
+
+    const btn = document.getElementById('saveContactBtn');
+    btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Saving…';
+
+    const { error } = await supabase.from('landlords').update({
+      phone,
+      address          : address || null,
+      website          : website || null,
+      social_facebook  : facebook || null,
+      social_instagram : instagram || null,
+      social_linkedin  : linkedin || null
+    }).eq('id', profile.id);
+
+    btn.disabled = false; btn.innerHTML = '<i class="fas fa-save"></i> Save Contact Info';
+
+    if (error) return CP.UI.toast('Failed to save: ' + error.message, 'error');
+    CP.UI.toast('Contact info saved!', 'success');
+  });
+
+  // ── Password ───────────────────────────────────────────────
+  function makeToggle(btnId, inputId) {
+    document.getElementById(btnId).addEventListener('click', () => {
+      const inp = document.getElementById(inputId);
+      const icon = document.querySelector(`#${btnId} i`);
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+      icon.className = inp.type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+    });
+  }
+  makeToggle('togglePw', 'newPassword');
+  makeToggle('togglePw2', 'confirmPassword');
+
+  // Strength
+  document.getElementById('newPassword').addEventListener('input', () => {
+    const pw = document.getElementById('newPassword').value;
+    let score = 0;
+    if (pw.length >= 8) score++; if (pw.length >= 12) score++;
+    if (/[A-Z]/.test(pw)) score++; if (/[0-9]/.test(pw)) score++;
+    if (/[^A-Za-z0-9]/.test(pw)) score++;
+    const levels = [
+      {pct:'0%',color:'var(--slate-pale)',label:''},
+      {pct:'25%',color:'var(--crimson)',label:'Weak'},
+      {pct:'50%',color:'#f59e0b',label:'Fair'},
+      {pct:'75%',color:'var(--gold)',label:'Good'},
+      {pct:'90%',color:'#22c55e',label:'Strong'},
+      {pct:'100%',color:'#16a34a',label:'Very Strong'},
+    ];
+    const lv = levels[Math.min(score,5)];
+    document.getElementById('strengthFill').style.width = pw.length ? lv.pct : '0%';
+    document.getElementById('strengthFill').style.background = lv.color;
+    document.getElementById('strengthLabel').textContent = pw.length ? lv.label : '';
+  });
+
+  const matchMsg = document.getElementById('matchMsg');
+  function checkMatch() {
+    const pw = document.getElementById('newPassword').value;
+    const cf = document.getElementById('confirmPassword').value;
+    if (!cf) { matchMsg.textContent = ''; return; }
+    if (pw === cf) { matchMsg.textContent = '✓ Passwords match'; matchMsg.style.color = 'var(--emerald)'; }
+    else           { matchMsg.textContent = '✗ Do not match'; matchMsg.style.color = 'var(--crimson)'; }
+  }
+  document.getElementById('confirmPassword').addEventListener('input', checkMatch);
+  document.getElementById('newPassword').addEventListener('input', () => { if (document.getElementById('confirmPassword').value) checkMatch(); });
+
+  document.getElementById('savePasswordBtn').addEventListener('click', async () => {
+    const pw = document.getElementById('newPassword').value;
+    const cf = document.getElementById('confirmPassword').value;
+    if (pw.length < 8) return CP.UI.toast('Password must be at least 8 characters.', 'error');
+    if (pw !== cf)     return CP.UI.toast('Passwords do not match.', 'error');
+
+    const btn = document.getElementById('savePasswordBtn');
+    btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Updating…';
+    const { error } = await supabase.auth.updateUser({ password: pw });
+    btn.disabled = false; btn.innerHTML = '<i class="fas fa-lock"></i> Update Password';
+
+    if (error) return CP.UI.toast('Failed: ' + error.message, 'error');
+    CP.UI.toast('Password updated!', 'success');
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmPassword').value = '';
+    matchMsg.textContent = '';
+  });
+
+  // ── Delete account ─────────────────────────────────────────
+  document.getElementById('deleteAccountBtn').addEventListener('click', () => {
+    CP.UI.toast('To delete your account, please contact support at ' + (window.CONFIG ? CONFIG.COMPANY_EMAIL : 'support@choiceproperties.com'), 'info');
+  });"></i>${msg}`;
+    c.appendChild(t);
+    setTimeout(() => { t.style.opacity='0'; t.style.transition='opacity 300ms'; setTimeout(()=>t.remove(),300); }, 4500);
+  }
+</script>
+
+
+<!-- Mobile Bottom Nav (landlord portal) -->
+<nav class="mobile-bottom-nav" id="mobileBottomNav">
+  <a href="/landlord/dashboard.html" class="mobile-bottom-nav-item "><i class="fas fa-th-large"></i>Dashboard</a>
+  <a href="/landlord/applications.html" class="mobile-bottom-nav-item "><i class="fas fa-file-alt"></i>Apps</a>
+  <a href="/landlord/inquiries.html" class="mobile-bottom-nav-item "><i class="fas fa-envelope"></i>Inquiries</a>
+  <a href="/landlord/new-listing.html" class="mobile-bottom-nav-item "><i class="fas fa-plus-circle"></i>New</a>
+  <a href="/landlord/settings.html" class="mobile-bottom-nav-item active"><i class="fas fa-cog"></i>Settings</a>
+</nav>
+<script>
+  const mn = document.getElementById('mainNav') || document.querySelector('.nav');
+  if (mn) window.addEventListener('scroll', () => mn.classList.toggle('scrolled', window.scrollY > 20), { passive: true });
+</script>
+</body>
+</html>

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+  <meta name="theme-color" content="#006aff">
+  <link rel="manifest" href="/manifest.json"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<title>Application Submitted — Choice Properties</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <script defer src="/config.js"></script>
+<link rel="preload" href="/css/main.css?v=1775137055043" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/css/main.css?v=1775137055043"></noscript>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/apply.css?v=1775137055043">
+  <link rel="preload" href="/css/mobile.css?v=1775137055043" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/css/mobile.css?v=1775137055043"></noscript>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family: var(--font-base);background:#f5f6fa;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:0;}
+.card{background:#fff;border:1px solid #e0e0e0;border-radius:12px;padding:48px 40px;text-align:center;max-width:560px;width:100%;box-shadow:0 4px 24px rgba(0,0,0,0.07)}
+.check-icon{font-size:3.5rem;color:#27ae60;margin-bottom:16px}
+h1{font-size:1.6rem;color:#0a1628;margin-bottom:8px}
+.subtitle{color:#666;font-size:.9rem;line-height:1.7;margin-bottom:20px}
+
+/* Property context banner */
+.property-ctx{background:linear-gradient(135deg,#0e1825,#1a2d45);border-radius:8px;padding:14px 18px;margin-bottom:20px;text-align:left;position:relative;overflow:hidden}
+.property-ctx::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#c9a84c,#e8c96a,#c9a84c)}
+.pctx-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(201,168,76,.8);margin-bottom:4px}
+.pctx-title{color:#fff;font-weight:700;font-size:14px;margin-bottom:3px}
+.pctx-addr{color:rgba(255,255,255,.55);font-size:12px}
+
+.app-id-wrap{display:inline-flex;align-items:center;gap:0;margin-bottom:16px;border:1px solid #f0e68c;border-radius:6px;overflow:hidden}
+.app-id{font-family:monospace;font-size:1.1rem;font-weight:700;color:#c9a84c;background:#fefbf0;padding:10px 20px;border:none;margin-bottom:0}
+.copy-btn{background:#fff8dc;border:none;border-left:1px solid #f0e68c;padding:10px 14px;cursor:pointer;color:#8a6000;font-size:.85rem;transition:background .15s}
+.copy-btn:hover{background:#f0e68c}
+.copy-btn.copied{background:#d1fae5;color:#065f46}
+
+.save-notice{font-size:.8rem;color:#666;margin-bottom:20px}
+.save-notice strong{color:#0a1628}
+
+.steps{text-align:left;margin:20px 0;padding:16px;background:#f8f9fa;border-radius:8px}
+.steps-title{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#888;margin-bottom:12px}
+.step{display:flex;gap:12px;padding:8px 0;font-size:.84rem;color:#444;border-bottom:1px solid #eee}
+.step:last-child{border-bottom:none}
+.step-num{width:22px;height:22px;background:#0a1628;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;flex-shrink:0;margin-top:1px}
+
+/* Decision estimate */
+.decision-estimate{background:#eef9f2;border:1px solid #a7f3c8;border-radius:8px;padding:13px 16px;margin:16px 0;display:flex;align-items:center;gap:12px;text-align:left}
+.de-icon{color:#27ae60;font-size:1.3rem;flex-shrink:0}
+.de-text{font-size:.83rem;color:#1a4731;line-height:1.5}
+.de-text strong{font-size:.9rem}
+
+.btn{display:inline-block;background:linear-gradient(135deg,#0a1628,#1d3a6e);color:#fff;text-decoration:none;padding:13px 28px;border-radius:6px;font-weight:700;font-size:.85rem;letter-spacing:.05em;text-transform:uppercase;margin:6px 4px}
+.btn-gold{background:linear-gradient(135deg,#c9a84c,#a8863c);color:#0a1628}
+.contact-line{margin-top:20px;font-size:.75rem;color:#999}
+</style>
+</head>
+<body>
+<nav style="width:100%;background:rgba(255,255,255,0.97);backdrop-filter:blur(12px);border-bottom:1px solid #e4e7ef;padding:0 24px;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;">
+  <a href="/index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+    <div style="width:30px;height:30px;background:#0f1117;border-radius:7px;display:flex;align-items:center;justify-content:center;">
+      <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="M3 9.5L12 3L21 9.5V20C21 20.55 20.55 21 20 21H15V15H9V21H4C3.45 21 3 20.55 3 20V9.5Z" fill="white" opacity="0.9"/><circle cx="12" cy="11" r="2.5" fill="rgba(37,99,235,0.9)"/></svg>
+    </div>
+    <span style="font-family:var(--font-base);font-weight:700;font-size:14.5px;color:#0f1117;letter-spacing:-0.01em;">Choice Properties</span>
+  </a>
+  <a href="/index.html" style="color:#6b7280;font-size:13px;text-decoration:none;padding:6px 12px;border-radius:7px;">← Browse Listings</a>
+</nav>
+<div style="flex:1;display:flex;align-items:center;justify-content:center;padding:32px 20px;width:100%;">
+<div class="card">
+  <div class="check-icon"><i class="fas fa-check-circle"></i></div>
+  <h1>Application Submitted!</h1>
+  <p class="subtitle">Your rental application has been officially received and securely recorded in our system.</p>
+
+  <!-- Property context (shown when arriving from a listing) -->
+  <div class="property-ctx" id="property-ctx" style="display:none">
+    <div class="pctx-label">Application For</div>
+    <div class="pctx-title" id="pctx-title"></div>
+    <div class="pctx-addr" id="pctx-addr"></div>
+  </div>
+
+  <div class="app-id-wrap">
+    <div class="app-id" id="app-id-display">Loading…</div>
+    <button class="copy-btn" id="copy-btn" title="Copy Application ID"><i class="fas fa-copy"></i> Copy</button>
+  </div>
+  <p class="save-notice"><strong>Save this Application ID.</strong> You will use it to track your status and access your dashboard at any time.</p>
+
+  <!-- Estimated decision date -->
+  <div class="decision-estimate" id="decision-estimate">
+    <div class="de-icon"><i class="fas fa-calendar-check"></i></div>
+    <div class="de-text">
+      <strong id="decision-date-line">Estimated decision within 2–3 business days</strong><br>
+      Our team will contact you shortly to arrange the application fee, after which formal review begins.
+    </div>
+  </div>
+
+  <div class="steps">
+    <div class="steps-title">What happens next</div>
+    <div class="step"><div class="step-num">1</div><div><strong>Payment Contact</strong> — Our team will contact you within 24 hours via your preferred method to arrange your application fee.</div></div>
+    <div class="step"><div class="step-num">2</div><div><strong>Active Review</strong> — Once payment is received, your application moves to formal review.</div></div>
+    <div class="step"><div class="step-num">3</div><div><strong>Decision</strong> — You will be notified via email. If approved, a lease will be prepared for your signature.</div></div>
+  </div>
+
+  <a href="dashboard.html" id="dashboard-link" class="btn btn-gold"><i class="fas fa-chart-line" style="margin-right:6px"></i>Track My Application</a>
+  <a href="../index.html" class="btn">Browse More Listings</a>
+
+  <p class="contact-line" id="contact-line" style="display:none">Questions? Text: <strong id="phone"></strong> · <span id="email"></span></p>
+</div>
+<script>
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function addBusinessDays(date, days) {
+  const d = new Date(date);
+  let added = 0;
+  while (added < days) {
+    d.setDate(d.getDate() + 1);
+    const dow = d.getDay();
+    if (dow !== 0 && dow !== 6) added++;
+  }
+  return d;
+}
+
+// ── Company contact line ──────────────────────────────────────────────────────
+const phone = CONFIG.COMPANY_PHONE;
+const email = CONFIG.COMPANY_EMAIL;
+const isConfigured = phone && !phone.includes('YOUR') && email && !email.includes('your@');
+if (isConfigured) {
+  document.getElementById('phone').textContent = phone;
+  document.getElementById('email').textContent = email;
+  document.getElementById('contact-line').style.display = '';
+}
+
+// ── Application ID ────────────────────────────────────────────────────────────
+const p = new URLSearchParams(location.search);
+const appId = sessionStorage.getItem('lastSuccessAppId') || p.get('appId') || p.get('id') || '—';
+document.getElementById('app-id-display').textContent = appId;
+if (appId !== '—') document.getElementById('dashboard-link').href = 'dashboard.html?id=' + encodeURIComponent(appId);
+
+// ── Property context ──────────────────────────────────────────────────────────
+// Primary source: sessionStorage (set by loadLockedProperty on the form page).
+// Fallback: URL params (legacy, for bookmarked links).
+let ctx = {};
+try { ctx = JSON.parse(sessionStorage.getItem('cp_property_context') || '{}'); } catch(e) {}
+
+const propTitle = ctx.title || p.get('title') || '';
+const propFee   = ctx.application_fee !== undefined ? parseInt(ctx.application_fee) : parseInt(p.get('fee') || '-1');
+const propRent  = ctx.monthly_rent ? parseInt(ctx.monthly_rent) : null;
+const propBeds  = ctx.bedrooms  || null;
+const propBaths = ctx.bathrooms || null;
+
+// Build address string
+let propAddr = '';
+if (ctx.address) {
+  propAddr = [ctx.address, ctx.city, ctx.state].filter(Boolean).join(', ');
+  if (ctx.zip) propAddr += ' ' + ctx.zip;
+} else {
+  propAddr = p.get('addr') || '';
+}
+
+if (propTitle) {
+  document.getElementById('pctx-title').textContent = propTitle;
+
+  // Build the detail line: address + rent + beds/baths
+  const meta = [];
+  if (propRent) meta.push('$' + propRent.toLocaleString() + '/mo');
+  const roomStr = [propBeds ? propBeds + ' bed' : '', propBaths ? propBaths + ' bath' : ''].filter(Boolean).join(' · ');
+  if (roomStr) meta.push(roomStr);
+  const addrLine = propAddr ? propAddr + (meta.length ? '  ·  ' + meta.join('  ·  ') : '') : meta.join('  ·  ');
+  document.getElementById('pctx-addr').textContent = addrLine;
+  document.getElementById('property-ctx').style.display = 'block';
+}
+
+// ── Fee-conditional messaging ─────────────────────────────────────────────────
+// propFee -1 means unknown (no sessionStorage and no URL param) — show generic copy.
+const hasFee    = propFee > 0;
+const feeKnown  = propFee >= 0;
+const feeLabel  = hasFee ? '$' + propFee.toLocaleString() : '';
+
+const estimateEl   = document.getElementById('decision-estimate');
+const stepsEl      = document.querySelector('.steps');
+const dateLineEl   = document.getElementById('decision-date-line');
+
+if (hasFee) {
+  // Fee required — team will contact within 24 h; decision follows after payment
+  const decisionDate = addBusinessDays(new Date(), 5);
+  const opts = { weekday: 'long', month: 'long', day: 'numeric' };
+  if (dateLineEl) dateLineEl.textContent =
+    'You can expect a decision by ' + decisionDate.toLocaleDateString('en-US', opts) + ' (after fee payment)';
+  estimateEl.querySelector('.de-text').innerHTML =
+    '<strong>' + (dateLineEl ? dateLineEl.textContent : 'Decision timeline') + '</strong><br>' +
+    'Our team will contact you within 24 hours to arrange your <strong>' + feeLabel + ' application fee</strong>. ' +
+    'Formal review begins after payment is received.';
+  if (stepsEl) stepsEl.innerHTML =
+    '<div class="steps-title">What happens next</div>' +
+    '<div class="step"><div class="step-num">1</div><div><strong>Payment Contact</strong> — Our team will reach out within 24 hours via your preferred contact method to arrange the ' + feeLabel + ' application fee.</div></div>' +
+    '<div class="step"><div class="step-num">2</div><div><strong>Active Review</strong> — Once payment is confirmed, your application moves to formal review.</div></div>' +
+    '<div class="step"><div class="step-num">3</div><div><strong>Decision</strong> — You will be notified by email. If approved, a lease will be prepared for your signature.</div></div>';
+} else if (feeKnown) {
+  // No fee — review starts immediately; faster decision estimate
+  const decisionDate = addBusinessDays(new Date(), 3);
+  const opts = { weekday: 'long', month: 'long', day: 'numeric' };
+  if (dateLineEl) dateLineEl.textContent =
+    'You can expect a decision by ' + decisionDate.toLocaleDateString('en-US', opts);
+  estimateEl.querySelector('.de-text').innerHTML =
+    '<strong>' + (dateLineEl ? dateLineEl.textContent : 'Decision timeline') + '</strong><br>' +
+    'No application fee required — your application moves directly to formal review.';
+  if (stepsEl) stepsEl.innerHTML =
+    '<div class="steps-title">What happens next</div>' +
+    '<div class="step"><div class="step-num">1</div><div><strong>Active Review</strong> — Your application is now in our queue for formal review. No payment required.</div></div>' +
+    '<div class="step"><div class="step-num">2</div><div><strong>Decision</strong> — You will be notified by email, usually within 2–3 business days.</div></div>' +
+    '<div class="step"><div class="step-num">3</div><div><strong>Lease Prepared</strong> — If approved, a lease will be sent to you for signature.</div></div>';
+} else {
+  // Fee unknown — use original generic copy with 3-day estimate
+  const decisionDate = addBusinessDays(new Date(), 3);
+  const opts = { weekday: 'long', month: 'long', day: 'numeric' };
+  if (dateLineEl) dateLineEl.textContent =
+    'You can expect a decision by ' + decisionDate.toLocaleDateString('en-US', opts);
+}
+
+// ── Copy button ───────────────────────────────────────────────────────────────
+document.getElementById('copy-btn').addEventListener('click', () => {
+  const btn = document.getElementById('copy-btn');
+  const _toast = () => {
+    btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.innerHTML = '<i class="fas fa-copy"></i> Copy'; btn.classList.remove('copied'); }, 2000);
+  };
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(appId).then(_toast).catch(_fallback);
+  } else { _fallback(); }
+  function _fallback() {
+    const ta = document.createElement('textarea');
+    ta.value = appId; ta.style.cssText = 'position:fixed;opacity:0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); _toast(); } catch(e) {}
+    document.body.removeChild(ta);
+  }
+});
+</script>
+</div><!-- /.wrapper -->
+</body>
+</html>

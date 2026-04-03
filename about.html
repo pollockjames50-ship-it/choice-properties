@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="theme-color" content="#006aff">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Us — Choice Properties</title>
+  <meta name="description" content="Choice Properties is a nationwide rental marketplace — connecting quality tenants with verified landlords since 2024.">
+  <meta property="og:title" content="About Us — Choice Properties">
+  <meta property="og:description" content="Choice Properties is a nationwide rental marketplace — connecting quality tenants with verified landlords since 2024.">
+  <meta property="og:image" content="/assets/og-cover.jpg">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://choice-properties.pages.dev/about.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="About Us — Choice Properties">
+  <meta name="twitter:description" content="Choice Properties is a nationwide rental marketplace — connecting quality tenants with verified landlords since 2024.">
+  <meta name="twitter:image" content="/assets/og-cover.jpg">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="stylesheet" href="/assets/fontawesome.css">
+    <link rel="preload" href="/css/main.css?v=1775137055043" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/css/main.css?v=1775137055043"></noscript>
+  <link rel="preload" href="/css/mobile.css?v=1775137055043" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/css/mobile.css?v=1775137055043"></noscript>
+<style>
+  .info-page { padding: var(--space-16) 0 var(--space-24); }
+  .info-hero { background: var(--color-dark-surface); padding: var(--space-16) 0 var(--space-12); margin-bottom: var(--space-12); position: relative; overflow: hidden; }
+  .info-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 80% 60% at 70% 50%, rgba(212,160,23,0.10) 0%, transparent 60%); }
+  .info-hero::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px; background: linear-gradient(to right, transparent 5%, rgba(212,160,23,0.3) 30%, rgba(212,160,23,0.3) 70%, transparent 95%); }
+  .info-hero-inner { position: relative; z-index: 1; max-width: 720px; }
+  .info-hero-title { font-family: var(--font-base); font-size: clamp(32px, 5vw, 52px); font-weight: 700; color: var(--color-surface-raised); line-height: 1.1; margin-bottom: var(--space-3); letter-spacing: -0.02em; }
+  .info-hero-sub { font-size: 17px; color: rgba(255,255,255,0.52); line-height: 1.65; }
+  .info-content { max-width: 760px; }
+  .info-section { margin-bottom: var(--space-10); }
+  .info-section h2 { font-family: var(--font-base); font-size: 26px; font-weight: 700; color: var(--color-ink); margin-bottom: var(--space-4); padding-bottom: var(--space-3); border-bottom: 1.5px solid var(--color-surface-subtle); letter-spacing: -0.01em; }
+  .info-section p { font-size: 15.5px; color: var(--slate-mid); line-height: 1.8; margin-bottom: var(--space-4); }
+  .info-section ul { padding-left: var(--space-5); display: flex; flex-direction: column; gap: var(--space-2); }
+  .info-section ul li { font-size: 15.5px; color: var(--slate-mid); line-height: 1.7; }
+  .info-cta { background: linear-gradient(135deg, #04111F 0%, #0E2347 100%); border-radius: var(--radius-2xl); padding: var(--space-10) var(--space-10); margin-top: var(--space-12); display: flex; align-items: center; justify-content: space-between; gap: var(--space-6); flex-wrap: wrap; position: relative; overflow: hidden; }
+  .info-cta::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 60% 80% at 90% 50%, rgba(212,160,23,0.12) 0%, transparent 60%); pointer-events: none; }
+  .info-cta-text h3 { font-family: var(--font-base); font-size: 26px; font-weight: 700; color: var(--color-surface-raised); margin-bottom: var(--space-2); }
+  .info-cta-text p { font-size: 15px; color: rgba(255,255,255,0.52); }
+  .faq-item { border: 1px solid var(--slate-pale); border-radius: var(--radius-xl); overflow: hidden; transition: box-shadow var(--dur) var(--ease); }
+  .faq-item:hover { box-shadow: var(--shadow-sm); }
+  .faq-summary { padding: var(--space-5); font-weight: 600; font-size: 15.5px; color: var(--color-ink); cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); list-style: none; background: var(--color-surface-raised); transition: background var(--dur) var(--ease); }
+  .faq-summary:hover { background: var(--color-surface-page); }
+  .faq-summary::-webkit-details-marker { display: none; }
+  .faq-summary::after { content: '+'; font-size: 20px; font-weight: 300; color: var(--color-brand-light); flex-shrink: 0; transition: transform var(--dur) var(--ease); }
+  details[open] .faq-summary::after { transform: rotate(45deg); }
+  details[open] .faq-summary { color: var(--color-brand-light); background: var(--gold-pale); }
+  .faq-body { padding: 0 var(--space-5) var(--space-5); background: var(--color-surface-raised); font-size: 15px; color: var(--slate-mid); line-height: 1.75; }
+  .faq-list { display: flex; flex-direction: column; gap: var(--space-3); }
+  .steps-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--space-5); margin-top: var(--space-6); }
+  .step-card { background: var(--color-surface-raised); border: 1px solid var(--slate-pale); border-radius: var(--radius-xl); padding: var(--space-6); position: relative; transition: box-shadow var(--dur-slow) var(--ease), transform var(--dur-slow) var(--ease); }
+  .step-card:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); }
+  .step-number { font-family: var(--font-base); font-size: 48px; font-weight: 900; color: var(--gold-pale); line-height: 1; margin-bottom: var(--space-3); }
+  .step-icon { width: 44px; height: 44px; border-radius: var(--radius-lg); background: var(--gold-pale); display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--color-brand-light); margin-bottom: var(--space-4); border: 1px solid rgba(212,160,23,0.2); }
+  .step-title { font-weight: 700; font-size: 16px; color: var(--color-ink); margin-bottom: var(--space-2); }
+  .step-desc { font-size: 13.5px; color: var(--slate-mid); line-height: 1.65; }
+  .contact-card { background: var(--color-surface-raised); border: 1px solid var(--slate-pale); border-radius: var(--radius-2xl); padding: var(--space-8); box-shadow: var(--shadow-sm); }
+  .contact-card h3 { font-family: var(--font-base); font-size: 22px; font-weight: 700; color: var(--color-ink); margin-bottom: var(--space-5); }
+  .contact-row { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) 0; border-bottom: 1px solid var(--color-surface-subtle); font-size: 15px; color: var(--slate); }
+  .contact-row:last-child { border-bottom: none; }
+  .contact-row-icon { width: 38px; height: 38px; border-radius: var(--radius-lg); background: var(--gold-pale); display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--color-brand-light); flex-shrink: 0; }
+  .contact-row a { color: var(--color-ink); font-weight: 600; }
+  .contact-row a:hover { color: var(--color-brand-light); }
+
+  @media (max-width: 768px) {
+    .info-hero { padding: var(--space-10) 0 var(--space-8); margin-bottom: var(--space-8); }
+    .info-hero-title { font-size: clamp(26px, 7vw, 36px); }
+    .info-hero-sub { font-size: 15px; }
+    .info-content { padding: 0 var(--space-1); }
+    .info-cta { padding: var(--space-6); flex-direction: column; }
+    .info-cta-text h3 { font-size: 20px; }
+    .info-page { padding: var(--space-8) 0 var(--space-16); }
+  }
+  @media (max-width: 480px) {
+    .info-hero { padding: var(--space-8) 0 var(--space-6); }
+    .info-section h2 { font-size: 20px; }
+    .info-section p, .info-section ul li { font-size: 14.5px; }
+  }
+</style>
+</head>
+<body>
+<!-- Mobile Drawer Overlay -->
+<div id="site-nav"></div>
+
+<div class="info-hero">
+  <div class="container">
+    <div class="info-hero-inner">
+      <div class="section-eyebrow" style="margin-bottom:var(--s-4)">Our Story</div>
+      <h1 class="info-hero-title">America's Trusted Rental Marketplace</h1>
+      <p class="info-hero-sub">We built the platform we always wished existed — transparent, fast, and human.</p>
+    </div>
+  </div>
+</div>
+
+<div class="info-page">
+  <div class="container">
+    <div class="info-content">
+      <div class="info-section">
+        <h2>Who We Are</h2>
+        <p>Choice Properties is a Nationwide-based rental marketplace built to make renting better for everyone — tenants and landlords alike. We're hands-on, responsive, and genuinely invested in every placement we make.</p>
+        <p>Unlike national platforms that treat you like a ticket number, we pick up the phone. Our team personally reviews every listing and supports every application from submission to move-in.</p>
+      </div>
+
+      <div class="info-section">
+        <h2>Our Mission</h2>
+        <p>To make renting in Nationwide simple, transparent, and fast — with zero hidden fees and no bait-and-switch listings. We believe finding a home should be exciting, not exhausting.</p>
+      </div>
+
+      <div class="contact-card" style="margin-top:var(--s-8)">
+        <h3>Get in Touch</h3>
+        <div class="contact-row">
+          <div class="contact-row-icon"><i class="fas fa-phone"></i></div>
+          <div><a href="mailto:support@choiceproperties.com" data-cfg-email>support@choiceproperties.com</a> <span style="color:#8892a2;font-size:13px">(text preferred)</span></div>
+        </div>
+        <div class="contact-row">
+          <div class="contact-row-icon"><i class="fas fa-envelope"></i></div>
+          <div><a href="mailto:support@choiceproperties.com" data-cfg-email>support@choiceproperties.com</a></div>
+        </div>
+        <div class="contact-row">
+          <div class="contact-row-icon"><i class="fas fa-map-marker-alt"></i></div>
+          <div>Nationwide Rental Marketplace</div>
+        </div>
+      </div>
+
+      <div class="info-cta">
+        <div class="info-cta-text">
+          <h3>Browse Available Rentals</h3>
+          <p>Verified listings across Nationwide — apply in 15 minutes.</p>
+        </div>
+        <a href="/index.html" class="btn btn-primary btn-lg">View Listings</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="site-footer"></div>
+<script defer src="/config.js"></script>
+<script type="module" src="/js/cp-api.js"></script>
+<script defer src="/js/components.js"></script>
+</body>
+</html>

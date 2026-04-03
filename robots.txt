@@ -1,0 +1,27 @@
+User-agent: *
+
+# Private portals — no indexing
+Disallow: /admin/
+Disallow: /landlord/login.html
+Disallow: /landlord/register.html
+Disallow: /landlord/dashboard.html
+Disallow: /landlord/applications.html
+Disallow: /landlord/inquiries.html
+Disallow: /landlord/new-listing.html
+Disallow: /landlord/edit-listing.html
+Disallow: /landlord/settings.html
+
+# Application flow — contains personal data
+Disallow: /apply.html
+Disallow: /apply/
+
+# Internal tooling
+Disallow: /health.html
+
+# Public landlord profiles are allowed
+Allow: /landlord/profile.html
+
+# This placeholder is automatically rewritten at build time by generate-config.js
+# when SITE_URL is set in your Cloudflare Pages environment variables.
+# You do not need to edit this file manually.
+Sitemap: https://choicepropertiesofficial.pages.dev/sitemap.xml

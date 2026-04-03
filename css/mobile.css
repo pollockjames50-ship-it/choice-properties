@@ -1,0 +1,1114 @@
+/* ============================================================
+   CHOICE PROPERTIES — mobile.css v1
+   Mobile-first responsive layer. Loaded after all other CSS.
+
+   Strategy: base styles = mobile defaults.
+             min-width media queries enhance for larger screens.
+   Overrides desktop-first rules in main/listings/property/
+   apply/admin/landlord CSS files.
+   ============================================================ */
+
+
+/* ── SAFE AREA & ROOT TOKENS ─────────────────────────────── */
+:root {
+  --safe-top:    env(safe-area-inset-top,    0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left:   env(safe-area-inset-left,   0px);
+  --safe-right:  env(safe-area-inset-right,  0px);
+}
+
+
+/* ── BASE BODY ───────────────────────────────────────────── */
+/* Prevent iOS font inflation and horizontal overflow */
+html {
+  -webkit-text-size-adjust: 100%;
+  overflow-x: hidden;
+}
+body {
+  overflow-x: hidden;
+}
+
+
+/* ── INPUTS — prevent iOS zoom ───────────────────────────── */
+/* iOS Safari zooms the page when an input < 16px is focused */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="search"],
+input[type="date"],
+input[type="url"],
+input[type="color"],
+input[type="range"],
+select,
+textarea {
+  font-size: 16px !important;
+}
+@media (min-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="search"],
+  input[type="date"],
+  input[type="url"],
+  input[type="color"],
+  input[type="range"],
+  select,
+  textarea {
+    font-size: inherit !important;
+  }
+}
+
+
+/* ── TOUCH TARGETS ───────────────────────────────────────── */
+/* Ensure all interactive elements are at least 44×44px */
+button,
+[role="button"],
+.btn,
+a.btn,
+input[type="submit"],
+input[type="button"],
+input[type="reset"] {
+  min-height: 44px;
+}
+
+
+/* ── NAVIGATION ──────────────────────────────────────────── */
+/* On mobile: show hamburger, hide desktop nav links */
+.nav-mobile-toggle {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+}
+.nav-links {
+  display: none !important;
+}
+/* On desktop: flip it */
+@media (min-width: 769px) {
+  .nav-mobile-toggle {
+    display: none !important;
+  }
+  .nav-links {
+    display: flex !important;
+  }
+}
+
+/* Nav inner padding tighter on mobile */
+.nav-inner {
+  padding: 0 var(--space-4);
+}
+@media (min-width: 769px) {
+  .nav-inner {
+    padding: 0 var(--space-6);
+  }
+}
+
+/* Nav drawer — full safe-area-aware height, iOS notch support */
+.nav-drawer {
+  padding-top: calc(var(--space-6) + var(--safe-top));
+  padding-bottom: calc(var(--space-6) + var(--safe-bottom));
+}
+
+/* Nav drawer links — larger touch targets */
+.nav-drawer-link {
+  min-height: 48px;
+  padding-top: var(--space-3);
+  padding-bottom: var(--space-3);
+  display: flex;
+  align-items: center;
+}
+
+
+/* ── HERO — SEARCH BAR ───────────────────────────────────── */
+/* Stack fields vertically on all mobile screen sizes */
+.search-bar-top,
+.search-box {
+  flex-direction: column;
+  gap: 0;
+  border-radius: var(--radius-xl);
+}
+
+.search-field {
+  min-width: 100% !important;
+  border-right: none !important;
+  border-bottom: 1px solid var(--color-border) !important;
+  border-radius: 0 !important;
+  width: 100%;
+}
+.search-field:first-child {
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0 !important;
+}
+.search-field:last-of-type {
+  border-bottom: none !important;
+}
+
+.search-btn,
+.search-submit {
+  width: 100% !important;
+  justify-content: center !important;
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl) !important;
+  min-height: 52px;
+}
+
+/* Slightly shrink hero padding on small phones */
+.hero {
+  padding-top: var(--space-12);
+  padding-bottom: var(--space-12);
+  min-height: auto !important;
+}
+@media (min-width: 769px) {
+  .search-bar-top,
+  .search-box {
+    flex-direction: row;
+  }
+  .search-field {
+    min-width: unset !important;
+    border-right: 1px solid var(--color-border) !important;
+    border-bottom: none !important;
+    border-radius: 0 !important;
+    width: auto;
+  }
+  .search-field:first-child {
+    border-radius: var(--radius-full) 0 0 var(--radius-full) !important;
+  }
+  .search-btn,
+  .search-submit {
+    width: auto !important;
+    justify-content: flex-start !important;
+    border-radius: 0 var(--radius-full) var(--radius-full) 0 !important;
+    min-height: unset;
+  }
+  .hero {
+    padding-top: unset;
+    padding-bottom: unset;
+    min-height: revert;
+  }
+}
+
+/* Hero stats — compact on mobile */
+.hero-stats {
+  flex-wrap: wrap;
+  gap: var(--space-4) var(--space-5);
+  justify-content: center;
+}
+.hero-stat-divider {
+  display: none;
+}
+@media (min-width: 640px) {
+  .hero-stat-divider {
+    display: block;
+  }
+}
+
+
+/* ── PROPERTY GRID ───────────────────────────────────────── */
+/* Mobile-first: single column on small phones, widens at each breakpoint */
+.property-grid {
+  grid-template-columns: 1fr !important;
+  gap: var(--space-4);
+}
+@media (min-width: 540px) {
+  .property-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: var(--space-4) !important;
+  }
+}
+@media (min-width: 900px) {
+  .property-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: var(--space-5) !important;
+  }
+}
+@media (min-width: 1320px) {
+  .property-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: var(--space-6) !important;
+  }
+}
+
+/* Property card photo — use aspect-ratio exclusively (no padding-top hack).
+   aspect-ratio is set in listings.css; no override needed here. */
+
+
+/* ── FILTER BAR ──────────────────────────────────────────── */
+/* Make filter pills scrollable row on mobile */
+.filter-bar-inner {
+  padding: 0 var(--space-4);
+  -webkit-overflow-scrolling: touch;
+}
+.listings-controls {
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+
+/* ── FOOTER (public pages) ───────────────────────────────── */
+.footer-grid,
+.footer-grid.footer-grid {
+  grid-template-columns: 1fr !important;
+  gap: var(--space-8);
+}
+@media (min-width: 640px) {
+  .footer-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: var(--space-8);
+  }
+}
+@media (min-width: 1024px) {
+  .footer-grid {
+    grid-template-columns: 2.4fr 1fr 1fr 1fr !important;
+    gap: var(--space-12);
+  }
+}
+
+/* Footer bottom: stack on mobile */
+.footer-bottom {
+  flex-direction: column;
+  text-align: center;
+  align-items: center;
+  gap: var(--space-3);
+}
+@media (min-width: 640px) {
+  .footer-bottom {
+    flex-direction: row;
+    text-align: left;
+    align-items: center;
+  }
+}
+
+
+/* ── MODALS — bottom sheet on mobile ────────────────────── */
+@media (max-width: 640px) {
+  .modal-overlay {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+  .modal,
+  .modal-sm,
+  .modal-lg,
+  .modal-xl {
+    max-width: 100% !important;
+    width: 100% !important;
+    border-radius: var(--radius-2xl) var(--radius-2xl) 0 0 !important;
+    max-height: 92vh !important;
+    animation: mobileSheetIn 260ms var(--ease-out) forwards !important;
+    padding-bottom: var(--safe-bottom);
+  }
+  @keyframes mobileSheetIn {
+    from { transform: translateY(100%); opacity: 0.8; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+
+  /* Admin modal — same treatment */
+  .modal-overlay.open .modal {
+    border-radius: var(--radius-2xl) var(--radius-2xl) 0 0 !important;
+  }
+}
+
+
+/* ── TOAST — safe area aware ────────────────────────────── */
+@media (max-width: 640px) {
+  .toast-container {
+    bottom: calc(var(--space-4) + var(--safe-bottom));
+    left: var(--space-4);
+    right: var(--space-4);
+  }
+  .toast {
+    min-width: 0;
+    max-width: 100%;
+  }
+  /* Landlord portal has its own toast position with bottom nav */
+}
+
+
+/* ── ADMIN DASHBOARD ─────────────────────────────────────── */
+/* Mobile menu button — show by default (hidden on desktop) */
+.mobile-menu-btn {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1px solid var(--adm-border, #E0E0E0);
+  color: var(--adm-muted2, #565656);
+  width: 40px;
+  height: 40px;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+@media (min-width: 1025px) {
+  .mobile-menu-btn {
+    display: none !important;
+  }
+}
+
+/* Admin content padding — tighter on mobile */
+.content {
+  padding: 16px;
+}
+@media (min-width: 1025px) {
+  .content {
+    padding: 28px;
+  }
+}
+
+/* Admin stats grid — single column on phones */
+.stats-grid {
+  grid-template-columns: 1fr !important;
+  gap: 12px;
+}
+@media (min-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+@media (min-width: 1025px) {
+  .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
+  }
+}
+
+/* Admin form rows — single column on phones */
+.form-row {
+  grid-template-columns: 1fr !important;
+}
+@media (min-width: 640px) {
+  .form-row {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+
+/* Admin topbar — tighter on small screens */
+.topbar {
+  padding: 12px 16px;
+}
+@media (min-width: 1025px) {
+  .topbar {
+    padding: 16px 28px;
+  }
+}
+
+/* Admin table font — legible on small screens */
+@media (max-width: 640px) {
+  th, td {
+    padding: 10px 10px;
+    font-size: 0.75rem;
+  }
+  .truncate {
+    max-width: 120px;
+  }
+}
+
+
+/* ── LANDLORD PORTAL ─────────────────────────────────────── */
+/* Bottom nav — safe area aware */
+.mobile-bottom-nav {
+  padding-bottom: calc(var(--space-2) + var(--safe-bottom));
+}
+
+/* Dashboard main — account for bottom nav + safe area */
+@media (max-width: 1024px) {
+  .dashboard-main {
+    padding-bottom: calc(var(--space-20) + var(--safe-bottom)) !important;
+  }
+}
+
+/* App row — single column on small phones */
+@media (max-width: 480px) {
+  .app-row {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+
+/* ── APPLY FORM ──────────────────────────────────────────── */
+/* Step indicator — tighter on phones */
+@media (max-width: 480px) {
+  .progress-steps,
+  .step-indicator {
+    gap: var(--space-1);
+    font-size: 11px;
+  }
+  .step-number {
+    width: 26px;
+    height: 26px;
+    font-size: 11px;
+  }
+}
+
+/* Apply form nav buttons — full width on phones */
+@media (max-width: 480px) {
+  .form-nav,
+  .form-actions {
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  .btn-next,
+  .btn-prev,
+  .btn-submit {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+}
+
+
+/* ── PROPERTY DETAIL ─────────────────────────────────────── */
+/* Gallery swipe — full bleed on mobile */
+@media (max-width: 768px) {
+  .gallery-mosaic {
+    border-radius: 0;
+    margin-left: calc(-1 * var(--space-5));
+    margin-right: calc(-1 * var(--space-5));
+  }
+}
+
+/* Detail layout — single column on mobile already at 900px,
+   but ensure sidebar stacks below content on smaller screens */
+@media (max-width: 900px) {
+  .detail-layout,
+  .property-detail-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .detail-sidebar,
+  .property-sidebar {
+    position: static !important;
+    top: auto !important;
+  }
+}
+
+
+/* ── CONTENT PAGES (about, faq, etc.) ───────────────────── */
+@media (max-width: 640px) {
+  .content-card {
+    padding: var(--space-5) var(--space-5);
+  }
+  .content-page-hero h1 {
+    font-size: clamp(24px, 8vw, 36px);
+  }
+}
+
+
+/* ── GENERAL SPACING — mobile container ─────────────────── */
+.container {
+  padding-left: var(--space-4);
+  padding-right: var(--space-4);
+}
+@media (min-width: 640px) {
+  .container {
+    padding-left: var(--space-6);
+    padding-right: var(--space-6);
+  }
+}
+
+
+/* ── STATS ROW (dashboard stat cards) ───────────────────── */
+.stats-row {
+  grid-template-columns: 1fr 1fr !important;
+  gap: var(--space-3);
+}
+@media (max-width: 360px) {
+  .stats-row {
+    grid-template-columns: 1fr !important;
+  }
+}
+@media (min-width: 1025px) {
+  .stats-row {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+  }
+}
+
+
+/* ── WHY SECTION ─────────────────────────────────────────── */
+.why-grid {
+  grid-template-columns: 1fr !important;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+}
+@media (min-width: 640px) {
+  .why-grid {
+    grid-template-columns: 1fr 1fr !important;
+    max-width: unset;
+  }
+}
+@media (min-width: 1025px) {
+  .why-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
+
+/* ── SECTION TITLE TYPOGRAPHY ────────────────────────────── */
+.section-title {
+  font-size: clamp(24px, 6vw, 44px);
+}
+.why-section-title {
+  font-size: clamp(26px, 6vw, 52px);
+}
+
+
+/* ── HORIZONTAL SCROLL POLISH ────────────────────────────── */
+/* Smooth momentum scrolling everywhere it's used.
+   Proximity snap (not mandatory) avoids hijacking finger gestures. */
+.table-wrap,
+.filter-bar-inner,
+.steps {
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+}
+
+
+/* ── SCROLL-TO-TOP — safe area aware ────────────────────── */
+.scroll-top {
+  bottom: calc(var(--space-4) + var(--safe-bottom));
+  left: var(--space-4);
+}
+
+
+/* ── GLOBAL TOUCH IMPROVEMENTS ───────────────────────────── */
+/* Remove the 300ms tap delay and the blue flash on mobile browsers */
+a,
+button,
+[role="button"],
+input,
+label,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── HOVER GUARD — touch devices ────────────────────────── */
+/* Hover lift/scale effects are designed for pointer (mouse) devices.
+   On touch screens the :hover state fires on tap and can stick,
+   causing a visual jump before navigation. Guard all lift-on-hover
+   rules so they only activate when a true hover is available. */
+@media (hover: none) {
+  .property-card:hover {
+    transform: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    border-color: var(--color-border);
+  }
+  .property-card:hover::before { opacity: 0; }
+  .property-card:hover .property-card-nav { opacity: 0; }
+  .property-card:hover .property-card-slide img { transform: none; }
+  .property-card-apply:hover { transform: none; box-shadow: 0 2px 10px rgba(0,106,255,0.22); }
+  .property-card-view:hover { background: var(--color-surface-subtle); border-color: var(--color-border); color: var(--color-text-secondary); }
+  .detail-meta-item:hover { transform: none; }
+  .amenity-item:hover { background: var(--color-surface-raised); border-color: var(--color-border); box-shadow: var(--shadow-xs); }
+  .hiw-step-bubble:hover { transform: none; }
+}
+
+/* Standard text-size-adjust alongside webkit prefix */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Prevent overscroll bounce from leaking outside modal/drawer */
+.modal-overlay,
+.nav-drawer {
+  overscroll-behavior: contain;
+}
+
+
+/* ── FOCUS RING — keyboard-only visibility ───────────────── */
+/* Show focus ring only for keyboard navigation, hide for mouse/touch */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+
+/* ── PREFERS-REDUCED-MOTION ──────────────────────────────── */
+/* Disable all animations and transitions for users who prefer less motion.
+   Scroll behaviour is also linearised via scroll-behavior. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Keep functional transforms (e.g. translateY for sticky) but zero duration */
+  .hero-eyebrow,
+  .hero-headline, .hero-title,
+  .hero-sub, .hero-subtitle,
+  .search-bar, .search-box,
+  .hero-stats,
+  .property-card,
+  .hiw-step-bubble,
+  .why-card {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+
+/* ── 320px MICRO-PHONE ───────────────────────────────────── */
+/* Target very small handsets (iPhone SE 1st gen, Galaxy A01, etc.)
+   that sit just under the standard 375px design reference. */
+@media (max-width: 360px) {
+  /* Hero headline: prevent text overflow on tiny viewports */
+  .hero-headline,
+  .hero-title {
+    font-size: clamp(26px, 9vw, 36px);
+  }
+
+  /* Section titles: clamp down from 24px minimum to 22px */
+  .section-title { font-size: clamp(20px, 7vw, 28px); }
+  .why-section-title { font-size: clamp(22px, 8vw, 34px); }
+
+  /* Container: tighten horizontal breathing room */
+  .container {
+    padding-left: var(--space-3);
+    padding-right: var(--space-3);
+  }
+
+  /* Nav inner: prevent logo/icon squish */
+  .nav-inner { padding: 0 var(--space-3); }
+
+  /* Footer links: wrap more gracefully */
+  .footer-links { gap: 10px; }
+
+  /* Buttons: let them be slightly smaller to avoid overflow */
+  .btn { padding: 10px 16px; font-size: 13px; }
+
+  /* Hero stats: single column on truly tiny screens */
+  .hero-stats { flex-direction: column; align-items: center; gap: var(--space-3); }
+  .hero-stat-divider { display: none; }
+
+  /* Step circles in the wizard shrink further */
+  .step-circle { width: 24px; height: 24px; font-size: 10px; }
+}
+
+
+/* ── ULTRA-WIDE SCREENS (1440px → 2560px+) ───────────────── */
+/* Prevent content from over-stretching on wide monitors.
+   Container max-width expands gracefully instead of hitting hard walls. */
+
+/* 1440px — large laptop / desktop */
+@media (min-width: 1440px) {
+  .container {
+    max-width: 1360px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Give property grid more breathing room on 4K-adjacent displays */
+  .property-grid {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)) !important;
+    gap: var(--space-6) !important;
+  }
+
+  /* Wider hero search bar */
+  .search-bar,
+  .search-box {
+    max-width: 860px;
+  }
+}
+
+/* 1920px — Full HD / 2K monitors */
+@media (min-width: 1920px) {
+  .container {
+    max-width: 1600px;
+  }
+
+  /* Larger hero headline at very wide breakpoints */
+  .hero-headline,
+  .hero-title {
+    font-size: clamp(48px, 3.5vw, 72px);
+  }
+
+  .property-grid {
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)) !important;
+  }
+
+  /* Widen footer grid brand column */
+  .footer-grid {
+    grid-template-columns: 3fr 1fr 1fr 1fr !important;
+  }
+}
+
+/* 2560px+ — 2K / 4K / ultra-wide monitors */
+@media (min-width: 2560px) {
+  .container {
+    max-width: 2000px;
+  }
+
+  .property-grid {
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)) !important;
+  }
+}
+
+
+/* ── ADMIN TABLES — card layout on small phones ──────────── */
+/* On screens narrower than 600px, transform table rows into stacked cards
+   so users don't need to scroll horizontally to read critical data. */
+@media (max-width: 600px) {
+  /* Enable card-table by removing the wrapper's overflow so rows stack */
+  .table-wrap { overflow-x: visible; }
+
+  /* Hide header row — labels come from data-label attributes on each cell */
+  .table thead,
+  .listing-table thead { display: none; }
+
+  /* Each row becomes a card */
+  .table tbody tr,
+  .listing-table tbody tr {
+    display: block;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-3);
+    padding: var(--space-3);
+    background: var(--color-surface-raised);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+
+  /* Each cell becomes a label:value row */
+  .table tbody td,
+  .listing-table tbody td {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: 6px 0;
+    font-size: 13px;
+    border-bottom: 1px solid var(--color-border-muted);
+    text-align: right;
+  }
+  .table tbody td:last-child,
+  .listing-table tbody td:last-child { border-bottom: none; }
+
+  /* Inject label from data-label attribute before each cell */
+  .table tbody td[data-label]::before,
+  .listing-table tbody td[data-label]::before {
+    content: attr(data-label);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+    text-align: left;
+    flex-shrink: 0;
+  }
+
+  /* Actions cell: show inline, flush right */
+  .table-actions,
+  .listing-row-actions {
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  /* Remove row hover background that looks odd on card layout */
+  .table tbody tr:hover td { background: transparent; }
+}
+
+
+/* ── ADMIN FILTER BAR — wrapping on phones ───────────────── */
+/* The admin page filter bar can overflow on small screens.
+   Let it wrap gracefully and keep buttons accessible. */
+@media (max-width: 640px) {
+  .filter-bar,
+  .filter-bar-inner {
+    flex-wrap: wrap;
+    height: auto;
+    padding-top: var(--space-2);
+    padding-bottom: var(--space-2);
+  }
+
+  .filter-pill,
+  .filter-btn {
+    flex-shrink: 0;
+  }
+
+  .listings-sort {
+    margin-left: auto;
+  }
+}
+
+
+/* ── PRINT STYLES ─────────────────────────────────────────── */
+/* Hide interactive chrome when the user prints a property listing
+   or applies for a rental. Keep the important content readable. */
+@media print {
+  /* Hide navigation, fixed elements, animations */
+  .nav,
+  .nav-drawer,
+  .mobile-bottom-nav,
+  .scroll-top,
+  .toast-container,
+  .modal-overlay,
+  .lightbox,
+  .mosaic-expand-btn,
+  .mosaic-nav-btn,
+  .mosaic-mobile-count,
+  .filter-bar,
+  .search-bar,
+  .hero-stats,
+  .why-section,
+  .hiw-section,
+  .footer {
+    display: none !important;
+  }
+
+  body {
+    background: #fff;
+    color: #000;
+    font-size: 12pt;
+    line-height: 1.6;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: underline;
+  }
+
+  /* Show the URL of links after their text */
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 10pt;
+    color: #555;
+  }
+
+  /* Prevent page breaks inside cards and table rows */
+  .property-card,
+  .why-card,
+  .content-card,
+  .table tbody tr {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Gallery mosaic: single column, auto height for print */
+  .gallery-mosaic {
+    height: auto !important;
+    grid-template-columns: 1fr !important;
+  }
+  .mosaic-side { display: none !important; }
+  .mosaic-main { height: 280pt; border-radius: 0; }
+
+  .container { max-width: 100% !important; padding: 0 !important; }
+}
+
+
+/* ── LANDSCAPE SHORT-VIEWPORT (phones rotated) ───────────── */
+/* On a rotated phone the viewport height can be 375-430px.
+   The hero has min-height: auto already, but its vertical
+   padding alone can push below the fold before the user sees
+   the search bar. Compress it in landscape orientation. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .hero {
+    padding-top: var(--space-8) !important;
+    padding-bottom: var(--space-8) !important;
+  }
+  .hero-headline,
+  .hero-title {
+    font-size: clamp(24px, 5vw, 40px) !important;
+  }
+  .hero-stats { display: none; }
+}
+
+
+/* ── LANDLORD LISTING-ROW — tiny phones ──────────────────── */
+/* Below 400px the 64px thumb + title + action buttons become
+   cramped in a single flex row. Stack to two rows: thumb+body
+   on top, actions below, aligned right. */
+@media (max-width: 400px) {
+  .listing-row {
+    flex-wrap: wrap;
+  }
+  .listing-row-actions {
+    width: 100%;
+    justify-content: flex-end;
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--color-border-muted);
+    margin-top: var(--space-2);
+  }
+}
+
+
+/* ── ADMIN SEARCH INPUT — prevent overflow on tiny screens ── */
+/* The search input has an inline min-width:220px that can push
+   the filter row wider than the viewport on 360px handsets. */
+@media (max-width: 400px) {
+  #search,
+  input[id="search"] {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+}
+
+
+/* ── PROPERTY CONTACT CARD — full width on mobile ─────────── */
+/* The contact card in the property sidebar stacks below the
+   detail at 900px. Ensure it fills the container width. */
+@media (max-width: 900px) {
+  .contact-card {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+
+/* ── PHOTO UPLOAD / DROP ZONE — mobile tap area ──────────── */
+/* The file drop zone has a large desktop padding that is
+   unnecessarily tall on mobile. Reduce it. */
+@media (max-width: 640px) {
+  .file-drop-zone,
+  .photo-drop-zone {
+    padding: var(--space-6) var(--space-4) !important;
+  }
+  .photo-preview-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)) !important;
+  }
+}
+
+
+/* ── APPLY FORM — summary grid on tiny phones ─────────────── */
+/* The 2-column summary grid becomes too narrow on ≤360px.
+   Force single column so values aren't truncated. */
+@media (max-width: 360px) {
+  .summary-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .time-categories {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+
+/* ── PROPERTY CARD IMAGE — landscape phones ──────────────── */
+/* In landscape the card photos can be disproportionately short
+   because the viewport is wide. Use 16/9 to match most property photos. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .property-card-img {
+    aspect-ratio: 16 / 9;
+  }
+}
+
+
+/* ── CONTENT-VISIBILITY: below-fold rendering optimization ──────────────── */
+/* Skips layout/paint for off-screen sections until scroll approaches.       */
+/* contain-intrinsic-size is a size hint so scrollbar height stays accurate. */
+
+/* Property detail — description, amenities, map, similar listings */
+.property-desc-body,
+.property-amenities,
+.property-location,
+.similar-section {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 400px;
+}
+
+/* Apply wizard — steps below the active one */
+.apply-step:not(.active) {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 600px;
+}
+
+/* FAQ — answers list */
+.faq-list {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 1200px;
+}
+
+/* How it works & About — below-hero sections */
+.hiw-steps,
+.why-section,
+.info-page {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 600px;
+}
+
+/* Listings — card grid (dynamically populated, hint only) */
+.property-grid {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 800px;
+}
+
+
+/* ── DARK MODE FOUNDATION ────────────────────────────────────────────────── */
+/* Inverts surface, text, border, and card tokens for OLED/dark-mode users.  */
+/* Scoped to body:not(.admin-layout):not(.landlord-layout) so dashboards     */
+/* (which have their own separate CSS) are never affected.                   */
+@media (prefers-color-scheme: dark) {
+
+  body:not(.admin-layout):not(.landlord-layout) {
+    --color-bg:              #0d1117;
+    --color-surface:         #161b22;
+    --color-surface-subtle:  #1c2128;
+    --color-surface-raised:  #1c2128;
+    --color-border:          #30363d;
+    --color-border-muted:    #21262d;
+    --ink:                   #e6edf3;
+    --ink-muted:             #8b949e;
+    --ink-faint:             #484f58;
+    --white:                 #161b22;
+    --blue:                  #4493f8;
+    --blue-hover:            #388bfd;
+    background-color: var(--color-bg);
+    color: var(--ink);
+  }
+
+  body:not(.admin-layout):not(.landlord-layout) .nav {
+    background: rgba(13,17,23,0.95);
+    border-bottom-color: var(--color-border);
+  }
+
+  body:not(.admin-layout):not(.landlord-layout) .nav-drawer {
+    background: #161b22;
+  }
+
+  body:not(.admin-layout):not(.landlord-layout) .property-card,
+  body:not(.admin-layout):not(.landlord-layout) .property-card-body {
+    background: var(--color-surface);
+    border-color: var(--color-border);
+  }
+
+  body:not(.admin-layout):not(.landlord-layout) .search-bar,
+  body:not(.admin-layout):not(.landlord-layout) .search-field input,
+  body:not(.admin-layout):not(.landlord-layout) .search-field select {
+    background: var(--color-surface);
+    border-color: var(--color-border);
+    color: var(--ink);
+  }
+
+  body:not(.admin-layout):not(.landlord-layout) input,
+  body:not(.admin-layout):not(.landlord-layout) select,
+  body:not(.admin-layout):not(.landlord-layout) textarea {
+    background: var(--color-surface);
+    border-color: var(--color-border);
+    color: var(--ink);
+  }
+
+  body:not(.admin-layout):not(.landlord-layout) .card,
+  body:not(.admin-layout):not(.landlord-layout) .info-card,
+  body:not(.admin-layout):not(.landlord-layout) .faq-item,
+  body:not(.admin-layout):not(.landlord-layout) .hiw-step,
+  body:not(.admin-layout):not(.landlord-layout) .why-card {
+    background: var(--color-surface);
+    border-color: var(--color-border);
+  }
+
+  body:not(.admin-layout):not(.landlord-layout) .footer {
+    background: #0d1117;
+    border-top-color: var(--color-border);
+  }
+}

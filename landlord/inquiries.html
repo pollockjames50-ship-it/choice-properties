@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="theme-color" content="#006aff">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="preconnect" id="sb-preconnect"><!-- set by config.js -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Inquiries — Choice Properties</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="stylesheet" href="/assets/fontawesome.css">
+    <link rel="preload" href="/css/main.css?v=1775137055043" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/css/main.css?v=1775137055043"></noscript>
+  <link rel="stylesheet" href="/css/landlord.css?v=1775137055043">
+  <link rel="stylesheet" href="/css/admin.css?v=1775137055043">
+  <link rel="preload" href="/css/mobile.css?v=1775137055043" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/css/mobile.css?v=1775137055043"></noscript>
+  <style>
+    .inquiry-card {
+      border: 1px solid var(--slate-pale);
+      border-radius: var(--radius-sm);
+      padding: var(--space-5);
+      margin-bottom: var(--space-3);
+      background: var(--color-surface-raised);
+      transition: border-color 200ms;
+      border-left: 4px solid var(--slate-pale);
+    }
+    .inquiry-card.unread {
+      border-left-color: var(--color-brand-light);
+      background: var(--gold-pale);
+    }
+    .inquiry-card:hover { border-color: var(--color-brand-light); }
+    .inquiry-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-4);
+      font-size: 13px;
+      color: var(--slate);
+      margin: var(--space-3) 0;
+    }
+    .inquiry-meta span { display: flex; align-items: center; gap: 6px; }
+    .inquiry-meta i { color: var(--color-brand-light); }
+    .inquiry-message {
+      font-size: 14px;
+      color: var(--slate);
+      line-height: 1.6;
+      background: var(--color-surface-page);
+      border-radius: var(--radius-sm);
+      padding: var(--space-4);
+      margin: var(--space-3) 0;
+      border-left: 3px solid var(--slate-pale);
+    }
+    .inquiry-actions {
+      display: flex;
+      gap: var(--space-3);
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: var(--space-4);
+    }
+  </style>
+<script defer src="/config.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script type="module" src="/js/cp-api.js"></script>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/index.html" class="nav-logo">
+      <div class="nav-logo-mark">C</div>
+      <div>
+        <div class="nav-logo-text">Choice Properties</div>
+        <div class="nav-logo-sub">Landlord Portal</div>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a href="/index.html" class="nav-link">View Listings →</a>
+      <button class="btn btn-ghost btn-sm" id="signOutBtn"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+    </div>
+  </div>
+</nav>
+
+<div class="dashboard-layout">
+    <aside class="dashboard-sidebar">
+    <div class="sidebar-section-label">Menu</div>
+    <a href="/landlord/dashboard.html" class="sidebar-nav-item"><i class="fas fa-th-large"></i> Dashboard</a>
+    <a href="/landlord/new-listing.html" class="sidebar-nav-item"><i class="fas fa-plus-circle"></i> Add Listing</a>
+    <a href="/landlord/applications.html" class="sidebar-nav-item"><i class="fas fa-file-alt"></i> Applications</a>
+    <a href="/landlord/inquiries.html" class="sidebar-nav-item active"><i class="fas fa-envelope"></i> Inquiries <span id="unreadBadge" class="badge badge-gold" style="display:none"></span></a>
+    <div class="sidebar-section-label" style="margin-top:var(--s-4)">Account</div>
+    <a href="/landlord/settings.html" class="sidebar-nav-item"><i class="fas fa-cog"></i> Settings</a>
+    <a href="#" class="sidebar-nav-item" id="viewProfileSide"><i class="fas fa-id-badge"></i> My Profile</a>
+    <a href="#" class="sidebar-nav-item" id="sideSignOut"><i class="fas fa-sign-out-alt"></i> Sign Out</a>
+    <div style="flex:1"></div>
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar" id="userAvatar">?</div>
+      <div>
+        <div class="sidebar-user-name" id="userName">Loading…</div>
+        <div class="sidebar-user-email" id="userEmail"></div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="dashboard-main">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--s-8);flex-wrap:wrap;gap:var(--s-4)">
+      <div>
+        <div class="section-eyebrow">Landlord Portal</div>
+        <h1 class="section-title" style="font-size:28px">Inquiries</h1>
+        <p style="color:var(--slate);font-size:14px;margin-top:var(--s-2)">Messages sent by tenants from your property listings.</p>
+      </div>
+      <button class="btn btn-outline" id="markAllReadBtn">
+        <i class="fas fa-check-double"></i> Mark All as Read
+      </button>
+    </div>
+
+    <div class="stats-row" style="margin-bottom:var(--s-6)">
+      <div class="stat-card"><div><div class="stat-card-label">Total Inquiries</div><div class="stat-card-value" id="statTotal">—</div></div><div class="stat-card-icon"><i class="fas fa-envelope"></i></div></div>
+      <div class="stat-card"><div><div class="stat-card-label">Unread</div><div class="stat-card-value" id="statUnread">—</div></div><div class="stat-card-icon" style="background:#fef3c7;color:#b45309"><i class="fas fa-envelope-open"></i></div></div>
+      <div class="stat-card"><div><div class="stat-card-label">This Week</div><div class="stat-card-value" id="statWeek">—</div></div><div class="stat-card-icon" style="background:#d1fae5;color:#1a7a52"><i class="fas fa-calendar-week"></i></div></div>
+      <div class="stat-card"><div><div class="stat-card-label">Properties w/ Inquiries</div><div class="stat-card-value" id="statProps">—</div></div><div class="stat-card-icon"><i class="fas fa-home"></i></div></div>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="dashboard-section" style="margin-bottom:var(--s-4)">
+      <div style="padding:var(--s-4) var(--s-5);display:flex;gap:var(--s-3);flex-wrap:wrap;align-items:center">
+        <div style="position:relative;flex:1;min-width:200px">
+          <i class="fas fa-search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#8892a2;font-size:13px"></i>
+          <input type="text" class="form-input" id="searchInput" placeholder="Search by name, email, or message…" style="padding-left:36px">
+        </div>
+        <select class="form-select" id="readFilter" style="width:160px">
+          <option value="">All Messages</option>
+          <option value="unread">Unread Only</option>
+          <option value="read">Read Only</option>
+        </select>
+        <select class="form-select" id="propFilter" style="width:200px">
+          <option value="">All Properties</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="dashboard-section">
+      <div class="dashboard-section-header">
+        <div class="dashboard-section-title">All Messages</div>
+        <span id="resultCount" style="font-size:13px;color:#8892a2"></span>
+      </div>
+      <div id="inquiriesContainer" style="padding:var(--s-5)">
+        <div class="cp-empty-state"><span class="cp-empty-icon">💬</span><span class="cp-empty-msg">Loading inquiries…</span></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+
+<script type="module">
+  import { supabase } from '../js/cp-api.js';
+  import { requireAuth, getLandlordProfile, signOut } from '../js/cp-api.js';
+
+  const session = await requireAuth('/landlord/login.html');
+  if (!session) throw new Error();
+  const profile = await getLandlordProfile();
+  if (!profile) { window.location.href = '/landlord/login.html'; throw new Error(); }
+
+  document.getElementById('userName').textContent   = profile.business_name || profile.contact_name;
+  document.getElementById('viewProfileSide').href = `/landlord/profile.html?id=${profile.id}`;
+  document.getElementById('userEmail').textContent  = profile.email;
+  document.getElementById('userAvatar').textContent = profile.contact_name.charAt(0).toUpperCase();
+  [document.getElementById('signOutBtn'), document.getElementById('sideSignOut')].forEach(b => b?.addEventListener('click', signOut));
+
+  let allInquiries = [];
+  let properties   = [];
+
+  // Single query — PostgREST !inner join returns property data nested on each inquiry row.
+  // No separate properties fetch needed.
+  const { ok, data: fetchedInquiries, error: inqErr } = await CP.Inquiries.getForLandlord(profile.id);
+
+  if (!ok) {
+    document.getElementById('inquiriesContainer').innerHTML = CP.UI.errorState('Failed to load inquiries. Please refresh.');
+  } else {
+    allInquiries = fetchedInquiries || [];
+
+    // Build properties list from the nested join data for the property filter dropdown
+    const seenIds = new Set();
+    allInquiries.forEach(inq => {
+      if (inq.properties && !seenIds.has(inq.properties.id)) {
+        seenIds.add(inq.properties.id);
+        properties.push(inq.properties);
+      }
+    });
+
+    // Populate property filter
+    const propFilter = document.getElementById('propFilter');
+    properties.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.id;
+      opt.textContent = p.title || `${p.address}, ${p.city}`;
+      propFilter.appendChild(opt);
+    });
+
+    if (!allInquiries.length) {
+      renderEmpty();
+    } else {
+      renderStats(allInquiries);
+      renderInquiries(allInquiries);
+    }
+  }
+
+  function renderStats(inqs) {
+    const now    = new Date();
+    const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
+    const unread  = inqs.filter(i => !i.read).length;
+
+    document.getElementById('statTotal').textContent  = inqs.length;
+    document.getElementById('statUnread').textContent = unread;
+    document.getElementById('statWeek').textContent   = inqs.filter(i => new Date(i.created_at) > weekAgo).length;
+    document.getElementById('statProps').textContent  = new Set(inqs.map(i => i.property_id)).size;
+
+    const badge = document.getElementById('unreadBadge');
+    if (unread > 0) { badge.textContent = unread; badge.style.display = 'inline'; }
+    else badge.style.display = 'none';
+  }
+
+  function renderInquiries(inqs) {
+    document.getElementById('resultCount').textContent = `${inqs.length} message${inqs.length !== 1 ? 's' : ''}`;
+    const c = document.getElementById('inquiriesContainer');
+
+    if (!inqs.length) {
+      c.innerHTML = CP.UI.emptyState('No inquiries yet. When tenants send messages from your listings, they\'ll appear here.', '✉️');
+      return;
+    }
+
+    const propMap = {};
+    properties.forEach(p => { propMap[p.id] = p; });
+
+    c.innerHTML = inqs.map(inq => {
+      const prop = inq.properties || propMap[inq.property_id];
+      const date = new Date(inq.created_at);
+      const dateStr = date.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+      const timeStr = date.toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
+      const safeName  = CP_esc(inq.tenant_name);
+      const safeEmail = CP_esc(inq.tenant_email);
+      const safePhone = CP_esc(inq.tenant_phone);
+      const safeMsg   = CP_esc(inq.message) || '(no message)';
+      const mailSubject = encodeURIComponent('Re: Your inquiry about ' + (prop?.title || 'the property'));
+      return `
+        <div class="inquiry-card ${inq.read ? '' : 'unread'}" id="inq-${inq.id}">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:var(--s-3)">
+            <div>
+              <div style="font-weight:700;font-size:16px;color:#0e0e0f;display:flex;align-items:center;gap:var(--s-2)">
+                ${inq.read ? '' : '<span style="width:8px;height:8px;border-radius:50%;background:var(--gold);flex-shrink:0;display:inline-block"></span>'}
+                ${safeName}
+              </div>
+              <div style="font-size:12px;color:#8892a2;margin-top:2px">${dateStr} at ${timeStr}</div>
+            </div>
+            ${prop ? `<a href="/property.html?id=${prop.id}" target="_blank" style="font-size:13px;color:#2563eb;text-decoration:none;font-weight:500">
+              <i class="fas fa-home" style="margin-right:4px"></i>${prop.title || prop.address}
+            </a>` : ''}
+          </div>
+          <div class="inquiry-meta">
+            ${inq.tenant_email ? `<span><i class="fas fa-envelope"></i><a href="mailto:${safeEmail}" style="color:inherit;text-decoration:none">${safeEmail}</a></span>` : ''}
+            ${inq.tenant_phone ? `<span><i class="fas fa-phone"></i><a href="tel:${inq.tenant_phone.replace(/\D/g,'')}" style="color:inherit;text-decoration:none">${safePhone}</a></span>` : ''}
+          </div>
+          <div class="inquiry-message">${safeMsg}</div>
+          <div class="inquiry-actions">
+            ${inq.tenant_email ? `
+              <a href="mailto:${safeEmail}?subject=${mailSubject}" class="btn btn-sm btn-primary">
+                <i class="fas fa-reply"></i> Reply by Email
+              </a>` : ''}
+            ${inq.tenant_phone ? `
+              <a href="tel:${inq.tenant_phone.replace(/\D/g,'')}" class="btn btn-sm btn-outline">
+                <i class="fas fa-phone"></i> Call
+              </a>` : ''}
+            ${!inq.read ? `
+              <button class="btn btn-sm btn-ghost" onclick="markRead('${inq.id}')">
+                <i class="fas fa-check"></i> Mark as Read
+              </button>` : `<span style="font-size:12px;color:#8892a2"><i class="fas fa-check-double"></i> Read</span>`}
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function renderEmpty() {
+    document.getElementById('statTotal').textContent  = 0;
+    document.getElementById('statUnread').textContent = 0;
+    document.getElementById('statWeek').textContent   = 0;
+    document.getElementById('statProps').textContent  = 0;
+    document.getElementById('inquiriesContainer').innerHTML = CP.UI.emptyState(
+      'No listings yet. Add a listing first, then tenants can send you messages.<br><a href="/landlord/new-listing.html" class="btn btn-primary" style="margin-top:var(--s-5)"><i class="fas fa-plus"></i> Add Listing</a>',
+      '🏠'
+    );
+  }
+
+  // Mark single inquiry as read
+  window.markRead = async (id) => {
+    await supabase.from('inquiries').update({ read: true }).eq('id', id);
+    const inq = allInquiries.find(i => i.id === id);
+    if (inq) inq.read = true;
+    const card = document.getElementById(`inq-${id}`);
+    if (card) {
+      card.classList.remove('unread');
+      card.querySelector('.inquiry-actions').lastElementChild?.remove();
+      renderStats(allInquiries);
+    }
+  };
+
+  // Mark all as read
+  document.getElementById('markAllReadBtn').addEventListener('click', async () => {
+    const ids = [...new Set(allInquiries.map(i => i.property_id))];
+    if (!ids.length) return;
+    await supabase.from('inquiries').update({ read: true }).in('property_id', ids);
+    allInquiries.forEach(i => i.read = true);
+    renderStats(allInquiries);
+    renderInquiries(applyFilters());
+    CP.UI.toast('All marked as read.', 'success');
+  });
+
+  // Filters
+  function applyFilters() {
+    const q    = document.getElementById('searchInput').value.toLowerCase();
+    const read = document.getElementById('readFilter').value;
+    const prop = document.getElementById('propFilter').value;
+    let f = [...allInquiries];
+    if (read === 'unread') f = f.filter(i => !i.read);
+    if (read === 'read')   f = f.filter(i => i.read);
+    if (prop)              f = f.filter(i => i.property_id === prop);
+    if (q) f = f.filter(i =>
+      ((i.tenant_name||'')+(i.tenant_email||'')+(i.message||'')).toLowerCase().includes(q));
+    return f;
+  }
+
+  ['searchInput','readFilter','propFilter'].forEach(id => {
+    document.getElementById(id).addEventListener(id === 'searchInput' ? 'input' : 'change', () => {
+      renderInquiries(applyFilters());
+    });
+  });"></i>${msg}`;
+    c.appendChild(t);
+    setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 300ms'; setTimeout(() => t.remove(), 300); }, 3500);
+  }
+</script>
+
+
+<!-- Mobile Bottom Nav (landlord portal) -->
+<nav class="mobile-bottom-nav" id="mobileBottomNav">
+  <a href="/landlord/dashboard.html" class="mobile-bottom-nav-item "><i class="fas fa-th-large"></i>Dashboard</a>
+  <a href="/landlord/applications.html" class="mobile-bottom-nav-item "><i class="fas fa-file-alt"></i>Apps</a>
+  <a href="/landlord/inquiries.html" class="mobile-bottom-nav-item active"><i class="fas fa-envelope"></i>Inquiries</a>
+  <a href="/landlord/new-listing.html" class="mobile-bottom-nav-item "><i class="fas fa-plus-circle"></i>New</a>
+  <a href="/landlord/settings.html" class="mobile-bottom-nav-item "><i class="fas fa-cog"></i>Settings</a>
+</nav>
+<script>
+  const mn = document.getElementById('mainNav') || document.querySelector('.nav');
+  if (mn) window.addEventListener('scroll', () => mn.classList.toggle('scrolled', window.scrollY > 20), { passive: true });
+</script>
+</body>
+</html>

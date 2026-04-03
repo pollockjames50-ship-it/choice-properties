@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+  <meta name="theme-color" content="#006aff">
+  <link rel="manifest" href="/manifest.json">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Choice Properties — Deployment Health Check</title>
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<script defer src="/config.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; padding: 40px 20px; }
+  .wrap { max-width: 640px; margin: 0 auto; }
+  h1 { font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .sub { font-size: 13px; color: #64748b; margin-bottom: 32px; }
+  .card { background: #1a1f2e; border: 1px solid #2d3748; border-radius: 10px; overflow: hidden; margin-bottom: 16px; }
+  .card-header { padding: 14px 20px; border-bottom: 1px solid #2d3748; font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: #64748b; }
+  .check { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid #1e2535; font-size: 14px; }
+  .check:last-child { border-bottom: none; }
+  .check-label { color: #cbd5e1; }
+  .check-detail { font-size: 11px; color: #475569; margin-top: 3px; font-family: monospace; }
+  .badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .badge.pending  { background: #1e2535; color: #64748b; }
+  .badge.ok       { background: #052e16; color: #4ade80; border: 1px solid #166534; }
+  .badge.warn     { background: #2d1f00; color: #fbbf24; border: 1px solid #92400e; }
+  .badge.fail     { background: #2d0a0a; color: #f87171; border: 1px solid #991b1b; }
+  .badge.running  { background: #0f1f3d; color: #60a5fa; border: 1px solid #1d4ed8; }
+  .spinner { width: 10px; height: 10px; border: 2px solid #475569; border-top-color: #60a5fa; border-radius: 50%; animation: spin .7s linear infinite; display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .run-btn { display: block; width: 100%; padding: 14px; background: #2563eb; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; margin-bottom: 16px; transition: background .15s; }
+  .run-btn:hover { background: #1d4ed8; }
+  .run-btn:disabled { background: #1e2535; color: #475569; cursor: not-allowed; }
+  .summary { padding: 16px 20px; border-radius: 10px; font-size: 14px; font-weight: 600; text-align: center; margin-bottom: 16px; display: none; }
+  .summary.all-ok  { background: #052e16; color: #4ade80; border: 1px solid #166534; }
+  .summary.has-fail{ background: #2d0a0a; color: #f87171; border: 1px solid #991b1b; }
+  .summary.has-warn{ background: #2d1f00; color: #fbbf24; border: 1px solid #92400e; }
+  .note { font-size: 12px; color: #475569; text-align: center; margin-top: 20px; line-height: 1.6; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>⚡ Deployment Health Check</h1>
+  <p class="sub">Verifies every service is connected and reachable. Run this after every deploy.</p>
+
+  <div id="summary" class="summary"></div>
+
+  <button class="run-btn" id="runBtn" onclick="runAll()">Run All Checks</button>
+
+  <!-- CONFIG -->
+  <div class="card">
+    <div class="card-header">Configuration</div>
+    <div class="check" id="chk-config">
+      <div><div class="check-label">config.js loaded</div><div class="check-detail" id="det-config">—</div></div>
+      <span class="badge pending" id="bdg-config">Waiting</span>
+    </div>
+    <div class="check" id="chk-supabase-url">
+      <div><div class="check-label">SUPABASE_URL set</div><div class="check-detail" id="det-supabase-url">—</div></div>
+      <span class="badge pending" id="bdg-supabase-url">Waiting</span>
+    </div>
+    <div class="check" id="chk-anon-key">
+      <div><div class="check-label">SUPABASE_ANON_KEY set</div><div class="check-detail" id="det-anon-key">—</div></div>
+      <span class="badge pending" id="bdg-anon-key">Waiting</span>
+    </div>
+    <div class="check" id="chk-imagekit">
+      <div><div class="check-label">ImageKit configured</div><div class="check-detail" id="det-imagekit">—</div></div>
+      <span class="badge pending" id="bdg-imagekit">Waiting</span>
+    </div>
+    <div class="check" id="chk-company">
+      <div><div class="check-label">Company info set</div><div class="check-detail" id="det-company">—</div></div>
+      <span class="badge pending" id="bdg-company">Waiting</span>
+    </div>
+  </div>
+
+  <!-- SUPABASE -->
+  <div class="card">
+    <div class="card-header">Supabase Database</div>
+    <div class="check" id="chk-db-connect">
+      <div><div class="check-label">Database reachable</div><div class="check-detail" id="det-db-connect">—</div></div>
+      <span class="badge pending" id="bdg-db-connect">Waiting</span>
+    </div>
+    <div class="check" id="chk-schema">
+      <div><div class="check-label">Schema tables exist</div><div class="check-detail" id="det-schema">—</div></div>
+      <span class="badge pending" id="bdg-schema">Waiting</span>
+    </div>
+    <div class="check" id="chk-security">
+      <div><div class="check-label">Security patches applied (lease-pdfs private)</div><div class="check-detail" id="det-security">—</div></div>
+      <span class="badge pending" id="bdg-security">Waiting</span>
+    </div>
+    <div class="check" id="chk-properties">
+      <div><div class="check-label">Properties table readable</div><div class="check-detail" id="det-properties">—</div></div>
+      <span class="badge pending" id="bdg-properties">Waiting</span>
+    </div>
+  </div>
+
+  <!-- EDGE FUNCTIONS -->
+  <div class="card">
+    <div class="card-header">Supabase Edge Functions</div>
+    <div class="check" id="chk-fn-process">
+      <div><div class="check-label">process-application reachable</div><div class="check-detail" id="det-fn-process">—</div></div>
+      <span class="badge pending" id="bdg-fn-process">Waiting</span>
+    </div>
+    <div class="check" id="chk-fn-inquiry">
+      <div><div class="check-label">send-inquiry reachable</div><div class="check-detail" id="det-fn-inquiry">—</div></div>
+      <span class="badge pending" id="bdg-fn-inquiry">Waiting</span>
+    </div>
+    <div class="check" id="chk-fn-lease">
+      <div><div class="check-label">generate-lease reachable</div><div class="check-detail" id="det-fn-lease">—</div></div>
+      <span class="badge pending" id="bdg-fn-lease">Waiting</span>
+    </div>
+    <div class="check" id="chk-fn-sign">
+      <div><div class="check-label">sign-lease reachable</div><div class="check-detail" id="det-fn-sign">—</div></div>
+      <span class="badge pending" id="bdg-fn-sign">Waiting</span>
+    </div>
+    <div class="check" id="chk-fn-status">
+      <div><div class="check-label">update-status reachable</div><div class="check-detail" id="det-fn-status">—</div></div>
+      <span class="badge pending" id="bdg-fn-status">Waiting</span>
+    </div>
+    <div class="check" id="chk-fn-paid">
+      <div><div class="check-label">mark-paid reachable</div><div class="check-detail" id="det-fn-paid">—</div></div>
+      <span class="badge pending" id="bdg-fn-paid">Waiting</span>
+    </div>
+    <div class="check" id="chk-fn-movein">
+      <div><div class="check-label">mark-movein reachable</div><div class="check-detail" id="det-fn-movein">—</div></div>
+      <span class="badge pending" id="bdg-fn-movein">Waiting</span>
+    </div>
+    <div class="check" id="chk-fn-message">
+      <div><div class="check-label">send-message reachable</div><div class="check-detail" id="det-fn-message">—</div></div>
+      <span class="badge pending" id="bdg-fn-message">Waiting</span>
+    </div>
+    <div class="check" id="chk-fn-imagekit">
+      <div><div class="check-label">imagekit-upload reachable</div><div class="check-detail" id="det-fn-imagekit">—</div></div>
+      <span class="badge pending" id="bdg-fn-imagekit">Waiting</span>
+    </div>
+  </div>
+
+  <p class="note">This page is not indexed by search engines.<br>Bookmark it and run it after every deploy or config change.</p>
+</div>
+
+<script>
+function set(id, status, label, detail) {
+  const bdg = document.getElementById('bdg-' + id);
+  const det = document.getElementById('det-' + id);
+  if (bdg) { bdg.className = 'badge ' + status; bdg.innerHTML = status === 'running' ? '<span class="spinner"></span> Checking' : label; }
+  if (det && detail) det.textContent = detail;
+}
+
+function running(id) { set(id, 'running', '', ''); }
+function ok(id, label, detail)   { set(id, 'ok',   '✓ ' + label, detail); }
+function warn(id, label, detail) { set(id, 'warn', '⚠ ' + label, detail); }
+function fail(id, label, detail) { set(id, 'fail', '✕ ' + label, detail); }
+
+async function checkConfig() {
+  running('config');
+  if (typeof CONFIG === 'undefined') { fail('config', 'Not loaded', 'config.js missing — check environment variables in your hosting platform dashboard and redeploy'); return false; }
+  ok('config', 'Loaded', 'config.js generated at build time');
+
+  running('supabase-url');
+  if (!CONFIG.SUPABASE_URL || CONFIG.SUPABASE_URL.includes('YOUR_')) { fail('supabase-url', 'Not set', 'Set SUPABASE_URL in your hosting platform environment variables'); }
+  else ok('supabase-url', 'Set', CONFIG.SUPABASE_URL);
+
+  running('anon-key');
+  if (!CONFIG.SUPABASE_ANON_KEY || CONFIG.SUPABASE_ANON_KEY.includes('YOUR_')) { fail('anon-key', 'Not set', 'Set SUPABASE_ANON_KEY in your hosting platform environment variables'); }
+  else ok('anon-key', 'Set', CONFIG.SUPABASE_ANON_KEY.substring(0, 20) + '...');
+
+  running('imagekit');
+  if (!CONFIG.IMAGEKIT_URL || CONFIG.IMAGEKIT_URL.includes('YOUR_')) { warn('imagekit', 'Not configured', 'Images will show placeholder — set IMAGEKIT_URL in your hosting platform environment variables when ready'); }
+  else ok('imagekit', 'Configured', CONFIG.IMAGEKIT_URL);
+
+  running('company');
+  const missing = ['COMPANY_NAME','COMPANY_EMAIL','COMPANY_PHONE'].filter(k => !CONFIG[k]);
+  if (missing.length) warn('company', 'Partial', 'Missing: ' + missing.join(', '));
+  else ok('company', 'Set', CONFIG.COMPANY_NAME + ' · ' + CONFIG.COMPANY_EMAIL);
+
+  return true;
+}
+
+async function checkDatabase() {
+  if (typeof CONFIG === 'undefined' || !CONFIG.SUPABASE_URL) {
+    ['db-connect','schema','security','properties'].forEach(id => fail(id, 'Skipped', 'Fix config first'));
+    return;
+  }
+  const sb = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+
+  running('db-connect');
+  try {
+    const { error } = await sb.from('admin_roles').select('id').limit(1);
+    if (error && error.code !== 'PGRST116') throw error;
+    ok('db-connect', 'Connected', 'Supabase responded successfully');
+  } catch(e) { fail('db-connect', 'Failed', e.message); return; }
+
+  running('schema');
+  try {
+    const tables = ['applications','properties','landlords','messages','email_logs','admin_roles'];
+    const results = await Promise.all(tables.map(t => sb.from(t).select('*', {count:'exact',head:true})));
+    const failed = tables.filter((t,i) => results[i].error && results[i].error.code !== 'PGRST116');
+    if (failed.length) fail('schema', 'Incomplete', 'Missing tables: ' + failed.join(', ') + ' — re-run SCHEMA.sql');
+    else ok('schema', 'All tables exist', tables.join(', '));
+  } catch(e) { fail('schema', 'Error', e.message); }
+
+  running('security');
+  try {
+    const { data, error } = await sb.storage.getBucket('lease-pdfs');
+    if (error) warn('security', 'Cannot verify', 'Run SECURITY-PATCHES.sql if not done yet');
+    else if (data && data.public === true) fail('security', 'Bucket is PUBLIC', 'SECURITY-PATCHES.sql not run — lease PDFs are publicly accessible! Run it now.');
+    else ok('security', 'Bucket is private', 'lease-pdfs bucket correctly set to private');
+  } catch(e) { warn('security', 'Cannot verify', 'Needs admin access to confirm'); }
+
+  running('properties');
+  try {
+    const { data, error, count } = await sb.from('properties').select('id', {count:'exact'}).eq('status','active').limit(1);
+    if (error) throw error;
+    ok('properties', 'Readable', `${count ?? 0} active listing(s) in database`);
+  } catch(e) { fail('properties', 'Failed', e.message); }
+}
+
+async function checkFunction(id, name) {
+  if (typeof CONFIG === 'undefined' || !CONFIG.SUPABASE_URL) { fail('fn-' + id, 'Skipped', 'Fix config first'); return; }
+  running('fn-' + id);
+  try {
+    // Send empty/invalid payload — we expect a 400/422/500 with JSON body, NOT a 404 or network error
+    // A proper JSON error response means the function is deployed and running
+    const res = await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/${name}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': CONFIG.SUPABASE_ANON_KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE_ANON_KEY}` },
+      body: JSON.stringify({ _healthcheck: true })
+    });
+    const text = await res.text();
+    let json = null;
+    try { json = JSON.parse(text); } catch(_) {}
+    if (res.status === 404 || text.includes('Function not found')) {
+      fail('fn-' + id, 'Not deployed', 'Push a change to supabase/functions/ to trigger auto-deploy');
+    } else if (json !== null) {
+      // Got valid JSON back — function is running (error responses are expected for invalid payload)
+      ok('fn-' + id, 'Deployed', `HTTP ${res.status} — function running`);
+    } else {
+      warn('fn-' + id, 'Unclear', `HTTP ${res.status} — unexpected response`);
+    }
+  } catch(e) {
+    fail('fn-' + id, 'Unreachable', e.message);
+  }
+}
+
+async function runAll() {
+  const btn = document.getElementById('runBtn');
+  btn.disabled = true;
+  btn.textContent = 'Running checks...';
+  document.getElementById('summary').style.display = 'none';
+
+  // Reset all to pending
+  const ids = ['config','supabase-url','anon-key','imagekit','company',
+    'db-connect','schema','security','properties',
+    'fn-process','fn-inquiry','fn-lease','fn-sign','fn-status','fn-paid','fn-movein','fn-message','fn-imagekit'];
+  ids.forEach(id => set(id, 'pending', 'Waiting', '—'));
+
+  await checkConfig();
+  await checkDatabase();
+  await Promise.all([
+    checkFunction('process',  'process-application'),
+    checkFunction('inquiry',  'send-inquiry'),
+    checkFunction('lease',    'generate-lease'),
+    checkFunction('sign',     'sign-lease'),
+    checkFunction('status',   'update-status'),
+    checkFunction('paid',     'mark-paid'),
+    checkFunction('movein',   'mark-movein'),
+    checkFunction('message',  'send-message'),
+    checkFunction('imagekit', 'imagekit-upload'),
+  ]);
+
+  // Summary
+  const badges = document.querySelectorAll('.badge');
+  const fails  = [...badges].filter(b => b.classList.contains('fail')).length;
+  const warns  = [...badges].filter(b => b.classList.contains('warn')).length;
+  const sum = document.getElementById('summary');
+  sum.style.display = 'block';
+  if (fails > 0) {
+    sum.className = 'summary has-fail';
+    sum.textContent = `${fails} critical issue${fails>1?'s':''} found — fix before going live`;
+  } else if (warns > 0) {
+    sum.className = 'summary has-warn';
+    sum.textContent = `All critical checks passed · ${warns} warning${warns>1?'s':''} — review above`;
+  } else {
+    sum.className = 'summary all-ok';
+    sum.textContent = '✓ All checks passed — site is ready';
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Run Again';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="theme-color" content="#006aff">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Applications — Choice Properties</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="stylesheet" href="/assets/fontawesome.css">
+    <link rel="preload" href="/css/main.css?v=1775137055043" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/css/main.css?v=1775137055043"></noscript>
+  <link rel="stylesheet" href="/css/landlord.css?v=1775137055043">
+  <link rel="stylesheet" href="/css/admin.css?v=1775137055043">
+  <link rel="preload" href="/css/mobile.css?v=1775137055043" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/css/mobile.css?v=1775137055043"></noscript>
+  <script defer src="/config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+  <script type="module" src="/js/cp-api.js"></script>
+  <style>
+    .app-card{border:1px solid var(--slate-pale);border-radius:var(--radius-sm);padding:var(--space-5);margin-bottom:var(--space-3);background:var(--color-surface-raised);border-left:4px solid var(--color-brand-light)}
+    .app-card.status-pending{border-left-color:#f59e0b}
+    .app-card.status-under_review{border-left-color:#6366f1}
+    .app-card.status-approved{border-left-color:#10b981}
+    .app-card.status-denied{border-left-color:#ef4444}
+    .app-card.status-waitlisted{border-left-color:#8b5cf6}
+    .app-card.status-withdrawn{border-left-color:#94a3b8}
+    .app-card.highlighted{outline:3px solid #2563eb;outline-offset:2px;animation:highlight-fade 3s ease forwards}
+    @keyframes highlight-fade{0%{outline-color:#2563eb}100%{outline-color:transparent}}
+    .app-card.status-signed{border-left-color:#3b82f6}
+    .app-meta{display:flex;flex-wrap:wrap;gap:var(--space-4);font-size:13px;color:var(--slate);margin:var(--space-2) 0 var(--space-4)}
+    .app-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center}
+    .modal-overlay.open{display:flex}
+    .modal{background:#fff;border-radius:10px;width:100%;max-width:480px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+    .modal-header{padding:16px 20px;border-bottom:1px solid var(--slate-pale);display:flex;justify-content:space-between;align-items:center}
+    .modal-title{font-weight:700;font-size:15px}
+    .modal-close{background:none;border:none;font-size:18px;cursor:pointer;color:var(--slate)}
+    .modal-body{padding:20px}
+    .modal-footer{padding:16px 20px;border-top:1px solid var(--slate-pale);display:flex;gap:8px;justify-content:flex-end}
+    .msg-bubble{padding:10px 12px;border-radius:6px;font-size:.8rem;line-height:1.6;margin-bottom:8px}
+    .msg-admin{background:#fef3c7;border-left:3px solid var(--color-brand-light)}
+    .msg-tenant{background:#f0f4ff;border-left:3px solid #6366f1}
+    .msg-meta{font-size:.65rem;color:var(--slate);margin-bottom:3px}
+    .detail-modal{background:#fff;border-radius:10px;width:100%;max-width:720px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+    .detail-modal-body{overflow-y:auto;padding:24px;flex:1}
+    .detail-section{margin-bottom:24px}
+    .detail-section-title{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--slate);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--slate-pale)}
+    .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    @media(max-width:560px){.detail-grid{grid-template-columns:1fr}}
+    .detail-field{background:#f8f9fa;border-radius:6px;padding:10px 12px}
+    .detail-field-label{font-size:.62rem;text-transform:uppercase;letter-spacing:.07em;color:var(--slate);margin-bottom:3px}
+    .detail-field-value{font-size:.85rem;color:#1a1a2e;font-weight:500;word-break:break-word}
+    .detail-field-value.empty{color:#bbb;font-style:italic;font-weight:400}
+    .detail-field.full{grid-column:1/-1}
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/index.html" class="nav-logo">
+      <div class="nav-logo-mark">C</div>
+      <div><div class="nav-logo-text">Choice Properties</div><div class="nav-logo-sub">Landlord Portal</div></div>
+    </a>
+    <div class="nav-links">
+      <a href="/index.html" class="nav-link">View Listings →</a>
+      <button class="btn btn-ghost btn-sm" id="signOutBtn"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+    </div>
+  </div>
+</nav>
+
+<div class="dashboard-layout">
+  <aside class="dashboard-sidebar">
+    <div class="sidebar-section-label">Menu</div>
+    <a href="/landlord/dashboard.html" class="sidebar-nav-item"><i class="fas fa-th-large"></i> Dashboard</a>
+    <a href="/landlord/new-listing.html" class="sidebar-nav-item"><i class="fas fa-plus-circle"></i> Add Listing</a>
+    <a href="/landlord/applications.html" class="sidebar-nav-item active"><i class="fas fa-file-alt"></i> Applications</a>
+    <a href="/landlord/inquiries.html" class="sidebar-nav-item"><i class="fas fa-envelope"></i> Inquiries</a>
+    <div class="sidebar-section-label" style="margin-top:var(--s-4)">Account</div>
+    <a href="/landlord/settings.html" class="sidebar-nav-item"><i class="fas fa-cog"></i> Settings</a>
+    <a href="#" class="sidebar-nav-item" id="viewProfileSide"><i class="fas fa-id-badge"></i> My Profile</a>
+    <a href="#" class="sidebar-nav-item" id="sideSignOut"><i class="fas fa-sign-out-alt"></i> Sign Out</a>
+    <div style="flex:1"></div>
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar" id="userAvatar">?</div>
+      <div>
+        <div class="sidebar-user-name" id="userName">Loading…</div>
+        <div class="sidebar-user-email" id="userEmail"></div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="dashboard-main">
+    <div style="margin-bottom:var(--s-8)">
+      <div class="section-eyebrow">Landlord Portal</div>
+      <h1 class="section-title" style="font-size:28px">Applications</h1>
+    </div>
+
+    <div class="stats-row" style="margin-bottom:var(--s-6)">
+      <div class="stat-card"><div><div class="stat-card-label">Total</div><div class="stat-card-value" id="statTotal">—</div></div><div class="stat-card-icon"><i class="fas fa-file-alt"></i></div></div>
+      <div class="stat-card"><div><div class="stat-card-label">Pending Payment</div><div class="stat-card-value" id="statPending">—</div></div><div class="stat-card-icon" style="background:#fef3c7;color:#b45309"><i class="fas fa-clock"></i></div></div>
+      <div class="stat-card"><div><div class="stat-card-label">Approved</div><div class="stat-card-value" id="statApproved">—</div></div><div class="stat-card-icon" style="background:#d1fae5;color:#1a7a52"><i class="fas fa-check-circle"></i></div></div>
+      <div class="stat-card"><div><div class="stat-card-label">Lease Signed</div><div class="stat-card-value" id="statSigned">—</div></div><div class="stat-card-icon" style="background:#dbeafe;color:#1d4ed8"><i class="fas fa-file-signature"></i></div></div>
+    </div>
+
+    <div class="dashboard-section" style="margin-bottom:var(--s-4)">
+      <div style="padding:var(--s-4) var(--s-5);display:flex;gap:var(--s-3);flex-wrap:wrap">
+        <div style="position:relative;flex:1;min-width:200px">
+          <i class="fas fa-search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#8892a2;font-size:13px"></i>
+          <input type="text" class="form-input" id="searchInput" placeholder="Search name, email, ID…" style="padding-left:36px" oninput="applyFilters()">
+        </div>
+        <select class="form-select" id="statusFilter" style="width:180px" onchange="applyFilters()">
+          <option value="">All Statuses</option>
+          <option value="pending">Pending Payment</option>
+          <option value="under_review">Under Review</option>
+          <option value="approved">Approved</option>
+          <option value="denied">Denied</option>
+          <option value="waitlisted">Waitlisted</option>
+          <option value="withdrawn">Withdrawn</option>
+        </select>
+        <select class="form-select" id="propertyFilter" style="width:220px" onchange="applyFilters()">
+          <option value="">All Properties</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="dashboard-section">
+      <div class="dashboard-section-header">
+        <div class="dashboard-section-title">All Applications</div>
+        <span id="resultCount" style="font-size:13px;color:#8892a2"></span>
+      </div>
+      <div id="appsContainer" style="padding:var(--s-4) var(--s-5)">
+        <div style="text-align:center;padding:40px;color:#8892a2"><i class="fas fa-spinner fa-pulse" style="font-size:24px"></i></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Status Modal -->
+<div class="modal-overlay" id="status-modal">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title" id="status-modal-title">Update Status</span><button class="modal-close" onclick="closeModal('status-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="field-label">Notes (optional)</label><textarea id="status-notes" style="width:100%;height:80px;border:1px solid var(--slate-pale);border-radius:6px;padding:10px;font-size:14px"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('status-modal')">Cancel</button>
+      <button class="btn btn-primary" id="status-confirm-btn" onclick="submitStatus()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Message Modal -->
+<div class="modal-overlay" id="msg-modal">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">Messages — <span id="msg-modal-name"></span></span><button class="modal-close" onclick="closeModal('msg-modal')">✕</button></div>
+    <div class="modal-body">
+      <div id="msg-thread" style="max-height:260px;overflow-y:auto;margin-bottom:12px"></div>
+      <textarea id="msg-input" style="width:100%;height:70px;border:1px solid var(--slate-pale);border-radius:6px;padding:10px;font-size:13px" placeholder="Type your message…"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('msg-modal')">Close</button>
+      <button class="btn btn-primary" onclick="sendMsg()">Send Message</button>
+    </div>
+  </div>
+</div>
+
+<!-- Full Application Detail Modal -->
+<div class="modal-overlay" id="detail-modal">
+  <div class="detail-modal">
+    <div class="modal-header">
+      <span class="modal-title" id="detail-modal-title">Full Application</span>
+      <button class="modal-close" onclick="closeModal('detail-modal')">✕</button>
+    </div>
+    <div class="detail-modal-body" id="detail-modal-body">
+      <div style="text-align:center;padding:40px;color:#8892a2"><i class="fas fa-spinner fa-pulse" style="font-size:24px"></i></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('detail-modal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script type="module">
+  import { requireAuth, getLandlordProfile, signOut } from '../js/cp-api.js';
+
+  const session = await requireAuth('/landlord/login.html');
+  if (!session) throw new Error('Not authenticated');
+  const profile = await getLandlordProfile();
+  if (!profile) { window.location.href = '/landlord/login.html'; throw new Error(); }
+
+  document.getElementById('userName').textContent  = profile.business_name || profile.contact_name;
+  document.getElementById('userEmail').textContent = profile.email;
+  document.getElementById('userAvatar').textContent = profile.contact_name.charAt(0).toUpperCase();
+  document.getElementById('viewProfileSide').href = `/landlord/profile.html?id=${profile.id}`;
+  [document.getElementById('signOutBtn'), document.getElementById('sideSignOut')]
+    .forEach(b => b?.addEventListener('click', signOut));
+
+  let allApps = [];
+  let curAppId = null;
+  let curAction = null;
+
+  // Check for deep-link highlight from dashboard
+  const highlightId = new URLSearchParams(location.search).get('highlight');
+
+  // Load applications for this landlord.
+  // We first fetch property IDs owned by this landlord so we can also surface
+  // applications where landlord_id was not resolved at submission time (e.g., the
+  // property existed but its landlord_id field was null at the time of submission).
+  // The RLS policy (applications_landlord_read) mirrors this OR logic server-side.
+  const { data: propRows } = await CP.sb()
+    .from('properties')
+    .select('id')
+    .eq('landlord_id', profile.id);
+  const propIds = (propRows || []).map(p => p.id);
+
+  let appQuery = CP.sb()
+    .from('applications')
+    .select('app_id,created_at,status,payment_status,lease_status,first_name,last_name,email,phone,property_address,property_id,admin_notes,monthly_rent')
+    .order('created_at', { ascending: false });
+
+  if (propIds.length > 0) {
+    appQuery = appQuery.or(`landlord_id.eq.${profile.id},property_id.in.(${propIds.join(',')})`);
+  } else {
+    appQuery = appQuery.eq('landlord_id', profile.id);
+  }
+
+  const { data, error } = await appQuery;
+
+  if (error) {
+    document.getElementById('appsContainer').innerHTML =
+      '<div style="text-align:center;padding:40px;color:red">Failed to load applications. Please refresh the page.</div>';
+  } else {
+    allApps = data || [];
+    renderStats(allApps);
+    populatePropertyFilter(allApps);
+    applyFilters();
+    if (highlightId) scrollToHighlight(highlightId);
+  }
+
+  // Populate property filter from distinct properties in the data
+  function populatePropertyFilter(apps) {
+    const seen = new Map();
+    apps.forEach(a => {
+      if (a.property_id && a.property_address && !seen.has(a.property_id)) {
+        seen.set(a.property_id, a.property_address);
+      }
+    });
+    const sel = document.getElementById('propertyFilter');
+    seen.forEach((address, id) => {
+      const opt = document.createElement('option');
+      opt.value = id;
+      opt.textContent = address.length > 40 ? address.slice(0, 38) + '…' : address;
+      sel.appendChild(opt);
+    });
+    if (seen.size <= 1) sel.style.display = 'none'; // hide if only one property
+  }
+
+  window.applyFilters = function() {
+    const q    = document.getElementById('searchInput').value.toLowerCase();
+    const st   = document.getElementById('statusFilter').value;
+    const prop = document.getElementById('propertyFilter').value;
+    let f = [...allApps];
+    if (st)   f = f.filter(a => a.status === st);
+    if (prop) f = f.filter(a => a.property_id === prop);
+    if (q)    f = f.filter(a => `${a.first_name} ${a.last_name} ${a.email} ${a.app_id} ${a.property_address||''}`.toLowerCase().includes(q));
+    renderApps(f);
+  };
+
+  function renderStats(apps) {
+    document.getElementById('statTotal').textContent    = apps.length;
+    document.getElementById('statPending').textContent  = apps.filter(a => a.payment_status === 'unpaid').length;
+    document.getElementById('statApproved').textContent = apps.filter(a => a.status === 'approved').length;
+    document.getElementById('statSigned').textContent   = apps.filter(a => a.lease_status === 'signed' || a.lease_status === 'co_signed').length;
+  }
+
+  function renderApps(apps) {
+    document.getElementById('resultCount').textContent = `${apps.length} result${apps.length !== 1 ? 's' : ''}`;
+    const c = document.getElementById('appsContainer');
+    if (!apps.length) {
+      c.innerHTML = `<div style="text-align:center;padding:60px;color:#8892a2">
+        <i class="fas fa-file-alt" style="font-size:36px;display:block;margin-bottom:12px;opacity:.3"></i>
+        <div style="font-weight:600;margin-bottom:6px">No applications found</div>
+      </div>`;
+      return;
+    }
+
+    c.innerHTML = apps.map(a => {
+      const statusClass = `status-${a.status}`;
+      const canApprove  = a.status === 'pending' || a.status === 'under_review' || a.status === 'waitlisted';
+      const canDeny     = a.status !== 'denied' && a.status !== 'withdrawn';
+      const canWaitlist = a.status === 'pending' || a.status === 'under_review';
+      const canMarkPaid = a.payment_status === 'unpaid' && a.status !== 'denied' && a.status !== 'withdrawn';
+      const d = new Date(a.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+
+      return `<div class="app-card ${statusClass}" id="card-${a.app_id}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
+          <div>
+            <div style="font-weight:700;font-size:16px">${CP_esc(a.first_name)} ${CP_esc(a.last_name)}</div>
+            <div style="font-size:12px;color:#8892a2;font-family:monospace">${a.app_id} · ${d}</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            ${CP.UI.statusBadge(a.status)}
+            ${CP.UI.paymentBadge(a.payment_status)}
+            ${CP.UI.leaseBadge(a.lease_status)}
+          </div>
+        </div>
+        <div class="app-meta">
+          ${a.email   ? `<span><i class="fas fa-envelope" style="color:#2563eb;margin-right:4px"></i>${CP_esc(a.email)}</span>` : ''}
+          ${a.phone   ? `<span><i class="fas fa-phone" style="color:#2563eb;margin-right:4px"></i>${CP_esc(a.phone)}</span>` : ''}
+          ${a.property_address ? `<span><i class="fas fa-home" style="color:#2563eb;margin-right:4px"></i>${CP_esc(a.property_address)}</span>` : ''}
+          ${a.monthly_rent ? `<span><i class="fas fa-dollar-sign" style="color:#2563eb;margin-right:4px"></i>${CP.UI.fmt.currency(a.monthly_rent)}/mo</span>` : ''}
+        </div>
+        <div class="app-actions">
+          ${canApprove  ? `<button class="btn btn-sm btn-success" onclick="openStatusModal('${a.app_id}','approve','${a.first_name} ${a.last_name}')"><i class="fas fa-check"></i> Approve</button>` : ''}
+          ${canWaitlist ? `<button class="btn btn-sm btn-ghost"   onclick="openStatusModal('${a.app_id}','waitlist','${a.first_name} ${a.last_name}')"><i class="fas fa-clock"></i> Waitlist</button>` : ''}
+          ${canDeny     ? `<button class="btn btn-sm btn-danger"  onclick="openStatusModal('${a.app_id}','deny','${a.first_name} ${a.last_name}')"><i class="fas fa-times"></i> Deny</button>` : ''}
+          ${canMarkPaid ? `<button class="btn btn-sm btn-ghost" style="color:#059669;border-color:#059669" onclick="markPaid('${a.app_id}','${a.first_name} ${a.last_name}',this)"><i class="fas fa-dollar-sign"></i> Mark Paid</button>` : ''}
+          <button class="btn btn-sm btn-ghost" onclick="openMsgModal('${a.app_id}','${a.first_name} ${a.last_name}')"><i class="fas fa-comment"></i> Message</button>
+          <button class="btn btn-sm btn-outline" onclick="openDetailModal('${a.app_id}','${a.first_name} ${a.last_name}')"><i class="fas fa-folder-open"></i> Full Application</button>
+          <a href="/apply/dashboard.html?id=${a.app_id}" target="_blank" class="btn btn-sm btn-outline"><i class="fas fa-external-link-alt"></i> View Status</a>
+        </div>
+        ${a.admin_notes ? `<div style="margin-top:8px;font-size:.75rem;color:var(--slate);background:#f8f9fa;border-radius:4px;padding:6px 10px"><i class="fas fa-sticky-note" style="margin-right:4px"></i>${CP_esc(a.admin_notes)}</div>` : ''}
+      </div>`;
+    }).join('');
+  }
+
+  // Scroll to and highlight a specific card (used by deep-link from dashboard)
+  function scrollToHighlight(appId) {
+    const el = document.getElementById(`card-${appId}`);
+    if (!el) return;
+    el.classList.add('highlighted');
+    setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
+  }
+
+  // Mark an application as paid (landlord-initiated)
+  window.markPaid = async function(appId, name, btn) {
+    if (!confirm(`Mark ${name}'s application fee as paid?`)) return;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Saving…';
+    const res = await CP.Applications.markPaid(appId);
+    if (res.ok) {
+      CP.UI.toast('Payment marked as paid.', 'success');
+      const app = allApps.find(a => a.app_id === appId);
+      if (app) app.payment_status = 'paid';
+      applyFilters();
+    } else {
+      CP.UI.toast('Error: ' + (res.error || 'Could not mark as paid'), 'error');
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-dollar-sign"></i> Mark Paid';
+    }
+  };
+
+  // Status actions
+  window.openStatusModal = function(appId, action, name) {
+    curAppId  = appId;
+    curAction = action;
+    const titles = { approve: `Approve — ${name}`, waitlist: `Waitlist — ${name}`, deny: `Deny — ${name}` };
+    const classes = { approve: 'btn btn-success', waitlist: 'btn btn-ghost', deny: 'btn btn-danger' };
+    const labels  = { approve: 'Confirm Approval', waitlist: 'Confirm Waitlist', deny: 'Confirm Denial' };
+    document.getElementById('status-modal-title').textContent = titles[action] || `Update — ${name}`;
+    document.getElementById('status-confirm-btn').className   = classes[action] || 'btn btn-primary';
+    document.getElementById('status-confirm-btn').textContent = labels[action] || 'Confirm';
+    document.getElementById('status-notes').value = '';
+    document.getElementById('status-modal').classList.add('open');
+  };
+
+  window.submitStatus = async function() {
+    const notes  = document.getElementById('status-notes').value.trim();
+    const statusMap = { approve: 'approved', waitlist: 'waitlisted', deny: 'denied' };
+    const status = statusMap[curAction] || curAction;
+    const btn    = document.getElementById('status-confirm-btn');
+    btn.disabled = true; btn.textContent = 'Saving…';
+    const res = await CP.Applications.updateStatus(curAppId, status, notes);
+    btn.disabled = false;
+    if (res.ok) {
+      CP.UI.toast(`Application ${status}.`, 'success');
+      closeModal('status-modal');
+      // Update local state
+      const app = allApps.find(a => a.app_id === curAppId);
+      if (app) app.status = status;
+      applyFilters();
+    } else {
+      CP.UI.toast('Error: ' + res.error, 'error');
+    }
+  };
+
+  // Messaging
+  window.openMsgModal = async function(appId, name) {
+    curAppId = appId;
+    document.getElementById('msg-modal-name').textContent = name;
+    document.getElementById('msg-input').value = '';
+    document.getElementById('msg-thread').innerHTML = '<div style="color:#8892a2;font-size:.8rem">Loading…</div>';
+    document.getElementById('msg-modal').classList.add('open');
+
+    const { data } = await CP.sb().from('messages').select('*').eq('app_id', appId).order('created_at', { ascending: true });
+    const msgs = data || [];
+    document.getElementById('msg-thread').innerHTML = msgs.length === 0
+      ? CP.UI.emptyState('No messages yet.', '💬')
+      : msgs.map(m => `<div class="msg-bubble msg-${m.sender}">
+          <div class="msg-meta">${CP_esc(m.sender_name || m.sender)} · ${CP.UI.fmt.dateTime(m.created_at)}</div>
+          ${CP_esc(m.message)}
+        </div>`).join('');
+    const t = document.getElementById('msg-thread');
+    t.scrollTop = t.scrollHeight;
+  };
+
+  window.sendMsg = async function() {
+    const msg = document.getElementById('msg-input').value.trim();
+    if (!msg) return;
+    const res = await CP.Applications.sendMessage(curAppId, msg, 'landlord', profile.business_name || profile.contact_name);
+    if (res.ok) {
+      CP.UI.toast('Message sent.', 'success');
+      openMsgModal(curAppId, document.getElementById('msg-modal-name').textContent);
+    } else {
+      CP.UI.toast('Error: ' + res.error, 'error');
+    }
+  };
+
+  window.closeModal = function(id) { document.getElementById(id).classList.remove('open'); };
+
+  // Full Application Detail Modal
+  window.openDetailModal = async function(appId, name) {
+    document.getElementById('detail-modal-title').textContent = `Application — ${name}`;
+    document.getElementById('detail-modal-body').innerHTML =
+      '<div style="text-align:center;padding:40px;color:#8892a2"><i class="fas fa-spinner fa-pulse" style="font-size:24px"></i></div>';
+    document.getElementById('detail-modal').classList.add('open');
+
+    const _getOneRes = await CP.Applications.getOne(appId);
+    const a = _getOneRes.data;
+    if (!_getOneRes.ok) {
+      document.getElementById('detail-modal-body').innerHTML =
+        '<div style="color:#991b1b;padding:20px">Failed to load application. Please try again.</div>';
+      return;
+    }
+    if (!a) {
+      document.getElementById('detail-modal-body').innerHTML =
+        '<div style="color:#991b1b;padding:20px">This application could not be found or you do not have access to it. If you believe this is an error, please contact support and reference application ID <strong>' + CP_esc(appId) + '</strong>.</div>';
+      return;
+    }
+
+    function field(label, value, full) {
+      const empty = !value || String(value).trim() === '';
+      return `<div class="detail-field${full ? ' full' : ''}">
+        <div class="detail-field-label">${label}</div>
+        <div class="detail-field-value${empty ? ' empty' : ''}">${empty ? 'Not provided' : CP_esc(String(value))}</div>
+      </div>`;
+    }
+    function fieldRaw(label, html, full) {
+      return `<div class="detail-field${full ? ' full' : ''}">
+        <div class="detail-field-label">${label}</div>
+        <div class="detail-field-value">${html}</div>
+      </div>`;
+    }
+    function section(title, html) {
+      return `<div class="detail-section"><div class="detail-section-title">${title}</div><div class="detail-grid">${html}</div></div>`;
+    }
+
+    const payMethod = [
+      a.primary_payment_method && a.primary_payment_method !== 'Other' ? a.primary_payment_method : a.primary_payment_method_other,
+      a.alternative_payment_method && a.alternative_payment_method !== 'Other' ? a.alternative_payment_method : a.alternative_payment_method_other,
+      a.third_choice_payment_method,
+    ].filter(Boolean).join(', ');
+
+    let docHtml = '';
+    const docPaths = Array.isArray(a.document_urls) && a.document_urls.length > 0 ? a.document_urls : [];
+    if (docPaths.length > 0) {
+      const docLinks = await Promise.all(docPaths.map(async (path, i) => {
+        const { data: signed } = await CP.sb().storage.from('application-docs').createSignedUrl(path, 3600).catch(() => ({ data: null }));
+        const url = signed?.signedUrl || null;
+        const label = path.includes('photo_id') ? '🪪 Photo ID' : path.includes('proof_of_income') ? '💼 Proof of Income' : path.includes('additional') ? '📄 Additional Document' : `📎 Document ${i+1}`;
+        return url
+          ? `<a href="${url}" target="_blank" style="display:inline-block;margin-bottom:4px;color:#2563eb;font-weight:600">${label} ↗</a>`
+          : `<span style="color:#bbb;font-style:italic">${label} — link unavailable</span>`;
+      }));
+      docHtml = fieldRaw('Uploaded Documents', `<div style="display:flex;flex-direction:column;gap:4px">${docLinks.join('')}</div>`, true);
+    } else if (a.document_url) {
+      // Legacy single document fallback
+      const { data: signed } = await CP.sb().storage.from('application-docs').createSignedUrl(a.document_url, 3600).catch(() => ({ data: null }));
+      const url = signed?.signedUrl || null;
+      docHtml = fieldRaw('Uploaded Document',
+        url
+          ? `<a href="${url}" target="_blank" style="color:#2563eb;font-weight:600">View Document ↗</a>`
+          : `<span style="color:#bbb;font-style:italic">Unable to generate link — please check Supabase storage</span>`,
+        true
+      );
+    } else {
+      docHtml = field('Uploaded Documents', 'None submitted', true);
+    }
+
+    document.getElementById('detail-modal-body').innerHTML = `
+      ${section('Personal Information', `
+        ${field('Full Name', `${a.first_name} ${a.last_name}`)}
+        ${field('Email', a.email)}
+        ${field('Phone', a.phone)}
+        ${field('Date of Birth', a.dob)}
+        ${field('SSN (masked)', a.ssn)}
+        ${field('Requested Move-In', a.requested_move_in_date)}
+        ${field('Desired Lease Term', a.desired_lease_term)}
+      `)}
+      ${section('Current Residence', `
+        ${field('Current Address', a.current_address, true)}
+        ${field('Duration at Address', a.residency_duration)}
+        ${field('Current Rent', a.current_rent_amount)}
+        ${field('Reason for Leaving', a.reason_for_leaving, true)}
+        ${field('Current Landlord', a.current_landlord_name)}
+        ${field('Landlord Phone', a.landlord_phone)}
+      `)}
+      ${section('Employment & Income', `
+        ${field('Employment Status', a.employment_status)}
+        ${field('Employer', a.employer)}
+        ${field('Job Title', a.job_title)}
+        ${field('Duration', a.employment_duration)}
+        ${field('Monthly Income', a.monthly_income)}
+        ${field('Other Income', a.other_income)}
+        ${field('Supervisor', a.supervisor_name)}
+        ${field('Supervisor Phone', a.supervisor_phone)}
+      `)}
+      ${a.has_co_applicant ? section('Co-Applicant', `
+        ${field('Name', `${a.co_applicant_first_name || ''} ${a.co_applicant_last_name || ''}`.trim())}
+        ${field('Email', a.co_applicant_email)}
+        ${field('Phone', a.co_applicant_phone)}
+        ${field('Date of Birth', a.co_applicant_dob)}
+        ${field('SSN (masked)', a.co_applicant_ssn)}
+        ${field('Employer', a.co_applicant_employer)}
+        ${field('Job Title', a.co_applicant_job_title)}
+        ${field('Monthly Income', a.co_applicant_monthly_income)}
+        ${field('Employment Duration', a.co_applicant_employment_duration)}
+      `) : ''}
+      ${section('Emergency Contact', `
+        ${field('Name', a.emergency_contact_name)}
+        ${field('Phone', a.emergency_contact_phone)}
+        ${field('Relationship', a.emergency_contact_relationship)}
+      `)}
+      ${section('References', `
+        ${field('Reference 1 Name', a.reference_1_name)}
+        ${field('Reference 1 Phone', a.reference_1_phone)}
+        ${field('Reference 2 Name', a.reference_2_name)}
+        ${field('Reference 2 Phone', a.reference_2_phone)}
+      `)}
+      ${section('Payment Preferences', `
+        ${field('Preferred Methods', payMethod, true)}
+      `)}
+      ${section('Documents', docHtml)}
+      ${a.admin_notes ? section('Internal Notes', field('Admin Notes', a.admin_notes, true)) : ''}
+      <div style="font-size:.72rem;color:#8892a2;text-align:center;padding-top:8px">
+        Application ID: ${CP_esc(a.app_id)} · Submitted: ${CP.UI.fmt.dateTime(a.created_at)}
+      </div>`;
+  };
+
+  // Sign out
+  [document.getElementById('signOutBtn'), document.getElementById('sideSignOut')]
+    .forEach(b => b?.addEventListener('click', signOut));
+</script>
+
+<nav class="mobile-bottom-nav">
+  <a href="/landlord/dashboard.html" class="mobile-bottom-nav-item"><i class="fas fa-th-large"></i>Dashboard</a>
+  <a href="/landlord/applications.html" class="mobile-bottom-nav-item active"><i class="fas fa-file-alt"></i>Apps</a>
+  <a href="/landlord/inquiries.html" class="mobile-bottom-nav-item"><i class="fas fa-envelope"></i>Inquiries</a>
+  <a href="/landlord/new-listing.html" class="mobile-bottom-nav-item"><i class="fas fa-plus-circle"></i>New</a>
+  <a href="/landlord/settings.html" class="mobile-bottom-nav-item"><i class="fas fa-cog"></i>Settings</a>
+</nav>
+</body>
+</html>

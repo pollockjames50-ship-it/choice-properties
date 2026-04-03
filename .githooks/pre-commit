@@ -1,0 +1,109 @@
+#!/bin/bash
+# ============================================================
+# CHOICE PROPERTIES — GIT PRE-COMMIT HOOK
+# Prevents commits with:
+#   ❌ node_modules/
+#   ❌ .env files
+#   ❌ config.js (auto-generated, never commit)
+#   ❌ .replit-cache
+#   ❌ Auto-generated files
+#
+# To install:
+#   chmod +x .githooks/pre-commit
+#   git config core.hooksPath .githooks
+#
+# To test:
+#   git commit (will run this script)
+#
+# To bypass (NOT recommended):
+#   git commit --no-verify
+# ============================================================
+
+set -e
+
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+ERRORS=()
+
+echo -e "${GREEN}Running pre-commit checks...${NC}"
+
+# Check 1: Prevent node_modules/ from being committed
+if git diff --cached --name-only | grep -q '^node_modules/'; then
+  ERRORS+=("${RED}❌ ERROR: node_modules/ cannot be committed${NC}")
+  ERRORS+=("   → This is auto-generated and GITIGNORED")
+  ERRORS+=("   → Fix: git reset node_modules/")
+fi
+
+# Check 2: Prevent .env files from being committed
+if git diff --cached --name-only | grep -qE '\.env(\.local)?'; then
+  ERRORS+=("${RED}❌ ERROR: .env files cannot be committed${NC}")
+  ERRORS+=("   → Secrets must never go to GitHub")
+  ERRORS+=("   → Fix: git reset .env")
+fi
+
+# Check 3: Prevent config.js from being committed
+if git diff --cached --name-only | grep -q '^config\.js$'; then
+  ERRORS+=("${RED}❌ ERROR: config.js cannot be committed${NC}")
+  ERRORS+=("   → This is generated at deploy time")
+  ERRORS+=("   → It contains secrets and is GITIGNORED")
+  ERRORS+=("   → Fix: git reset config.js")
+fi
+
+# Check 4: Prevent .replit-cache files
+if git diff --cached --name-only | grep -q '\.replit'; then
+  ERRORS+=("${RED}❌ ERROR: .replit-* files cannot be committed${NC}")
+  ERRORS+=("   → These are Replit auto-generated and GITIGNORED")
+  ERRORS+=("   → Fix: git reset .replit-*")
+fi
+
+# Check 5: Verify no package-lock.json changes (if only adding express)
+if git diff --cached package-lock.json 2>/dev/null | grep -q '^+'; then
+  ERRORS+=("${YELLOW}⚠️  WARNING: package-lock.json is being modified${NC}")
+  ERRORS+=("   → Make sure no new dependencies were added")
+  ERRORS+=("   → Only 'express' should be in package.json")
+fi
+
+# Check 6: Prevent accidental DB migration files
+if git diff --cached --name-only | grep -qE '(migration|migration_|\.sql\.bak)'; then
+  ERRORS+=("${RED}❌ ERROR: Database migrations cannot be committed here${NC}")
+  ERRORS+=("   → Migrations live in Supabase, not this repo")
+  ERRORS+=("   → Fix: git reset <file>")
+fi
+
+# If we found errors, display them and block commit
+if [ ${#ERRORS[@]} -gt 0 ]; then
+  echo ""
+  echo -e "${RED}═══════════════════════════════════════════════${NC}"
+  echo -e "${RED}COMMIT BLOCKED - SAFETY CHECK FAILED${NC}"
+  echo -e "${RED}═══════════════════════════════════════════════${NC}"
+  echo ""
+  
+  for error in "${ERRORS[@]}"; do
+    echo -e "$error"
+  done
+  
+  echo ""
+  echo -e "${YELLOW}This project is a STATIC WEBSITE.${NC}"
+  echo -e "${YELLOW}It does not use:${NC}"
+  echo "   • npm packages (except express for testing)"
+  echo "   • .env files in repo"
+  echo "   • config.js file in repo"
+  echo "   • Database migrations in repo"
+  echo ""
+  echo -e "${YELLOW}If you believe this is a mistake:${NC}"
+  echo "   1. Review your staged changes: git diff --cached"
+  echo "   2. Unstage bad files: git reset <file>"
+  echo "   3. Commit again"
+  echo ""
+  echo -e "${YELLOW}To bypass (NOT recommended):${NC}"
+  echo "   git commit --no-verify"
+  echo ""
+  
+  exit 1
+fi
+
+echo -e "${GREEN}✅ All checks passed!${NC}"
+exit 0

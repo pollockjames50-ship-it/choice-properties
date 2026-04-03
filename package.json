@@ -1,0 +1,14 @@
+{
+  "name": "choice-properties",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Choice Properties — rental marketplace. Static site served by a Node.js server on Replit. Backend is Supabase (cloud-hosted).",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "build": "node generate-config.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

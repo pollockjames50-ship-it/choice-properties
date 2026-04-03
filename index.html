@@ -1,0 +1,641 @@
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  STATIC SITE — AI AGENTS AND TOOLS: READ BEFORE ANY ACTION  ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║  DO NOT: run npm install, start a server, create config.js  ║
+  ║  DO NOT: connect to any local database or run migrations     ║
+  ║  DO NOT: configure workflows, runtimes, or environments      ║
+  ║                                                              ║
+  ║  DEPLOY PATH ONLY: edit → push to GitHub → Cloudflare Pages ║
+  ║  FULL RULES: .agents/instructions.md                        ║
+  ╚══════════════════════════════════════════════════════════════╝
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="theme-color" content="#006aff">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Choice Properties — Find Your Next Home Nationwide</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <meta name="description" content="Browse verified rental listings across the United States. Apartments, houses, and condos — apply online in minutes.">
+  <meta property="og:title" content="Choice Properties — Find Your Next Home Nationwide">
+  <meta property="og:description" content="Browse verified rental listings across the United States. Apartments, houses, and condos — apply online in minutes.">
+  <meta property="og:image" content="/assets/og-cover.jpg">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://choice-properties.pages.dev/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Choice Properties — Find Your Next Home Nationwide">
+  <meta name="twitter:description" content="Browse verified rental listings across the United States. Apply online in minutes.">
+  <meta name="twitter:image" content="/assets/og-cover.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <link rel="preload" href="/css/main.css?v=1775137055043" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/css/main.css?v=1775137055043"></noscript>
+  <link rel="preload" href="/css/listings.css?v=1775137055043" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/css/listings.css?v=1775137055043"></noscript>
+  <link rel="stylesheet" href="/assets/fontawesome.css">
+  <style>
+    /* ── CRITICAL CSS — above-fold paint for index.html ──────────────────────
+       Inlined to eliminate render-blocking flash on slow mobile connections.
+       Mirrors the minimal subset of main.css + listings.css needed for:
+       nav bar, hero section, body font, and card grid skeleton.
+    ─────────────────────────────────────────────────────────────────────── */
+    *,*::before,*::after{box-sizing:border-box}
+    html{-webkit-text-size-adjust:100%}
+    body{
+      margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      background:#fff;color:#1a1a1a;line-height:1.6;font-size:15px;
+    }
+    .nav{
+      position:fixed;top:0;left:0;right:0;height:64px;z-index:900;
+      background:rgba(255,255,255,0.97);
+      backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+      border-bottom:1px solid #e0e0e0;
+    }
+    .nav-inner{display:flex;align-items:center;justify-content:space-between;height:100%;padding:0 16px;max-width:1280px;margin:0 auto}
+    .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+    .nav-logo-emblem{width:34px;height:34px;border-radius:8px;background:#006aff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .hero{
+      position:relative;
+      background:linear-gradient(150deg,#04111F 0%,#0B1D38 45%,#0E2347 75%,#071627 100%);
+      min-height:500px;
+      padding:clamp(60px,10vw,110px) 0 clamp(60px,8vw,90px);
+      display:flex;align-items:center;overflow:hidden;
+    }
+    .property-grid{display:grid;grid-template-columns:1fr;gap:20px}
+    .property-card{border-radius:12px;overflow:hidden;background:#fff;border:1px solid #e0e0e0}
+    .property-card-img{position:relative;aspect-ratio:4/3;width:100%;overflow:hidden;background:linear-gradient(145deg,#c8d8e8 0%,#b8cad8 50%,#a8bac8 100%)}
+    #site-nav{height:64px}
+  </style>
+<script defer src="/config.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script type="module" src="/js/cp-api.js"></script>
+<script defer src="/js/components.js"></script>
+
+  <!-- I-060: WebSite + SearchAction structured data — enables Google Sitelinks Searchbox -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Choice Properties",
+    "url": "https://choice-properties.pages.dev/",
+    "description": "Nationwide rental property marketplace — apartments, houses, and condos.",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "https://choice-properties.pages.dev/listings.html?q={search_term_string}"
+      },
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+  <!-- Organization structured data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Choice Properties",
+    "url": "https://choice-properties.pages.dev/",
+    "logo": "https://choice-properties.pages.dev/assets/favicon.svg",
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "contactType": "customer service",
+      "availableLanguage": ["English", "Spanish"]
+    }
+  }
+  </script>
+</head>
+<body>
+
+<!-- ── Mobile Drawer Overlay ── -->
+<div id="site-nav"></div>
+
+<!-- ── Hero ── -->
+<section class="hero">
+  <div class="hero-atmosphere"></div>
+  <div class="hero-grain"></div>
+  <div class="hero-rule"></div>
+  <div class="hero-vertical-rule"></div>
+
+  <div class="container">
+    <div class="hero-inner">
+      <div class="hero-content">
+        <div class="hero-eyebrow">
+          <span class="hero-eyebrow-pulse"></span>
+          Nationwide Rental Marketplace
+        </div>
+
+        <h1 class="hero-headline">
+          Find a Home<br>You'll <em>Truly</em> Love
+        </h1>
+
+        <p class="hero-sub">
+          Verified listings, transparent pricing, no hidden fees.
+          Browse quality homes across all 50 states and apply in 15 minutes.
+        </p>
+
+        <!-- Search Bar — submits to /listings.html -->
+        <div class="search-bar">
+          <div class="search-bar-top">
+            <div class="search-field">
+              <i class="fas fa-search"></i>
+              <input type="text" id="searchInput"
+                placeholder="City, zip code, or neighborhood…"
+                autocomplete="off" aria-label="Search listings">
+            </div>
+            <div class="search-field">
+              <i class="fas fa-bed"></i>
+              <select id="bedroomsFilter" aria-label="Bedrooms">
+                <option value="">Any beds</option>
+                <option value="0">Studio</option>
+                <option value="1">1 Bed</option>
+                <option value="2">2 Beds</option>
+                <option value="3">3 Beds</option>
+                <option value="4">4+ Beds</option>
+              </select>
+            </div>
+            <div class="search-field">
+              <i class="fas fa-dollar-sign"></i>
+              <select id="maxRentFilter" aria-label="Max rent">
+                <option value="">Any price</option>
+                <option value="700">Up to $700</option>
+                <option value="900">Up to $900</option>
+                <option value="1100">Up to $1,100</option>
+                <option value="1400">Up to $1,400</option>
+                <option value="1700">Up to $1,700</option>
+                <option value="2200">Up to $2,200</option>
+                <option value="2500">Up to $2,500</option>
+                <option value="3000">Up to $3,000</option>
+                <option value="3500">Up to $3,500</option>
+                <option value="4000">Up to $4,000</option>
+                <option value="5000">Up to $5,000</option>
+              </select>
+            </div>
+            <button class="search-btn" id="searchBtn" aria-label="Search">
+              <i class="fas fa-search"></i> Search
+            </button>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <div class="hero-stat-num" id="statListings">—</div>
+            <div class="hero-stat-label">Active Listings</div>
+          </div>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat">
+            <div class="hero-stat-num">15 min</div>
+            <div class="hero-stat-label">Avg. Apply Time</div>
+          </div>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat">
+            <div class="hero-stat-num">50 States</div>
+            <div class="hero-stat-label">Coverage</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Trust Strip ── -->
+<div class="trust-strip" id="trust-section">
+  <div class="trust-strip-inner">
+    <div class="trust-strip-item"><i class="fas fa-shield-alt"></i> Verified Listings</div>
+    <div class="trust-strip-item"><i class="fas fa-clock"></i> 15-Min Application</div>
+    <div class="trust-strip-item"><i class="fas fa-lock"></i> Bank-Level Security</div>
+    <div class="trust-strip-item"><i class="fas fa-bell"></i> Real-Time Updates</div>
+    <div class="trust-strip-item"><i class="fas fa-map-marker-alt"></i> All 50 States</div>
+  </div>
+</div>
+
+<!-- ── Featured Listings ── -->
+<section class="featured-section" id="featuredSection" style="display:none">
+  <div class="container">
+    <div class="featured-header">
+      <div>
+        <div class="section-eyebrow"><i class="fas fa-bolt"></i> Available Now</div>
+        <h2 class="featured-title">Featured Listings</h2>
+        <p class="featured-subtitle">Our newest available homes — updated in real time.</p>
+      </div>
+      <a href="/listings.html" class="featured-view-all">View All Listings <i class="fas fa-arrow-right"></i></a>
+    </div>
+
+    <div class="property-grid" id="featuredGrid">
+      <div class="property-card property-card-skeleton">
+        <div class="property-card-img skeleton-img skeleton"></div>
+        <div class="property-card-body" style="gap:10px;padding:20px">
+          <div class="skeleton-line w-40 skeleton"></div>
+          <div class="skeleton-line w-80 skeleton"></div>
+          <div class="skeleton-line w-60 skeleton"></div>
+        </div>
+      </div>
+      <div class="property-card property-card-skeleton">
+        <div class="property-card-img skeleton-img skeleton"></div>
+        <div class="property-card-body" style="gap:10px;padding:20px">
+          <div class="skeleton-line w-40 skeleton"></div>
+          <div class="skeleton-line w-80 skeleton"></div>
+          <div class="skeleton-line w-60 skeleton"></div>
+        </div>
+      </div>
+      <div class="property-card property-card-skeleton">
+        <div class="property-card-img skeleton-img skeleton"></div>
+        <div class="property-card-body" style="gap:10px;padding:20px">
+          <div class="skeleton-line w-40 skeleton"></div>
+          <div class="skeleton-line w-80 skeleton"></div>
+          <div class="skeleton-line w-60 skeleton"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="featured-cta">
+      <a href="/listings.html" class="btn btn-primary btn-lg">Browse All Listings <i class="fas fa-arrow-right"></i></a>
+    </div>
+  </div>
+</section>
+
+<!-- ── How It Works ── -->
+<section class="hiw-section" id="how-it-works">
+  <div class="hiw-section-glow"></div>
+  <div class="container">
+    <div class="hiw-header">
+      <div class="section-eyebrow hiw-eyebrow">Simple Process</div>
+      <h2 class="hiw-title">Rent Your Next Home in 3 Easy Steps</h2>
+      <p class="hiw-subtitle">From your first search to signing your lease — we keep it fast, clear, and stress‑free.</p>
+    </div>
+    <div class="hiw-track">
+      <div class="hiw-connector"></div>
+      <div class="hiw-steps">
+        <div class="hiw-step">
+          <div class="hiw-step-bubble">
+            <span>01</span>
+          </div>
+          <div class="hiw-step-body">
+            <div class="hiw-step-icon"><i class="fas fa-search"></i></div>
+            <h3 class="hiw-step-title">Find Your Home</h3>
+            <p class="hiw-step-desc">Browse verified rentals across all 50 states. Filter by bedrooms, price, pet policy, and more to find your perfect fit.</p>
+          </div>
+        </div>
+        <div class="hiw-step">
+          <div class="hiw-step-bubble">
+            <span>02</span>
+          </div>
+          <div class="hiw-step-body">
+            <div class="hiw-step-icon"><i class="fas fa-file-alt"></i></div>
+            <h3 class="hiw-step-title">Apply Online</h3>
+            <p class="hiw-step-desc">Complete our secure 15-minute application from any device. No printing, no faxing — everything is handled online.</p>
+          </div>
+        </div>
+        <div class="hiw-step">
+          <div class="hiw-step-bubble hiw-step-bubble--last">
+            <span>03</span>
+          </div>
+          <div class="hiw-step-body">
+            <div class="hiw-step-icon"><i class="fas fa-key"></i></div>
+            <h3 class="hiw-step-title">Move In</h3>
+            <p class="hiw-step-desc">Get approved, sign your lease digitally, and coordinate your move-in with your landlord. Welcome home.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="hiw-cta">
+      <a href="/listings.html" class="btn btn-primary btn-lg">Browse Listings</a>
+      <a href="/how-to-apply.html" class="hiw-cta-link">Learn more about the process <i class="fas fa-arrow-right"></i></a>
+    </div>
+  </div>
+</section>
+
+<!-- ── Why Choose Us ── -->
+<section class="why-section" id="why-section">
+  <div class="why-bg"></div>
+  <div class="container">
+    <div style="text-align:center">
+      <div class="section-eyebrow">Why Choice Properties</div>
+      <h2 class="section-title">Renting Made Simple,<br>Transparent &amp; Fast</h2>
+    </div>
+    <div class="why-grid">
+      <div class="why-card">
+        <div class="why-card-num">01</div>
+        <h3>Verified Listings</h3>
+        <p>Every property is listed directly by verified landlords and monitored for quality. No scams, no ghost listings, no bait-and-switch tactics — ever.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-card-num">02</div>
+        <h3>Apply in 15 Minutes</h3>
+        <p>Our streamlined online application takes about 15 minutes from your phone. No printing, no faxing, no office visits required.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-card-num">03</div>
+        <h3>Personal Service</h3>
+        <p>Our team is dedicated, responsive, and genuinely invested in helping you find the right home — not just closing a deal.</p>
+      </div>
+    </div>
+    <div style="text-align:center">
+      <a href="/listings.html" class="btn btn-primary why-cta-btn">Browse Available Listings</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ── -->
+<div id="site-footer"></div>
+
+<div class="toast-container" id="toastContainer"></div>
+<button class="scroll-top" id="scrollTopBtn" aria-label="Back to top"><i class="fas fa-chevron-up"></i></button>
+
+<script type="module">
+const supabase = CP.sb();
+
+// CSP-safe image load/error handling (inline onload/onerror blocked by Cloudflare CSP nonce policy)
+document.addEventListener('load', function(e) {
+  if (e.target.tagName === 'IMG') e.target.classList.add('cp-img-loaded');
+}, true);
+document.addEventListener('error', function(e) {
+  var t = e.target;
+  if (t.tagName !== 'IMG') return;
+  t.classList.add('cp-img-loaded');
+  if (t.src !== location.origin + '/assets/placeholder-property.jpg') {
+    t.src = '/assets/placeholder-property.jpg';
+  }
+}, true);
+
+(async () => {
+  setupScrollTop();
+  setupSmoothScrollSections();
+
+  // Load featured listings + hero stat count in parallel
+  const statEl = document.getElementById('statListings');
+  if (statEl) {
+    // Show loading feedback while fetching stats
+    statEl.style.opacity = '0.6';
+    statEl.style.transition = 'opacity 0.3s ease';
+  }
+
+  const [, countResult] = await Promise.allSettled([
+    loadFeaturedListings(),
+    supabase.from('properties').select('id', { count: 'exact', head: true }).eq('status', 'active'),
+  ]);
+  
+  if (statEl) {
+    const count = countResult.status === 'fulfilled' ? countResult.value?.data?.length ?? countResult.value?.count : null;
+    if (count != null) {
+      statEl.textContent = count;
+      statEl.style.opacity = '1'; // Fade in the actual count
+    } else {
+      statEl.closest('.hero-stat').style.display = 'none';
+    }
+  }
+})();
+
+// ── Featured listings loader ───────────────────────────────
+async function loadFeaturedListings() {
+  const section = document.getElementById('featuredSection');
+  const grid    = document.getElementById('featuredGrid');
+  if (!section || !grid) return;
+  if (!CONFIG.SUPABASE_URL) return; // no credentials yet — stay hidden
+
+  // Show section with skeleton initially
+  section.style.display = '';
+
+  // Loading timeout: if fetch takes > 2.5s, show loading indicator
+  const loadingTimeout = setTimeout(() => {
+    const skeleton = grid.querySelector('.property-card-skeleton');
+    if (skeleton) {
+      const loadingMsg = document.createElement('div');
+      loadingMsg.style.cssText = 'grid-column:1/-1;text-align:center;padding:32px 24px;color:var(--color-text-secondary);font-size:0.9rem;';
+      loadingMsg.innerHTML = '<i class="fas fa-spinner" style="animation:spin 1s linear infinite;display:inline-block;margin-right:8px;"></i>Loading featured listings...';
+      grid.insertAdjacentElement('afterend', loadingMsg);
+      loadingMsg.id = 'loadingIndicator';
+    }
+  }, 2500);
+
+  try {
+    const { data: props, error } = await supabase
+      .from('properties')
+      .select('*, landlords(contact_name, business_name, avatar_url, verified)')
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
+      .limit(6);
+
+    clearTimeout(loadingTimeout);
+    const indicator = document.getElementById('loadingIndicator');
+    if (indicator) indicator.remove();
+
+    if (error || !props || !props.length) {
+      // I-033: Show a warm empty state instead of hiding the section entirely.
+      // An empty marketplace on launch day would look broken with no explanation.
+      grid.innerHTML = `
+        <div style="grid-column:1/-1;text-align:center;padding:56px 24px 48px;color:var(--color-text-secondary);">
+          <div style="font-size:40px;margin-bottom:16px;opacity:0.5;">🏡</div>
+          <h3 style="font-size:1.15rem;font-weight:600;color:var(--color-text-primary);margin:0 0 8px;">Listings Coming Soon</h3>
+          <p style="font-size:0.95rem;margin:0 0 24px;max-width:340px;margin-left:auto;margin-right:auto;line-height:1.5;">
+            We're just getting started — check back shortly for available properties in your area.
+          </p>
+          <a href="/listings.html" style="display:inline-block;padding:10px 22px;background:var(--color-brand);color:#fff;border-radius:8px;text-decoration:none;font-size:0.9rem;font-weight:500;">
+            Browse All Listings
+          </a>
+        </div>`;
+      return;
+    }
+
+    grid.innerHTML = props.map(p => buildFeaturedCard(p)).join('');
+
+    grid.querySelectorAll('.property-card').forEach(card => {
+      initFeaturedCarousel(card);
+      card.addEventListener('click', e => {
+        if (e.target.closest('a, button')) return;
+        window.location.href = `/property.html?id=${card.dataset.id}`;
+      });
+    });
+
+    animateFeaturedCards();
+  } catch (_) {
+    clearTimeout(loadingTimeout);
+    const indicator = document.getElementById('loadingIndicator');
+    if (indicator) indicator.remove();
+    // silently hide — never break the homepage
+  }
+}
+
+// ── Card builder (mirrors listings.html buildCard) ────────
+function buildFeaturedCard(p) {
+  const photos   = p.photo_urls?.length ? p.photo_urls : ['/assets/placeholder-property.jpg'];
+  const avail    = p.available_date ? featFmtAvail(p.available_date) : 'Available Now';
+  const availNow = !p.available_date || new Date(p.available_date) <= new Date();
+  const applyURL = `/apply.html?property_id=${p.id}${p.title ? '&property_name=' + encodeURIComponent(p.title) : ''}`;
+  const imgSizes = '(max-width: 539px) calc(100vw - 32px), (max-width: 899px) calc(50vw - 28px), calc(33vw - 32px)';
+
+  const slidesHtml = photos.map((url, i) => {
+    const lqip = CP.UI.lqipUrl(url);
+    const lqipStyle = lqip ? ` style="background-image:url('${lqip}');background-size:cover;background-position:center"` : '';
+    return `<div class="property-card-slide"${lqipStyle}><img src="${CONFIG.img(url,'card')}" srcset="${CONFIG.srcset(url,'card','card_2x')}" alt="${p.title} photo ${i+1}" sizes="${imgSizes}" loading="${i===0?'eager':'lazy'}" ${i===0?'fetchpriority="high"':''} decoding="async"></div>`;
+  }).join('');
+
+  const tags = [];
+  if (p.pets_allowed) tags.push(`<span class="property-card-tag tag-pet"><i class="fas fa-paw"></i> Pets OK</span>`);
+  if (p.parking) tags.push(`<span class="property-card-tag tag-parking"><i class="fas fa-car"></i> Parking</span>`);
+  if (Array.isArray(p.utilities_included) ? p.utilities_included.length > 0 : !!p.utilities_included)
+    tags.push(`<span class="property-card-tag tag-utilities"><i class="fas fa-bolt"></i> Utilities</span>`);
+
+  const addrLine = [p.address, p.city, p.state].filter(Boolean).join(', ');
+
+  const specParts = [];
+  if (p.bedrooms != null) specParts.push(`<span class="property-card-spec-item"><i class="fas fa-bed"></i>${p.bedrooms === 0 ? 'Studio' : p.bedrooms + ' Bed'}</span>`);
+  if (p.bathrooms)        specParts.push(`<span class="property-card-spec-item"><i class="fas fa-bath"></i>${p.bathrooms} Bath</span>`);
+  if (p.square_footage)   specParts.push(`<span class="property-card-spec-item">${p.square_footage.toLocaleString()} sqft</span>`);
+  const specsHtml = specParts.map((s, i) => i === 0 ? s : `<span class="property-card-spec-sep">·</span>${s}`).join('');
+
+  const ageDays = p.created_at ? Math.floor((Date.now() - new Date(p.created_at).getTime()) / 86400000) : 999;
+  let badge = '';
+  if (p.featured) {
+    badge = `<div class="property-card-badge badge-featured"><i class="fas fa-star"></i> Featured</div>`;
+  } else if (ageDays <= 3) {
+    badge = `<div class="property-card-badge badge-hot"><i class="fas fa-fire"></i> Hot Deal</div>`;
+  } else if (ageDays <= 7) {
+    badge = `<div class="property-card-badge badge-new"><i class="fas fa-tag"></i> New Listing</div>`;
+  } else if (p.landlords?.verified) {
+    badge = `<div class="property-card-badge badge-verified"><i class="fas fa-shield-halved"></i> Verified</div>`;
+  } else if (availNow || !p.available_date) {
+    badge = `<div class="property-card-badge badge-available"><i class="fas fa-circle-check"></i> Available Now</div>`;
+  } else {
+    const availLabel = new Date(p.available_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    badge = `<div class="property-card-badge badge-available"><i class="fas fa-calendar"></i> Avail. ${availLabel}</div>`;
+  }
+  const photoCountHtml = photos.length > 1 ? `<div class="property-card-photo-count"><i class="fas fa-camera"></i> ${photos.length}</div>` : '';
+
+  return `
+    <article class="property-card" data-id="${p.id}">
+      <a href="/property.html?id=${p.id}" style="display:block;text-decoration:none" tabindex="-1" aria-hidden="true">
+        <div class="property-card-img">
+          <div class="property-card-slides">${slidesHtml}</div>
+          ${photos.length > 1 ? `
+            <button class="property-card-nav prev" data-dir="-1" aria-label="Previous photo"><i class="fas fa-chevron-left"></i></button>
+            <button class="property-card-nav next" data-dir="1"  aria-label="Next photo"><i class="fas fa-chevron-right"></i></button>
+          ` : ''}
+          ${badge}
+          ${photoCountHtml}
+        </div>
+      </a>
+      <button class="property-card-save" data-id="${p.id}" aria-label="Save property"><i class="far fa-heart"></i></button>
+      <div class="property-card-body">
+        <div class="property-card-price">$${p.monthly_rent.toLocaleString()}<span class="property-card-price-unit">/mo</span></div>
+        ${specsHtml ? `<div class="property-card-specs">${specsHtml}</div>` : ''}
+        <a href="/property.html?id=${p.id}" style="text-decoration:none">
+          <div class="property-card-title">${p.title}</div>
+        </a>
+        <div class="property-card-addr"><i class="fas fa-location-dot"></i>${addrLine}</div>
+        ${tags.length ? `<div class="property-card-tags">${tags.join('')}</div>` : ''}
+      </div>
+    </article>`;
+}
+
+// ── Carousel (same logic as listings.html) ────────────────
+function initFeaturedCarousel(card) {
+  const slides  = card.querySelector('.property-card-slides');
+  const navBtns = card.querySelectorAll('.property-card-nav');
+  if (!slides || !navBtns.length) return;
+  let idx = 0;
+  const total = card.querySelectorAll('.property-card-slide').length;
+  function goTo(n) {
+    idx = (n + total) % total;
+    slides.style.transform = `translateX(-${idx * 100}%)`;
+  }
+  navBtns.forEach(btn => btn.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); goTo(idx + parseInt(btn.dataset.dir)); }));
+  let touchX = 0;
+  slides.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, { passive: true });
+  slides.addEventListener('touchend', e => { const diff = touchX - e.changedTouches[0].clientX; if (Math.abs(diff) > 40) goTo(idx + (diff > 0 ? 1 : -1)); }, { passive: true });
+}
+
+// ── Staggered entrance animation ──────────────────────────
+function animateFeaturedCards() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.querySelectorAll('#featuredGrid .property-card').forEach(c => c.classList.add('cp-card-visible'));
+    return;
+  }
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('cp-card-visible'); observer.unobserve(e.target); } });
+  }, { threshold: 0.06 });
+  document.querySelectorAll('#featuredGrid .property-card').forEach((card, i) => {
+    card.style.setProperty('--cp-delay', Math.min(i * 60, 320) + 'ms');
+    observer.observe(card);
+  });
+}
+
+// ── Helpers ───────────────────────────────────────────────
+function featDom(createdAt) { return Math.floor((Date.now() - new Date(createdAt).getTime()) / 86400000); }
+function featFmtAvail(dateStr) { const d = new Date(dateStr); return d <= new Date() ? 'Available Now' : 'Avail. ' + d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }
+function featCap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+// Hero search → redirect to listings page with params
+document.getElementById('searchBtn').addEventListener('click', goToListings);
+document.getElementById('searchInput').addEventListener('keydown', e => { if (e.key === 'Enter') goToListings(); });
+
+function goToListings() {
+  const q       = document.getElementById('searchInput').value.trim();
+  const beds    = document.getElementById('bedroomsFilter').value;
+  const maxrent = document.getElementById('maxRentFilter').value;
+  const params  = new URLSearchParams();
+  if (q)       params.set('q', q);
+  if (beds)    params.set('beds', beds);
+  if (maxrent) params.set('maxrent', maxrent);
+  const qs = params.toString();
+  window.location.href = `/listings.html${qs ? '?' + qs : ''}`;
+}
+
+
+function setupScrollTop() {
+  const btn = document.getElementById('scrollTopBtn');
+  window.addEventListener('scroll', () => btn.classList.toggle('visible', window.scrollY > 400), { passive: true });
+  btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+}
+
+// ── Smooth Scroll Section Highlighting ────────────────────
+function setupSmoothScrollSections() {
+  const sections = document.querySelectorAll('[id$="-section"], [id="how-it-works"]');
+  const navLinks = document.querySelectorAll('[data-scroll-to]');
+  
+  if (!sections.length) return;
+  
+  // Handle click events on scroll links
+  navLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+      const targetId = link.getAttribute('data-scroll-to');
+      const target = document.getElementById(targetId);
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+  });
+  
+  // Use Intersection Observer to highlight active section
+  const observerOptions = {
+    root: null,
+    rootMargin: '-30% 0px -70% 0px', // Trigger when section is 30% from top
+    threshold: 0
+  };
+  
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        // Remove active class from all nav links
+        navLinks.forEach(link => link.classList.remove('active'));
+        
+        // Add active class to matching link
+        const sectionId = entry.target.id;
+        const activeLink = document.querySelector(`[data-scroll-to="${sectionId}"]`);
+        if (activeLink) activeLink.classList.add('active');
+      }
+    });
+  }, observerOptions);
+  
+  // Observe all sections
+  sections.forEach(section => observer.observe(section));
+}
+</script>
+</body>
+</html>

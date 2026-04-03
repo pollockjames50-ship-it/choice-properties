@@ -1,0 +1,8 @@
+# _redirects — Cloudflare Pages
+#
+# No redirect rules are needed here.
+# Cloudflare Pages automatically serves 404.html for any unmatched route
+# when a 404.html file exists at the root — no rule required.
+#
+# If you add custom redirects in the future, the format is:
+#   /old-path   /new-path   301

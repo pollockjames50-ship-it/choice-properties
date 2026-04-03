@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="theme-color" content="#006aff">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="preconnect" href="https://ik.imagekit.io" crossorigin>
+  <link rel="preconnect" id="sb-preconnect"><!-- set by config.js -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Property — Choice Properties</title>
+  <meta name="description" content="View property details and apply online.">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <meta property="og:type"        content="website">
+  <meta property="og:site_name"   content="Choice Properties">
+  <meta property="og:title"       id="ogTitle"       content="Rental Property — Choice Properties">
+  <meta property="og:description" id="ogDescription" content="View property details and apply online.">
+  <meta property="og:url"         id="ogUrl"         content="">
+  <meta property="og:image"       id="ogImage"       content="">
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       id="twTitle"       content="Rental Property">
+  <meta name="twitter:description" id="twDescription" content="View property details and apply online.">
+  <meta name="twitter:image"       id="twImage"       content="">
+  <!-- Leaflet loaded lazily via IntersectionObserver in renderMap() -->
+  <link rel="stylesheet" href="/assets/fontawesome.css">
+    <link rel="preload" href="/css/main.css?v=1775137055043" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/css/main.css?v=1775137055043"></noscript>
+  <link rel="stylesheet" href="/css/property.css?v=1775137055043">
+  <!-- Styles in property.css -->
+<style>
+/* Mobile sticky Apply CTA — hidden on desktop */
+#mobile-apply-bar{display:none;position:fixed;bottom:0;left:0;right:0;z-index:200;background:#0a1628;border-top:1px solid rgba(255,255,255,.12);padding:12px 16px;padding-bottom:calc(12px + env(safe-area-inset-bottom));align-items:center;justify-content:space-between;gap:12px;box-shadow:0 -4px 24px rgba(0,0,0,.35)}
+#mobile-apply-bar .mob-price{color:rgba(255,255,255,.65);font-size:.75rem;line-height:1.2}
+#mobile-apply-bar .mob-price strong{display:block;font-size:1.05rem;font-weight:700;color:#fff;letter-spacing:-.01em}
+#mobile-apply-bar .mob-btn{background:var(--color-brand);color:#fff;border:none;border-radius:8px;padding:12px 22px;font-size:.875rem;font-weight:700;letter-spacing:-.01em;text-decoration:none;white-space:nowrap;cursor:pointer;flex-shrink:0;box-shadow:0 4px 16px rgba(0,106,255,.35);transition:background 160ms ease,box-shadow 160ms ease}
+#mobile-apply-bar .mob-btn:hover{background:var(--color-brand-hover);box-shadow:0 6px 22px rgba(0,106,255,.45)}
+@media(max-width:767px){#mobile-apply-bar.active{display:flex}body.mob-bar-active{padding-bottom:80px}}
+</style>
+<script defer src="/config.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script type="module" src="/js/cp-api.js"></script>
+<script defer src="/js/components.js"></script>
+</head>
+<body>
+
+<!-- ── Mobile Drawer Overlay ── -->
+
+<div id="site-nav"></div>
+
+<!-- ── Gallery Mosaic ── -->
+
+<div class="gallery-mosaic skeleton-loading" id="gallery">
+  <!-- Main large panel -->
+  <div class="mosaic-main" id="mosaicMain">
+    <img class="mosaic-main-img" id="mosaicMainImg" src="" alt="Property photo" fetchpriority="high" decoding="async">
+  </div>
+  <!-- Right 2×2 side grid -->
+  <div class="mosaic-side" id="mosaicSide"></div>
+
+  <!-- See all photos button (desktop) -->
+  <button class="mosaic-expand-btn" id="mosaicExpandBtn">
+    <i class="fas fa-th"></i> See all photos
+  </button>
+
+  <!-- Mobile swipe nav arrows -->
+  <button class="mosaic-nav-btn prev" id="mosaicPrev"><i class="fas fa-chevron-left"></i></button>
+  <button class="mosaic-nav-btn next" id="mosaicNext"><i class="fas fa-chevron-right"></i></button>
+  <div class="mosaic-mobile-count" id="mosaicMobileCount">1 / 1</div>
+
+  <!-- Legacy galleryExpand kept for JS compatibility -->
+  <button id="galleryExpand" style="display:none"></button>
+</div>
+
+<!-- ── Gallery Thumbnail Strip ── -->
+<div class="gallery-strip" id="galleryStrip" role="list" aria-label="Property photos"></div>
+
+<!-- ── Lightbox ── -->
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Property photo gallery">
+  <!-- Header: counter + close -->
+  <div class="lightbox-header">
+    <div class="lightbox-counter" id="lightboxCounter" aria-live="polite" aria-atomic="true">1 / 1</div>
+    <button class="lightbox-close" id="lightboxClose" aria-label="Close gallery"><i class="fas fa-times"></i></button>
+  </div>
+  <!-- Main image stage -->
+  <div class="lightbox-stage">
+    <button class="lightbox-nav prev" id="lightboxPrev" aria-label="Previous photo"><i class="fas fa-chevron-left"></i></button>
+    <div class="lightbox-img-wrap" id="lightboxImgWrap">
+      <div class="lb-lqip-bg" id="lbLqipBg"></div>
+      <img class="lightbox-img" id="lightboxImg" src="" alt="Property photo" loading="lazy">
+      <div class="lb-spinner" id="lbSpinner"></div>
+    </div>
+    <button class="lightbox-nav next" id="lightboxNext" aria-label="Next photo"><i class="fas fa-chevron-right"></i></button>
+  </div>
+  <!-- Thumbnail filmstrip -->
+  <div class="lightbox-thumbs" id="lightboxThumbs"></div>
+</div>
+
+<!-- ── Detail Content ── -->
+
+<div class="property-detail">
+  <div class="container">
+    <div class="detail-layout">
+
+  <!-- Main column -->
+  <div class="detail-main" id="detailMain">
+    <div class="detail-breadcrumb">
+      <a href="/listings.html">Listings</a>
+      <i class="fas fa-chevron-right" style="font-size:10px"></i>
+      <span id="breadcrumbCity">Loading…</span>
+      <span id="breadcrumbTitleGroup" style="display:none">
+        <i class="fas fa-chevron-right" style="font-size:10px"></i>
+        <span id="breadcrumbTitle"></span>
+      </span>
+    </div>
+
+    <div class="detail-header">
+      <div class="detail-price" id="detailPrice">
+        <div class="skeleton" style="height:44px;width:200px;border-radius:8px"></div>
+      </div>
+      <div class="detail-title" id="detailTitle">
+        <div class="skeleton" style="height:28px;width:72%;border-radius:6px;margin-bottom:6px"></div>
+      </div>
+      <div class="detail-address" id="detailAddress">
+        <div class="skeleton" style="height:18px;width:52%;border-radius:4px"></div>
+      </div>
+    </div>
+
+    <div class="detail-meta-row" id="detailMeta"></div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">About This Property</div>
+      <div class="detail-desc" id="detailDesc">
+        <div class="skeleton skeleton-line" style="width:100%;height:15px;margin-bottom:10px"></div>
+        <div class="skeleton skeleton-line" style="width:96%;height:15px;margin-bottom:10px"></div>
+        <div class="skeleton skeleton-line" style="width:88%;height:15px;margin-bottom:10px"></div>
+        <div class="skeleton skeleton-line" style="width:70%;height:15px"></div>
+      </div>
+    </div>
+
+    <div class="detail-section detail-tabs-wrap" id="detailTabsSection" style="display:none">
+      <div class="detail-tabs" id="detailTabs" role="tablist">
+        <button class="detail-tab active" data-panel="panelAmenities" id="tabAmenities" role="tab" aria-selected="true" aria-controls="panelAmenities">
+          <i class="fas fa-list-check"></i> Amenities
+        </button>
+        <button class="detail-tab" data-panel="panelUtilities" id="tabUtilities" role="tab" aria-selected="false" aria-controls="panelUtilities" style="display:none">
+          <i class="fas fa-bolt"></i> Utilities
+        </button>
+        <button class="detail-tab" data-panel="panelLease" id="tabLease" role="tab" aria-selected="false" aria-controls="panelLease" style="display:none">
+          <i class="fas fa-file-contract"></i> Lease
+        </button>
+      </div>
+      <div class="detail-tab-panel active" id="panelAmenities" role="tabpanel" aria-labelledby="tabAmenities">
+        <div class="amenities-grid" id="amenitiesGrid"></div>
+      </div>
+      <div class="detail-tab-panel" id="panelUtilities" role="tabpanel" aria-labelledby="tabUtilities">
+        <div class="amenities-grid" id="utilitiesGrid"></div>
+      </div>
+      <div class="detail-tab-panel" id="panelLease" role="tabpanel" aria-labelledby="tabLease">
+        <div class="amenities-grid" id="leaseGrid"></div>
+      </div>
+    </div>
+    <div id="amenitiesSection" style="display:none"></div>
+    <div id="utilitiesSection" style="display:none"></div>
+    <div id="leaseSection" style="display:none"></div>
+
+    <!-- Map section — uses Leaflet if lat/lng available, fallback iframe -->
+    <div class="detail-section">
+      <div class="detail-section-title">Location</div>
+      <div class="map-container" id="mapContainer">
+        <div id="mapFallback" style="height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:var(--s-2);color:#8892a2">
+          <i class="fas fa-map-marker-alt" style="font-size:32px;color:#2563eb"></i>
+          <span id="mapAddressLabel" style="font-size:14px"></span>
+        </div>
+      </div>
+      <p id="mapNeighborhood" style="font-size:13px;color:#8892a2;margin-top:8px;display:none">
+        <i class="fas fa-info-circle" style="color:var(--gold)"></i>
+        <span id="mapNeighborhoodText"></span>
+      </p>
+      <a href="#" class="map-open-btn" id="mapOpenBtn" target="_blank" rel="noopener noreferrer" style="display:none">
+        <i class="fas fa-diamond-turn-right"></i> Open in Maps
+      </a>
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="detail-sidebar">
+    <!-- Apply Card -->
+    <div class="apply-card">
+      <div class="apply-card-header">
+        <div class="apply-card-price" id="sidebarPrice">—</div>
+        <div class="apply-card-avail" id="sidebarAvail">
+          <i class="fas fa-circle"></i> Checking availability…
+        </div>
+      </div>
+      <div class="apply-card-body">
+        <div class="apply-cost-row">
+          <span class="apply-cost-label">Monthly Rent</span>
+          <span class="apply-cost-value" id="sidebarRent">—</span>
+        </div>
+        <div class="apply-cost-row">
+          <span class="apply-cost-label">Security Deposit</span>
+          <span class="apply-cost-value" id="sidebarDeposit">—</span>
+        </div>
+        <div class="apply-cost-row">
+          <span class="apply-cost-label">Application Fee</span>
+          <span class="apply-cost-value" id="sidebarFee">—</span>
+        </div>
+        <div class="apply-cost-row" id="sidebarMoveInRow" style="display:none">
+          <span class="apply-cost-label">Available From</span>
+          <span class="apply-cost-value" id="sidebarMoveIn">—</span>
+        </div>
+        <a href="#" class="apply-btn" id="applyBtn">
+          Apply Now <i class="fas fa-paper-plane" style="font-size:14px"></i>
+        </a>
+        <p class="apply-disclaimer">
+          <i class="fas fa-lock" style="color:var(--gold)"></i>
+          Your info is encrypted & secure. Fee collected after review.
+        </p>
+        <a href="/apply/dashboard.html"
+           target="_blank"
+           class="apply-track-link">
+          <i class="fas fa-search"></i> Already applied? Track your application →
+        </a>
+      </div>
+    </div>
+
+    <!-- Landlord Profile Card -->
+    <div class="landlord-card" id="landlordCard" style="display:none;">
+      <div class="landlord-card-avatar" id="landlordAvatar">?</div>
+      <div class="landlord-card-info">
+        <div class="landlord-card-label">Listed by</div>
+        <div class="landlord-card-name" id="landlordName">—</div>
+        <div class="landlord-card-tagline" id="landlordTagline"></div>
+      </div>
+      <i class="fas fa-circle-check landlord-card-verified" id="landlordVerified" style="display:none" title="Verified landlord"></i>
+    </div>
+
+    <!-- Contact Card -->
+    <div class="contact-card" id="contactCard">
+      <div class="contact-drawer-handle-bar"></div>
+      <div class="contact-card-header-row">
+        <div class="share-row">
+          <button class="share-btn" id="savePropBtn">
+            <i class="far fa-heart"></i> Save
+          </button>
+          <button class="share-btn" onclick="shareProp()">
+            <i class="fas fa-share-alt"></i> Share
+          </button>
+        </div>
+        <button class="contact-drawer-close-btn" id="contactDrawerCloseBtn" aria-label="Close">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="contact-card-title">Questions? Message the Landlord</div>
+      <div class="contact-form-group">
+        <label class="form-label">Your Name</label>
+        <input type="text" class="form-input" id="inqName" placeholder="Full name">
+      </div>
+      <div class="contact-form-group">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-input" id="inqEmail" placeholder="your@email.com">
+      </div>
+      <div class="contact-form-group">
+        <label class="form-label">Phone (optional)</label>
+        <input type="tel" class="form-input" id="inqPhone" placeholder="(555) 000-0000">
+      </div>
+      <div class="contact-form-group">
+        <label class="form-label">Message</label>
+        <textarea class="form-textarea" id="inqMessage" rows="3" maxlength="1500" placeholder="I'm interested in this property and have a few questions…"></textarea>
+        <div style="text-align:right;font-size:11px;color:#8892a2;margin-top:4px"><span id="inqCharCount">0</span> / 1500</div>
+        <div style="font-size:11px;color:#8892a2;margin-top:2px">Plain text only — no links or URLs.</div>
+      </div>
+      <button class="btn btn-primary btn-full" id="sendInquiryBtn">
+        <i class="fas fa-paper-plane"></i> Send Message
+      </button>
+    </div><!-- /.contact-card -->
+  </div><!-- /.detail-sidebar -->
+
+</div><!-- /.detail-layout -->
+  </div><!-- /.container -->
+</div><!-- /.property-detail -->
+
+<!-- ── Footer ── -->
+
+<div id="site-footer"></div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Leaflet loaded lazily via IntersectionObserver in renderMap() -->
+
+<script type="module">
+import { supabase, buildApplyURL, incrementCounter, getSession } from './js/cp-api.js';
+import { updateNav as _updateNav } from './js/cp-api.js';
+
+// Extended nav init — wires both navAuthLink and drawerAuthLink, populates contacts
+async function updateNav() {
+  await _updateNav();
+  // Wire drawerAuthLink to match navAuthLink after _updateNav resolves
+  const navLink    = document.getElementById('navAuthLink');
+  const drawerLink = document.getElementById('drawerAuthLink');
+  if (navLink && drawerLink) {
+    drawerLink.href = navLink.href;
+    drawerLink.textContent = navLink.textContent;
+  }
+  // Populate CONFIG-driven contacts
+  if (window.CONFIG) {
+    const df = document.getElementById('drawerFooterEmail');
+    if (df) { df.href = 'mailto:' + CONFIG.COMPANY_EMAIL; df.textContent = CONFIG.COMPANY_EMAIL; }
+    document.querySelectorAll('[data-cfg-email]').forEach(el => { el.href = 'mailto:' + CONFIG.COMPANY_EMAIL; el.textContent = CONFIG.COMPANY_EMAIL; });
+    document.querySelectorAll('[data-cfg-phone]').forEach(el => { el.href = 'tel:' + CONFIG.COMPANY_PHONE.replace(/\D/g,''); el.textContent = CONFIG.COMPANY_PHONE; });
+  }
+}
+
+updateNav();
+
+const params     = new URLSearchParams(window.location.search);
+const propertyId = params.get('id');
+const isPreview  = params.get('preview') === 'true';
+
+if (!propertyId && !isPreview) {
+  // Show an error toast then redirect to the listings page
+  if (window.CP && window.CP.UI) {
+    window.CP.UI.toast('Property not found.', 'error');
+    setTimeout(() => { window.location.href = '/listings.html'; }, 800);
+  } else {
+    window.location.href = '/listings.html';
+  }
+}
+
+let currentProperty = null;
+let photoIndex      = 0;
+let allPhotos       = [];
+const savedIds = new Set(JSON.parse(localStorage.getItem('cp_saved') || '[]'));
+
+if (isPreview) {
+  // ── Preview mode — load from sessionStorage ──
+  const raw = sessionStorage.getItem('cp_listing_preview');
+  if (!raw) { window.location.href = '/index.html'; } else {
+    const previewProp = JSON.parse(raw);
+    // Inject preview banner
+    const banner = document.createElement('div');
+    banner.id = 'previewBanner';
+    banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#f59e0b;color:#0a1628;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;box-shadow:0 2px 12px rgba(0,0,0,0.2);font-family:var(--font-body,sans-serif);font-size:14px;font-weight:600';
+    banner.innerHTML = `
+      <span><i class="fas fa-eye" style="margin-right:6px"></i>Preview Mode — This listing has not been published yet.</span>
+      <button onclick="history.back()" style="background:#0a1628;color:#f59e0b;border:none;border-radius:6px;padding:6px 14px;font-size:13px;font-weight:700;cursor:pointer">← Back to Editor</button>`;
+    document.body.prepend(banner);
+    document.body.style.paddingTop = '48px';
+    currentProperty = previewProp;
+    renderProperty(previewProp);
+    // Disable apply buttons in preview mode
+    requestAnimationFrame(() => {
+      ['applyBtn','mobApplyBtn'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.href = '#';
+          el.style.pointerEvents = 'none';
+          el.style.opacity = '0.5';
+          el.title = 'Apply button disabled in preview mode';
+          el.addEventListener('click', e => e.preventDefault());
+        }
+      });
+    });
+  }
+} else {
+  loadProperty(propertyId);
+}
+
+async function loadProperty(id) {
+  try {
+    const { data: prop, error } = await supabase
+      .from('properties')
+      .select('*, landlords(id, user_id, business_name, contact_name, avatar_url, tagline, verified)')
+      .eq('id', id)
+      .single();
+    if (error || !prop) throw new Error('Not found');
+
+    // Guard non-active listings from public view
+    if (prop.status !== 'active') {
+      const session    = await getSession();
+      const viewerId   = session?.user?.id || null;
+      const ownerId    = prop.landlords?.user_id || null;
+      const isOwner    = viewerId && ownerId && viewerId === ownerId;
+      if (!isOwner) {
+        renderUnavailable(prop.status);
+        return;
+      }
+    }
+
+    currentProperty = prop;
+    await incrementCounter('properties', id, 'views_count');
+    renderProperty(prop);
+  } catch(e) {
+    showToast('Property not found.', 'error');
+    setTimeout(() => window.location.href = '/index.html', 2000);
+  }
+}
+
+function renderUnavailable(status) {
+  document.title = 'Listing Unavailable — Choice Properties';
+  document.getElementById('gallery').style.display = 'none';
+  document.querySelector('.property-detail').innerHTML = `
+    <div class="container" style="padding:80px 16px;text-align:center;max-width:540px;margin:0 auto">
+      <div style="font-size:48px;margin-bottom:16px;color:var(--color-brand)"><i class="fas fa-house-circle-exclamation"></i></div>
+      <h1 style="font-size:1.5rem;font-weight:700;color:var(--ink);margin-bottom:12px">
+        This listing is not currently available.
+      </h1>
+      <p style="color:var(--muted);font-size:15px;margin-bottom:32px">
+        ${status === 'rented'
+          ? 'This property has already been rented.'
+          : 'This listing has been paused or removed by the landlord.'}
+      </p>
+      <a href="/index.html" class="btn btn-primary" style="display:inline-block">
+        Browse All Listings
+      </a>
+    </div>`;
+}
+
+/* ── Amenity icon helpers ── */
+function amenityIcon(text) {
+  const t = text.toLowerCase();
+  if (/wi.?fi|internet|wireless/.test(t))              return 'fa-wifi';
+  if (/gym|fitness|workout/.test(t))                   return 'fa-dumbbell';
+  if (/pool|swimming/.test(t))                         return 'fa-water-ladder';
+  if (/air.?cond|a\/c|cooling|central air/.test(t))   return 'fa-snowflake';
+  if (/\bheat\b|furnace|radiant/.test(t))              return 'fa-fire';
+  if (/laundry|washer|dryer/.test(t))                  return 'fa-shirt';
+  if (/dishwasher/.test(t))                            return 'fa-sink';
+  if (/parking|garage|driveway/.test(t))               return 'fa-car-side';
+  if (/pet|dog|cat/.test(t))                           return 'fa-paw';
+  if (/balcony|patio|deck|terrace/.test(t))            return 'fa-umbrella-beach';
+  if (/storage|closet/.test(t))                        return 'fa-box';
+  if (/elevator|lift/.test(t))                         return 'fa-elevator';
+  if (/security|camera|doorbell|alarm/.test(t))        return 'fa-shield-halved';
+  if (/hardwood|flooring/.test(t))                     return 'fa-layer-group';
+  if (/microwave|oven|stove|range/.test(t))            return 'fa-utensils';
+  if (/refrigerator|fridge/.test(t))                   return 'fa-temperature-low';
+  if (/smoke|carbon monoxide/.test(t))                 return 'fa-triangle-exclamation';
+  if (/cable|tv|television/.test(t))                   return 'fa-tv';
+  if (/furnish|furniture/.test(t))                     return 'fa-couch';
+  if (/yard|garden|lawn|outdoor/.test(t))              return 'fa-seedling';
+  if (/wheel|accessible|handicap/.test(t))             return 'fa-wheelchair';
+  if (/concierge|doorman/.test(t))                     return 'fa-user-tie';
+  if (/solar|green|eco/.test(t))                       return 'fa-leaf';
+  if (/rooftop|roof/.test(t))                          return 'fa-building';
+  return 'fa-circle-check';
+}
+function amenityIconColor(text) {
+  const t = text.toLowerCase();
+  if (/wi.?fi|internet|wireless|cable|tv/.test(t))     return 'icon-sky';
+  if (/pool|swimming|balcony|patio|deck|yard/.test(t)) return 'icon-teal';
+  if (/gym|fitness|workout/.test(t))                   return 'icon-purple';
+  if (/pet|dog|cat/.test(t))                           return 'icon-rose';
+  if (/solar|green|eco|yard|garden|lawn/.test(t))      return 'icon-green';
+  if (/smoke|carbon|alarm|security/.test(t))           return 'icon-amber';
+  return '';
+}
+
+function renderProperty(p) {
+  document.title = `${p.title} — Choice Properties`;
+
+  // OG meta
+  const ogImg  = CONFIG.img(p.photo_urls?.[0] || '', 'og') || '/assets/placeholder-property.jpg';
+  const ogDesc = `${p.bedrooms === 0 ? 'Studio' : (p.bedrooms + ' bed')} · ${p.bathrooms} bath · $${p.monthly_rent.toLocaleString()}/mo · ${p.address}, ${p.city}, ${p.state}`;
+  ['ogTitle','twTitle'].forEach(id => setMeta(id, `${p.title} — Choice Properties`));
+  ['ogDescription','twDescription'].forEach(id => setMeta(id, ogDesc));
+  ['ogImage','twImage'].forEach(id => setMeta(id, ogImg));
+  setMeta('ogUrl', window.location.href);
+  document.querySelector('meta[name="description"]')?.setAttribute('content', ogDesc);
+
+  // ── I-059: Structured data — RealEstateListing schema for Google Rich Results ──
+  // Added: potentialAction (RentalAction), numberOfRooms, floorSize, leaseLength,
+  // amenityFeature, and BreadcrumbList. These fields are required or strongly
+  // recommended for Google's RentalListing rich result eligibility.
+  const sd = document.createElement('script');
+  sd.type = 'application/ld+json';
+  const amenities = [];
+  if (p.parking)      amenities.push({ "@type": "LocationFeatureSpecification", "name": "Parking",        "value": true });
+  if (p.pets_allowed) amenities.push({ "@type": "LocationFeatureSpecification", "name": "Pets Allowed",   "value": true });
+  if (p.laundry)      amenities.push({ "@type": "LocationFeatureSpecification", "name": "Laundry",        "value": p.laundry });
+  if (p.ac)           amenities.push({ "@type": "LocationFeatureSpecification", "name": "Air Conditioning","value": true });
+  sd.textContent = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "RealEstateListing",
+    "name": p.title,
+    "description": p.description || undefined,
+    "url": window.location.href,
+    "image": p.photo_urls?.[0] ? CONFIG.img(p.photo_urls[0], 'og') : undefined,
+    "datePosted": p.created_at ? p.created_at.split('T')[0] : undefined,
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": p.address,
+      "addressLocality": p.city,
+      "addressRegion": p.state,
+      "postalCode": p.zip || undefined,
+      "addressCountry": "US"
+    },
+    "geo": (p.lat && p.lng) ? {
+      "@type": "GeoCoordinates",
+      "latitude": p.lat,
+      "longitude": p.lng
+    } : undefined,
+    "offers": {
+      "@type": "Offer",
+      "price": p.monthly_rent,
+      "priceCurrency": "USD",
+      "availability": "https://schema.org/InStock",
+      "priceSpecification": {
+        "@type": "UnitPriceSpecification",
+        "price": p.monthly_rent,
+        "priceCurrency": "USD",
+        "unitText": "MONTH"
+      }
+    },
+    "numberOfRooms": p.bedrooms || undefined,
+    "numberOfBathroomsTotal": p.bathrooms || undefined,
+    "floorSize": p.sqft ? {
+      "@type": "QuantitativeValue",
+      "value": p.sqft,
+      "unitCode": "FTK"
+    } : undefined,
+    "amenityFeature": amenities.length ? amenities : undefined,
+    "potentialAction": {
+      "@type": "RentAction",
+      "target": window.location.origin + "/apply.html?property=" + (p.id || "")
+    }
+  });
+  document.head.appendChild(sd);
+
+  // BreadcrumbList structured data
+  const bcSd = document.createElement('script');
+  bcSd.type = 'application/ld+json';
+  bcSd.textContent = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home",     "item": window.location.origin + "/" },
+      { "@type": "ListItem", "position": 2, "name": "Listings", "item": window.location.origin + "/listings.html" },
+      { "@type": "ListItem", "position": 3, "name": p.title,    "item": window.location.href }
+    ]
+  });
+  document.head.appendChild(bcSd);
+  // ── End I-059 ─────────────────────────────────────────────
+
+  document.getElementById('breadcrumbCity').textContent = `${p.city}, ${p.state}`;
+  const bcGroup = document.getElementById('breadcrumbTitleGroup');
+  const bcTitle = document.getElementById('breadcrumbTitle');
+  if (bcTitle && bcGroup) { bcTitle.textContent = p.title; bcGroup.style.display = ''; }
+
+  // Gallery
+  allPhotos = p.photo_urls?.length ? p.photo_urls : ['/assets/placeholder-property.jpg'];
+  renderGallery(allPhotos);
+
+  // Header
+  document.getElementById('detailPrice').innerHTML = `$${p.monthly_rent.toLocaleString()}<span>/month</span>`;
+  document.getElementById('detailTitle').textContent = p.title;
+  document.getElementById('detailAddress').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${p.address}, ${p.city}, ${p.state} ${p.zip || ''}`;
+
+  // Listed-by attribution
+  if (p.landlords) {
+    const ll = p.landlords;
+    const name = ll.business_name || ll.contact_name;
+    const attr = document.createElement('div');
+    attr.className = 'detail-listed-by';
+    attr.innerHTML = `<i class="fas fa-user"></i> Listed by <span>${name}</span>`;
+    document.getElementById('detailAddress').insertAdjacentElement('afterend', attr);
+  }
+
+  // Meta row
+  const metas = [];
+  if (p.bedrooms != null) metas.push({ label:'Bedrooms', value: p.bedrooms === 0 ? 'Studio' : p.bedrooms, icon:'fa-bed' });
+  if (p.bathrooms)        metas.push({ label:'Bathrooms', value: p.bathrooms, icon:'fa-bath' });
+  if (p.square_footage)   metas.push({ label:'Sq. Ft.', value: p.square_footage.toLocaleString(), icon:'fa-ruler-combined' });
+  if (p.property_type)    metas.push({ label:'Type', value: capitalize(p.property_type), icon:'fa-home' });
+  if (p.pets_allowed != null) metas.push({ label:'Pets', value: p.pets_allowed ? 'Allowed' : 'No Pets', icon:'fa-paw' });
+  document.getElementById('detailMeta').innerHTML = metas.map(m => `
+    <div class="detail-meta-item">
+      <div class="detail-meta-icon"><i class="fas ${m.icon}"></i></div>
+      <div class="detail-meta-text">
+        <div class="detail-meta-label">${m.label}</div>
+        <div class="detail-meta-value">${m.value}</div>
+      </div>
+    </div>`).join('');
+
+  const descEl = document.getElementById('detailDesc');
+  const descText = p.description || 'No additional description provided.';
+  const descParas = descText.split(/\n+/).map(s => s.trim()).filter(Boolean);
+  descEl.innerHTML = descParas.map(s => `<p>${s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</p>`).join('');
+  if (descText.length > 300) {
+    descEl.classList.add('truncated');
+    const rmBtn = document.createElement('button');
+    rmBtn.className = 'detail-read-more';
+    rmBtn.innerHTML = '<i class="fas fa-chevron-down" style="font-size:11px"></i> Read more';
+    rmBtn.addEventListener('click', () => {
+      descEl.classList.remove('truncated');
+      rmBtn.remove();
+    });
+    descEl.insertAdjacentElement('afterend', rmBtn);
+  }
+
+  let hasAmenities = false, hasUtilities = false, hasLease = false;
+
+  if (p.amenities?.length) {
+    hasAmenities = true;
+    document.getElementById('amenitiesGrid').innerHTML = p.amenities.map(a =>
+      `<div class="amenity-item"><i class="fas ${amenityIcon(a)} ${amenityIconColor(a)}"></i>${a}</div>`).join('');
+  }
+
+  const utilRows = [];
+  if (p.utilities_included?.length) utilRows.push(...p.utilities_included.map(u =>
+    `<div class="amenity-item"><i class="fas fa-bolt icon-amber"></i>${u} Included</div>`));
+  if (p.parking) utilRows.push(`<div class="amenity-item"><i class="fas fa-car"></i>Parking: ${p.parking}</div>`);
+  if (utilRows.length) {
+    hasUtilities = true;
+    document.getElementById('utilitiesGrid').innerHTML = utilRows.join('');
+  }
+
+  const leaseItems = [];
+  if (p.lease_terms?.length) leaseItems.push(`<div class="amenity-item"><i class="fas fa-file-contract"></i>${p.lease_terms.join(', ')}</div>`);
+  if (p.security_deposit) leaseItems.push(`<div class="amenity-item"><i class="fas fa-shield-alt"></i>Deposit: $${p.security_deposit.toLocaleString()}</div>`);
+  if (p.showing_instructions) leaseItems.push(`<div class="amenity-item" style="grid-column:1/-1"><i class="fas fa-key"></i><span><strong>Showings:</strong> ${p.showing_instructions}</span></div>`);
+  if (leaseItems.length) {
+    hasLease = true;
+    document.getElementById('leaseGrid').innerHTML = leaseItems.join('');
+  }
+
+  // Show tabbed section and configure visible tabs
+  if (hasAmenities || hasUtilities || hasLease) {
+    document.getElementById('detailTabsSection').style.display = '';
+    const tabConfig = [
+      { tabId: 'tabAmenities', panelId: 'panelAmenities', has: hasAmenities },
+      { tabId: 'tabUtilities', panelId: 'panelUtilities', has: hasUtilities },
+      { tabId: 'tabLease',     panelId: 'panelLease',     has: hasLease     },
+    ];
+    let firstActive = null;
+    tabConfig.forEach(({ tabId, panelId, has }) => {
+      const tabEl   = document.getElementById(tabId);
+      const panelEl = document.getElementById(panelId);
+      if (has) {
+        tabEl.style.display = '';
+        if (!firstActive) firstActive = { tabEl, panelEl };
+      } else {
+        tabEl.style.display = 'none';
+        panelEl.classList.remove('active');
+      }
+    });
+    if (firstActive) {
+      document.querySelectorAll('.detail-tab').forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
+      document.querySelectorAll('.detail-tab-panel').forEach(pl => pl.classList.remove('active'));
+      firstActive.tabEl.classList.add('active');
+      firstActive.tabEl.setAttribute('aria-selected', 'true');
+      firstActive.panelEl.classList.add('active');
+    }
+  }
+
+  // Map — Leaflet if lat/lng, fallback to Google embed
+  renderMap(p);
+
+  // Open in Maps button
+  const mapOpenBtn = document.getElementById('mapOpenBtn');
+  if (mapOpenBtn) {
+    const mapAddr = encodeURIComponent(`${p.address}, ${p.city}, ${p.state} ${p.zip || ''}`);
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    mapOpenBtn.href = isIOS
+      ? `maps://maps.apple.com/?q=${mapAddr}`
+      : `https://maps.google.com/maps?q=${mapAddr}`;
+    mapOpenBtn.style.display = '';
+  }
+
+  const availNow = !p.available_date || new Date(p.available_date) <= new Date();
+
+  // Sidebar
+  document.getElementById('sidebarPrice').innerHTML = `$${p.monthly_rent.toLocaleString()}<span>/month</span>`;
+  document.getElementById('sidebarAvail').innerHTML = `<i class="fas fa-circle" style="color:${availNow?'var(--color-success)':'var(--gold)'}"></i> ${availNow ? 'Available Now' : 'Available ' + formatDate(p.available_date)}`;
+  document.getElementById('sidebarRent').textContent    = `$${p.monthly_rent.toLocaleString()}`;
+  document.getElementById('sidebarDeposit').textContent = p.security_deposit ? `$${p.security_deposit.toLocaleString()}` : 'Contact landlord';
+  document.getElementById('sidebarFee').textContent     = (p.application_fee != null && p.application_fee > 0) ? `$${p.application_fee}` : 'Free';
+  if (p.available_date) {
+    document.getElementById('sidebarMoveInRow').style.display = '';
+    document.getElementById('sidebarMoveIn').textContent = formatDate(p.available_date);
+  }
+
+  // Landlord card
+  if (p.landlords) {
+    const ll = p.landlords;
+    const name = ll.business_name || ll.contact_name;
+    const card = document.getElementById('landlordCard');
+    card.style.display = 'flex';
+    document.getElementById('landlordName').textContent = name;
+    if (ll.tagline) document.getElementById('landlordTagline').textContent = ll.tagline;
+    const avatarEl = document.getElementById('landlordAvatar');
+    if (ll.avatar_url) avatarEl.innerHTML = `<img src="${CONFIG.img(ll.avatar_url,'avatar')}" alt="${name}" loading="lazy">`;
+    else avatarEl.textContent = name.charAt(0).toUpperCase();
+    if (ll.verified) document.getElementById('landlordVerified').style.display = 'inline';
+  }
+
+  // Apply button — build URL with full property context for form prefill
+  const applyURL = buildApplyURL(p);
+  document.getElementById('applyBtn').href = applyURL;
+
+  // Guard apply button for non-active listings
+  if (p.status !== 'active') {
+    const applyBtn = document.getElementById('applyBtn');
+    applyBtn.removeAttribute('href');
+    applyBtn.style.pointerEvents = 'none';
+    applyBtn.style.opacity       = '0.5';
+    applyBtn.style.cursor        = 'not-allowed';
+    applyBtn.innerHTML = `<i class="fas fa-ban" style="font-size:14px"></i> ${p.status === 'rented' ? 'No Longer Available' : 'Not Currently Available'}`;
+    document.getElementById('sidebarAvail').innerHTML = `<i class="fas fa-circle" style="color:#c0392b"></i> ${p.status === 'rented' ? 'Rented' : 'Unavailable'}`;
+  }
+
+  // Mobile sticky Apply bar — only for active listings
+  if (p.status === 'active') {
+    document.getElementById('mobBarRent').textContent = `$${p.monthly_rent.toLocaleString()}/mo`;
+    document.getElementById('mobApplyBtn').href       = applyURL;
+    document.getElementById('mobile-apply-bar').classList.add('active');
+    document.body.classList.add('mob-bar-active');
+  }
+
+  // Save button state
+  const saveBtn = document.getElementById('savePropBtn');
+  if (savedIds.has(p.id)) saveBtn.innerHTML = '<i class="fas fa-heart" style="color:var(--crimson)"></i> Saved';
+  saveBtn.addEventListener('click', () => toggleSave(p.id, saveBtn));
+}
+
+/* ── Leaflet mini-map (lazy-loaded via IntersectionObserver) ── */
+// M-10: Leaflet CSS+JS (~180KB gzipped) is only injected when the map
+// container scrolls into the viewport, saving bandwidth on every page visit.
+const LEAFLET_CSS = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';
+const LEAFLET_JS  = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
+
+function loadLeaflet() {
+  return new Promise((resolve, reject) => {
+    if (window.L) { resolve(); return; }
+    // Inject CSS first (non-blocking)
+    if (!document.querySelector(`link[href="${LEAFLET_CSS}"]`)) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = LEAFLET_CSS;
+      link.crossOrigin = 'anonymous';
+      document.head.appendChild(link);
+    }
+    // Inject JS and resolve when loaded
+    const script = document.createElement('script');
+    script.src = LEAFLET_JS;
+    script.crossOrigin = 'anonymous';
+    script.onload = resolve;
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+}
+
+function _initLeafletMap(p) {
+  const container = document.getElementById('mapContainer');
+  const lat = parseFloat(p.lat);
+  const lng = parseFloat(p.lng);
+  container.innerHTML = '<div id="propertyMiniMap"></div>';
+  const map = L.map('propertyMiniMap', { zoomControl: true, scrollWheelZoom: false }).setView([lat, lng], 15);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
+  const icon = L.divIcon({
+    className: '',
+    html: `<div style="background:#0e0e0f;color:white;padding:6px 12px;border-radius:20px;font-weight:700;font-size:12px;font-family:'Plus Jakarta Sans',sans-serif;white-space:nowrap;border:2px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3)">$${p.monthly_rent.toLocaleString()}/mo</div>`,
+    iconAnchor: [45, 16], iconSize: [90, 32]
+  });
+  L.marker([lat, lng], { icon }).addTo(map).bindPopup(`<b>${p.title}</b><br>${p.address}`);
+}
+
+function renderMap(p) {
+  const container = document.getElementById('mapContainer');
+  if (p.lat && p.lng) {
+    const lat = parseFloat(p.lat);
+    const lng = parseFloat(p.lng);
+    if (!isNaN(lat) && !isNaN(lng)) {
+      // Use IntersectionObserver to defer Leaflet load until map is in viewport
+      const observer = new IntersectionObserver((entries, obs) => {
+        if (!entries[0].isIntersecting) return;
+        obs.disconnect();
+        loadLeaflet()
+          .then(() => _initLeafletMap(p))
+          .catch(() => {
+            // Leaflet failed to load — fall back to Google embed
+            const mapAddr = encodeURIComponent(`${p.address}, ${p.city}, ${p.state} ${p.zip}`);
+            container.innerHTML = `<iframe src="https://maps.google.com/maps?q=${mapAddr}&output=embed&z=15" title="Property location" loading="lazy" style="width:100%;height:100%;border:none"></iframe>`;
+          });
+      }, { rootMargin: '200px' });
+      observer.observe(container);
+      return;
+    }
+  }
+  // Fallback: Google embed (no lat/lng available)
+  const mapAddr = encodeURIComponent(`${p.address}, ${p.city}, ${p.state} ${p.zip}`);
+  document.getElementById('mapAddressLabel').textContent = `${p.address}, ${p.city}`;
+  container.innerHTML = `<iframe src="https://maps.google.com/maps?q=${mapAddr}&output=embed&z=15" title="Property location" loading="lazy" style="width:100%;height:100%;border:none"></iframe>`;
+}
+
+/* ── Gallery Mosaic ── */
+function renderGallery(photos) {
+  photoIndex = 0;
+  const mainImg    = document.getElementById('mosaicMainImg');
+  const mosaicMain = document.getElementById('mosaicMain');
+  const mosaicSide = document.getElementById('mosaicSide');
+  const expandBtn  = document.getElementById('mosaicExpandBtn');
+  const mobileCount = document.getElementById('mosaicMobileCount');
+  const prevBtn    = document.getElementById('mosaicPrev');
+  const nextBtn    = document.getElementById('mosaicNext');
+
+  // Remove skeleton once we have real photos to show
+  document.getElementById('gallery').classList.remove('skeleton-loading');
+
+  // Hero image — LCP candidate, load at high priority with srcset for retina
+  mainImg.src    = CONFIG.img(photos[0], 'gallery');
+  mainImg.srcset = `${CONFIG.img(photos[0], 'card')} 600w, ${CONFIG.img(photos[0], 'gallery')} 1200w, ${CONFIG.img(photos[0], 'gallery_2x')} 2400w`;
+  mainImg.sizes  = '(max-width: 768px) 100vw, (max-width: 1280px) 65vw, 55vw';
+  mainImg.alt    = 'Property photo 1';
+
+  // LQIP blur-up for hero image — tiny blurred placeholder fades out once full image loads
+  const heroLqip = lqipUrl(photos[0]);
+  if (heroLqip) {
+    const lqBg = document.createElement('div');
+    lqBg.className = 'lqip-bg';
+    lqBg.style.backgroundImage = `url('${heroLqip}')`;
+    mosaicMain.insertBefore(lqBg, mainImg);
+    const fadeLqip = () => lqBg.classList.add('faded');
+    mainImg.addEventListener('load', fadeLqip, { once: true });
+    if (mainImg.complete && mainImg.naturalWidth > 0) fadeLqip();
+  }
+
+  mosaicMain.addEventListener('click', () => openLightbox(0));
+
+  // Side 2×2 grid — use gallery preset for crisp quality, lazy-load each cell
+  const sidePanels = photos.slice(1, 5);
+  if (sidePanels.length > 0) {
+    mosaicSide.innerHTML = sidePanels.map((url, i) => {
+      const idx = i + 1;
+      const isLast = (i === sidePanels.length - 1) && (photos.length > 5);
+      const remaining = photos.length - 5;
+      const lqUrl = lqipUrl(url);
+      return `
+        <div class="mosaic-cell" data-idx="${idx}">
+          ${lqUrl ? `<div class="lqip-bg" style="background-image:url('${lqUrl}')"></div>` : ''}
+          <img src="${CONFIG.img(url,'gallery')}"
+               srcset="${CONFIG.img(url,'gallery')} 1x, ${CONFIG.img(url,'gallery_2x')} 2x"
+               sizes="(max-width: 768px) 50vw, 25vw"
+               alt="Property photo ${idx+1}"
+               loading="${i === 0 ? 'eager' : 'lazy'}"
+               ${i === 0 ? 'fetchpriority="high"' : ''}
+               decoding="async">
+          ${isLast ? `
+            <div class="mosaic-cell-overlay">
+              <span class="mosaic-overlay-icon"><i class="fas fa-images"></i></span>
+              <span class="mosaic-overlay-label">+${remaining} more</span>
+            </div>` : ''}
+        </div>`;
+    }).join('');
+    // Fade out each cell's LQIP placeholder once its image loads
+    mosaicSide.querySelectorAll('.mosaic-cell').forEach(cell => {
+      cell.addEventListener('click', () => openLightbox(parseInt(cell.dataset.idx)));
+      const img = cell.querySelector('img');
+      const bg  = cell.querySelector('.lqip-bg');
+      if (img && bg) {
+        const fadeBg = () => bg.classList.add('faded');
+        img.addEventListener('load', fadeBg, { once: true });
+        if (img.complete && img.naturalWidth > 0) fadeBg();
+      }
+    });
+  } else {
+    mosaicSide.style.display = 'none';
+    document.getElementById('gallery').style.gridTemplateColumns = '1fr';
+  }
+
+  expandBtn.innerHTML = `<i class="fas fa-th-large"></i> See All Photos <span class="mosaic-photo-count">${photos.length}</span>`;
+  expandBtn.addEventListener('click', () => openLightbox(0));
+
+  if (mobileCount) mobileCount.textContent = `1 / ${photos.length}`;
+  prevBtn.addEventListener('click', () => showPhoto((photoIndex - 1 + photos.length) % photos.length));
+  nextBtn.addEventListener('click', () => showPhoto((photoIndex + 1) % photos.length));
+
+  // Touch swipe on mosaic (mobile carousel) — velocity-aware
+  let touchX = 0, touchT = 0;
+  mosaicMain.addEventListener('touchstart', e => {
+    touchX = e.touches[0].clientX;
+    touchT = Date.now();
+  }, { passive: true });
+  mosaicMain.addEventListener('touchend', e => {
+    const diff = touchX - e.changedTouches[0].clientX;
+    const dt   = Date.now() - touchT;
+    const vel  = Math.abs(diff) / dt; // px/ms
+    if (Math.abs(diff) > 30 || vel > 0.3) {
+      showPhoto((photoIndex + (diff > 0 ? 1 : -1) + photos.length) % photos.length);
+    }
+  }, { passive: true });
+
+  // Keyboard — lightbox arrows + escape
+  document.addEventListener('keydown', e => {
+    if (document.getElementById('lightbox').classList.contains('open')) {
+      if (e.key === 'ArrowLeft')  lightboxNav(-1);
+      if (e.key === 'ArrowRight') lightboxNav(1);
+      if (e.key === 'Escape')     closeLightbox();
+    }
+  });
+
+  document.getElementById('galleryExpand').addEventListener('click', () => openLightbox(photoIndex));
+
+  // Build thumbnail strip
+  buildGalleryStrip(photos);
+}
+
+/* ── Thumbnail Strip ── */
+function buildGalleryStrip(photos) {
+  const strip = document.getElementById('galleryStrip');
+  if (!strip) return;
+  if (photos.length < 2) { strip.style.display = 'none'; return; }
+
+  strip.innerHTML = photos.map((url, i) => `
+    <button class="gallery-strip-thumb${i === 0 ? ' active' : ''}"
+            data-idx="${i}" role="listitem"
+            aria-label="View photo ${i + 1}" aria-pressed="${i === 0 ? 'true' : 'false'}">
+      <img src="${CONFIG.img(url, 'strip')}"
+           srcset="${CONFIG.img(url, 'strip')} 1x, ${CONFIG.img(url, 'thumb')} 2x"
+           alt="Photo ${i + 1}"
+           loading="${i < 5 ? 'eager' : 'lazy'}"
+           decoding="async">
+    </button>`).join('');
+
+  strip.querySelectorAll('.gallery-strip-thumb').forEach(btn => {
+    btn.addEventListener('click', () => showPhoto(parseInt(btn.dataset.idx)));
+  });
+}
+
+function syncStripActive(idx) {
+  const thumbs = document.querySelectorAll('.gallery-strip-thumb');
+  thumbs.forEach((t, i) => {
+    const active = i === idx;
+    t.classList.toggle('active', active);
+    t.setAttribute('aria-pressed', active ? 'true' : 'false');
+  });
+  const activeThumb = document.querySelector('.gallery-strip-thumb.active');
+  if (activeThumb) {
+    activeThumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }
+}
+
+function showPhoto(idx) {
+  photoIndex = idx;
+  const mainImg = document.getElementById('mosaicMainImg');
+  mainImg.style.opacity = '0';
+  mainImg.style.transition = 'opacity 150ms';
+  setTimeout(() => {
+    mainImg.src    = CONFIG.img(allPhotos[idx], 'gallery');
+    mainImg.srcset = `${CONFIG.img(allPhotos[idx], 'card')} 600w, ${CONFIG.img(allPhotos[idx], 'gallery')} 1200w, ${CONFIG.img(allPhotos[idx], 'gallery_2x')} 2400w`;
+    mainImg.alt    = `Property photo ${idx + 1}`;
+    mainImg.style.opacity = '1';
+  }, 150);
+  const mobileCount = document.getElementById('mosaicMobileCount');
+  if (mobileCount) mobileCount.textContent = `${idx + 1} / ${allPhotos.length}`;
+  syncStripActive(idx);
+}
+
+/* ── Lightbox ── */
+let lightboxThumbsBuilt = false;
+let _lbOpener = null;  // element that opened the lightbox — restored on close
+
+// Focus trap — keep keyboard navigation inside the lightbox while open
+function _lbFocusTrap(e) {
+  const lb = document.getElementById('lightbox');
+  if (!lb.classList.contains('open')) return;
+  const focusable = lb.querySelectorAll(
+    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+  );
+  const first = focusable[0];
+  const last  = focusable[focusable.length - 1];
+  if (e.key === 'Tab') {
+    if (e.shiftKey) {
+      if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+    } else {
+      if (document.activeElement === last)  { e.preventDefault(); first.focus(); }
+    }
+  }
+}
+
+function openLightbox(idx) {
+  _lbOpener = document.activeElement;
+  const lb = document.getElementById('lightbox');
+  lb.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  if (!lightboxThumbsBuilt) {
+    buildLightboxThumbs();
+    lightboxThumbsBuilt = true;
+  }
+  lightboxShow(idx);
+  document.addEventListener('keydown', _lbFocusTrap);
+  // Move keyboard focus into the lightbox for accessibility
+  requestAnimationFrame(() => document.getElementById('lightboxClose').focus());
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+  document.removeEventListener('keydown', _lbFocusTrap);
+  // Return focus to the element that triggered the lightbox
+  if (_lbOpener && typeof _lbOpener.focus === 'function') _lbOpener.focus();
+  _lbOpener = null;
+}
+
+function buildLightboxThumbs() {
+  const thumbsEl = document.getElementById('lightboxThumbs');
+  if (!thumbsEl || !allPhotos.length) return;
+  thumbsEl.innerHTML = allPhotos.map((url, i) =>
+    `<button class="lb-thumb" data-idx="${i}" aria-label="View photo ${i + 1}">
+      <img src="${CONFIG.img(url, 'thumb')}" alt="" loading="lazy" decoding="async">
+    </button>`
+  ).join('');
+  thumbsEl.querySelectorAll('.lb-thumb').forEach(btn => {
+    btn.addEventListener('click', () => lightboxShow(parseInt(btn.dataset.idx)));
+  });
+}
+
+let _lbNavDir = 0;  // -1 = prev, 1 = next, 0 = direct click
+
+function lightboxShow(idx) {
+  photoIndex = idx;
+  const wrap    = document.getElementById('lightboxImgWrap');
+  const img     = document.getElementById('lightboxImg');
+  const spinner = document.getElementById('lbSpinner');
+  const lqipBg  = document.getElementById('lbLqipBg');
+
+  // Directional slide-out animation on previous image
+  if (_lbNavDir !== 0) {
+    const outClass = _lbNavDir > 0 ? 'slide-out-left' : 'slide-out-right';
+    wrap.classList.remove('slide-in-left', 'slide-in-right', 'slide-out-left', 'slide-out-right');
+    wrap.classList.add(outClass);
+  }
+
+  const slideInClass = _lbNavDir > 0 ? 'slide-in-left' : _lbNavDir < 0 ? 'slide-in-right' : null;
+
+  // Show LQIP blur-up while the full image loads
+  if (lqipBg) {
+    const lqip = lqipUrl(allPhotos[idx]);
+    if (lqip) {
+      lqipBg.style.backgroundImage = `url('${lqip}')`;
+      lqipBg.classList.remove('faded');
+      lqipBg.classList.add('visible');
+    } else {
+      lqipBg.classList.remove('visible');
+    }
+  }
+
+  setTimeout(() => {
+    // Hide image and show spinner while new src loads
+    img.classList.add('loading');
+    spinner.classList.add('visible');
+
+    wrap.classList.remove('slide-in-left', 'slide-in-right', 'slide-out-left', 'slide-out-right');
+
+    // Full-quality lightbox image with srcset for retina screens
+    const newSrc = CONFIG.img(allPhotos[idx], 'lightbox');
+    img.src    = newSrc;
+    img.srcset = `${CONFIG.img(allPhotos[idx], 'gallery')} 1200w, ${CONFIG.img(allPhotos[idx], 'gallery_2x')} 2400w, ${CONFIG.img(allPhotos[idx], 'lightbox')} 4000w`;
+    img.sizes  = '100vw';
+    img.alt    = `Property photo ${idx + 1}`;
+
+    const reveal = () => {
+      img.classList.remove('loading');
+      spinner.classList.remove('visible');
+      // Fade out the LQIP once the real image has loaded
+      if (lqipBg) { lqipBg.classList.add('faded'); }
+      if (slideInClass) {
+        wrap.classList.add(slideInClass);
+        // Clean up animation class after it completes
+        const cleanup = () => { wrap.classList.remove(slideInClass); wrap.removeEventListener('animationend', cleanup); };
+        wrap.addEventListener('animationend', cleanup, { once: true });
+      }
+      // Preload surrounding images for instant navigation
+      preloadLightboxAdjacentImages(idx);
+    };
+
+    if (img.complete && img.naturalWidth > 0) {
+      reveal();
+    } else {
+      img.addEventListener('load',  reveal, { once: true });
+      img.addEventListener('error', reveal, { once: true });
+    }
+  }, _lbNavDir !== 0 ? 120 : 0);
+
+  document.getElementById('lightboxCounter').textContent = `${idx + 1} / ${allPhotos.length}`;
+
+  // Sync lightbox filmstrip
+  document.querySelectorAll('.lb-thumb').forEach((t, i) => {
+    t.classList.toggle('active', i === idx);
+  });
+  const activeThumb = document.querySelector('.lb-thumb.active');
+  if (activeThumb) {
+    activeThumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }
+
+  // Also sync the main page thumbnail strip so it tracks lightbox navigation
+  syncStripActive(idx);
+}
+
+function lightboxNav(dir) {
+  _lbNavDir = dir;
+  lightboxShow((photoIndex + dir + allPhotos.length) % allPhotos.length);
+  _lbNavDir = 0;
+}
+
+/* Lightbox swipe support — velocity-aware */
+(function() {
+  let lbTouchX = 0, lbTouchT = 0;
+  const lb = document.getElementById('lightbox');
+  lb.addEventListener('touchstart', e => {
+    lbTouchX = e.touches[0].clientX;
+    lbTouchT = Date.now();
+  }, { passive: true });
+  lb.addEventListener('touchend', e => {
+    const diff = lbTouchX - e.changedTouches[0].clientX;
+    const dt   = Date.now() - lbTouchT;
+    const vel  = Math.abs(diff) / dt; // px/ms
+    if (Math.abs(diff) > 30 || vel > 0.3) lightboxNav(diff > 0 ? 1 : -1);
+  }, { passive: true });
+})();
+
+document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
+document.getElementById('lightboxPrev').addEventListener('click', () => lightboxNav(-1));
+document.getElementById('lightboxNext').addEventListener('click', () => lightboxNav(1));
+document.getElementById('lightbox').addEventListener('click', e => {
+  if (e.target === document.getElementById('lightbox') ||
+      e.target === document.getElementById('lightboxImgWrap')) closeLightbox();
+});
+
+/* ── Inquiry ── */
+document.getElementById('inqMessage').addEventListener('input', function() {
+  document.getElementById('inqCharCount').textContent = this.value.length;
+});
+
+let inquiryCooldown = false;
+document.getElementById('sendInquiryBtn').addEventListener('click', async () => {
+  if (inquiryCooldown) { showToast('Please wait before sending another message.', 'info'); return; }
+
+  const name    = document.getElementById('inqName').value.trim();
+  const email   = document.getElementById('inqEmail').value.trim();
+  const phone   = document.getElementById('inqPhone').value.trim();
+  const message = document.getElementById('inqMessage').value.trim();
+  if (!name || !email || !message) { showToast('Please fill in name, email, and message.', 'error'); return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast('Please enter a valid email address.', 'error'); return; }
+
+  const btn = document.getElementById('sendInquiryBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Sending\u2026';
+
+  // Use CP.Inquiries.submit() so the edge function fires confirmation + landlord emails.
+  const { error } = await CP.Inquiries.submit({
+    property_id:  currentProperty.id,
+    tenant_name:  name,
+    tenant_email: email,
+    tenant_phone: phone || null,
+    message
+  });
+
+  if (error) {
+    showToast('Failed to send. Please try again.', 'error');
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
+  } else {
+    showToast('Message sent! The landlord will be in touch soon.', 'success');
+    btn.innerHTML = '<i class="fas fa-check"></i> Sent!';
+
+    // Clear form fields after successful send
+    document.getElementById('inqName').value    = '';
+    document.getElementById('inqEmail').value   = '';
+    document.getElementById('inqPhone').value   = '';
+    document.getElementById('inqMessage').value = '';
+
+    // 60-second rate limit cooldown
+    inquiryCooldown = true;
+    let secs = 60;
+    const countdown = setInterval(() => {
+      secs--;
+      if (secs <= 0) {
+        clearInterval(countdown);
+        inquiryCooldown = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
+        btn.disabled = false;
+      } else {
+        btn.innerHTML = `<i class="fas fa-clock"></i> Wait ${secs}s`;
+      }
+    }, 1000);
+  }
+});
+
+/* ── Detail Tabs ── */
+document.getElementById('detailTabs')?.addEventListener('click', e => {
+  const tab = e.target.closest('.detail-tab');
+  if (!tab || tab.classList.contains('active')) return;
+  document.querySelectorAll('.detail-tab').forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
+  document.querySelectorAll('.detail-tab-panel').forEach(p => p.classList.remove('active'));
+  tab.classList.add('active');
+  tab.setAttribute('aria-selected', 'true');
+  const panelId = tab.dataset.panel;
+  document.getElementById(panelId)?.classList.add('active');
+});
+
+/* ── Contact Drawer (mobile) ── */
+(function() {
+  const contactCard     = document.getElementById('contactCard');
+  const drawerOverlay   = document.getElementById('contactDrawerOverlay');
+  const mobMsgBtn       = document.getElementById('mobMsgBtn');
+  const drawerCloseBtn  = document.getElementById('contactDrawerCloseBtn');
+
+  function openContactDrawer() {
+    contactCard?.classList.add('drawer-open');
+    drawerOverlay?.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeContactDrawer() {
+    contactCard?.classList.remove('drawer-open');
+    drawerOverlay?.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  mobMsgBtn?.addEventListener('click', openContactDrawer);
+  drawerOverlay?.addEventListener('click', closeContactDrawer);
+  drawerCloseBtn?.addEventListener('click', closeContactDrawer);
+})();
+
+/* ── Share & Save ── */
+window.shareProp = () => {
+  if (navigator.share) navigator.share({ title: currentProperty?.title, url: window.location.href });
+  else { navigator.clipboard.writeText(window.location.href); showToast('Link copied!', 'success'); }
+};
+
+function toggleSave(id, btn) {
+  if (savedIds.has(id)) {
+    savedIds.delete(id); btn.innerHTML = '<i class="far fa-heart"></i> Save';
+  } else {
+    savedIds.add(id); btn.innerHTML = '<i class="fas fa-heart" style="color:var(--crimson)"></i> Saved';
+    showToast('Property saved!', 'success');
+  }
+  localStorage.setItem('cp_saved', JSON.stringify([...savedIds]));
+}
+
+/* ── Mobile Drawer ── */
+/* ── Helpers ── */
+function setMeta(id, val) { document.getElementById(id)?.setAttribute('content', val); }
+function formatDate(str) {
+  // Append T00:00:00 so JS parses as local time, not UTC midnight (avoids day-off bug)
+  const d = new Date(str.includes('T') ? str : str + 'T00:00:00');
+  return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+}
+function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+/* ── LQIP helper — delegates to CP.UI.lqipUrl (defined in cp-api.js) ── */
+function lqipUrl(url) { return CP.UI.lqipUrl(url); }
+
+/* ── Preload ±2 adjacent lightbox images for instant prev/next navigation ── */
+function preloadLightboxAdjacentImages(idx) {
+  const n = allPhotos.length;
+  if (n < 2) return;
+  [-1, 1, -2, 2].forEach(offset => {
+    const i = (idx + offset + n) % n;
+    if (i !== idx) {
+      const pre = new Image();
+      pre.src = CONFIG.img(allPhotos[i], 'lightbox');
+    }
+  });
+}
+
+function showToast(msg, type = 'info') {
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  const icons = { success: 'check-circle', error: 'exclamation-circle', info: 'info-circle' };
+  t.innerHTML = `<i class="fas fa-${icons[type] || 'info-circle'}"></i> ${msg}`;
+  c.appendChild(t);
+  const duration = type === 'error' ? 5000 : 3200;
+  setTimeout(() => {
+    t.style.opacity = '0';
+    t.style.transform = 'translateY(6px) scale(0.97)';
+    t.style.transition = 'all 280ms';
+    setTimeout(() => t.remove(), 280);
+  }, duration);
+}
+
+</script>
+
+<!-- Contact drawer overlay (mobile) -->
+<div class="contact-drawer-overlay" id="contactDrawerOverlay" aria-hidden="true"></div>
+
+<!-- Mobile-only sticky Apply bar — populated by renderProperty() -->
+<div id="mobile-apply-bar" role="complementary" aria-label="Apply for this property">
+  <div class="mob-price">
+    <span>Monthly Rent</span>
+    <strong id="mobBarRent">—</strong>
+  </div>
+  <div class="mob-actions">
+    <button class="mob-msg-btn" id="mobMsgBtn" aria-label="Message landlord">
+      <i class="fas fa-comment-dots"></i>
+    </button>
+    <a href="#" id="mobApplyBtn" class="mob-btn">Apply Now</a>
+  </div>
+</div>
+</body>
+</html>

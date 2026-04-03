@@ -1,0 +1,20 @@
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  X-DNS-Prefetch-Control: off
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https://ik.imagekit.io https://*.supabase.co https://tile.openstreetmap.org https://*.basemaps.cartocdn.com; connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co https://script.google.com https://api.ipify.org https://api.my-ip.io https://ipapi.co https://nominatim.openstreetmap.org https://api.geoapify.com https://upload.imagekit.io https://api.imagekit.io; frame-src https://maps.google.com https://www.google.com; object-src 'none'; base-uri 'self';
+
+/css/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/js/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/config.js
+  Cache-Control: no-cache, no-store, must-revalidate

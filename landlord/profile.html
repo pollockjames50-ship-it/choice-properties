@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="theme-color" content="#006aff">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Landlord Profile — Choice Properties</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+    <meta name="description" id="metaDesc" content="Landlord Profile — Choice Properties Nationwide">
+  <!-- Open Graph -->
+  <meta property="og:type"        content="profile">
+  <meta property="og:site_name"   content="Choice Properties">
+  <meta property="og:title"       id="ogTitle"       content="Landlord Profile — Choice Properties">
+  <meta property="og:description" id="ogDescription" content="View rental listings from this landlord on Choice Properties.">
+  <meta property="og:url"         id="ogUrl"         content="">
+  <meta property="og:image"       id="ogImage"       content="">
+  <meta name="twitter:card"        content="summary">
+  <meta name="twitter:title"       id="twTitle"       content="Landlord Profile">
+  <meta name="twitter:description" id="twDescription" content="View rental listings on Choice Properties.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="stylesheet" href="/assets/fontawesome.css">
+    <link rel="preload" href="/css/main.css?v=1775137055043" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/css/main.css?v=1775137055043"></noscript>
+  <link rel="stylesheet" href="/css/landlord.css?v=1775137055043">
+  <link rel="preload" href="/css/listings.css?v=1775137055043" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/css/listings.css?v=1775137055043"></noscript>
+  <link rel="stylesheet" href="/css/admin.css?v=1775137055043">
+  <link rel="preload" href="/css/mobile.css?v=1775137055043" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/css/mobile.css?v=1775137055043"></noscript>
+  <style>
+    /* ── Profile Hero ─────────────────────────────── */
+    .profile-hero {
+      background: var(--color-ink);
+      padding: var(--space-16) 0 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .profile-hero-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 80% at 10% 50%, rgba(200,146,42,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 60% at 90% 20%, rgba(37,71,133,0.5) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .profile-hero-inner {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 var(--space-6);
+    }
+
+    .profile-card {
+      display: flex;
+      align-items: flex-end;
+      gap: var(--space-8);
+    }
+
+    .profile-avatar-wrap {
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .profile-avatar {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      border: 4px solid var(--color-brand-light);
+      object-fit: cover;
+      background: rgba(14,14,15,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-base);
+      font-size: 52px;
+      font-weight: 700;
+      color: var(--gold-bright);
+    }
+
+    .profile-avatar-fallback {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      border: 4px solid var(--color-brand-light);
+      background: linear-gradient(135deg, rgba(14,14,15,0.7), var(--slate));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-base);
+      font-size: 52px;
+      font-weight: 700;
+      color: var(--gold-bright);
+      flex-shrink: 0;
+    }
+
+    .profile-verified-badge {
+      position: absolute;
+      bottom: 4px;
+      right: 4px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--color-brand-light);
+      border: 3px solid var(--color-ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-ink);
+      font-size: 13px;
+    }
+
+    .profile-info {
+      padding-bottom: var(--space-8);
+      flex: 1;
+      min-width: 0;
+    }
+
+    .profile-name {
+      font-family: var(--font-base);
+      font-size: 38px;
+      font-weight: 700;
+      color: var(--color-surface-raised);
+      line-height: 1.1;
+      margin-bottom: var(--space-2);
+    }
+
+    .profile-tagline {
+      font-size: 16px;
+      color: var(--gold-bright);
+      margin-bottom: var(--space-3);
+      font-style: italic;
+    }
+
+    .profile-contact-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-4);
+      margin-top: var(--space-4);
+    }
+
+    .profile-contact-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      transition: color 200ms;
+    }
+    .profile-contact-item:hover { color: var(--gold-bright); }
+    .profile-contact-item i { color: var(--color-brand-light); width: 14px; text-align: center; }
+
+    .profile-stats-bar {
+      background: rgba(255,255,255,0.06);
+      border-top: 1px solid rgba(255,255,255,0.1);
+      margin-top: var(--space-8);
+    }
+
+    .profile-stats-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 var(--space-6);
+      display: flex;
+      gap: 0;
+    }
+
+    .profile-stat {
+      flex: 1;
+      padding: var(--space-5) var(--space-4);
+      text-align: center;
+      border-right: 1px solid rgba(255,255,255,0.08);
+    }
+    .profile-stat:last-child { border-right: none; }
+
+    .profile-stat-value {
+      font-family: var(--font-base);
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--gold-bright);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .profile-stat-label {
+      font-size: 12px;
+      color: rgba(255,255,255,0.5);
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    /* ── Profile Body ─────────────────────────────── */
+    .profile-body {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: var(--space-10) var(--space-6);
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: var(--space-10);
+      align-items: start;
+    }
+
+    .profile-main-col {}
+
+    .profile-section {
+      margin-bottom: var(--space-8);
+    }
+
+    .profile-section-title {
+      font-family: var(--font-base);
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--color-ink);
+      margin-bottom: var(--space-4);
+      padding-bottom: var(--space-3);
+      border-bottom: 2px solid var(--gold-pale);
+    }
+
+    .profile-bio {
+      font-size: 15px;
+      color: var(--slate);
+      line-height: 1.75;
+    }
+
+    .profile-specialties {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      margin-top: var(--space-3);
+    }
+
+    .specialty-tag {
+      padding: 6px 14px;
+      background: var(--gold-pale);
+      border: 1px solid rgba(200,146,42,0.25);
+      border-radius: 100px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--color-ink);
+    }
+
+    /* ── Sidebar info card ─────────────────────────── */
+    .profile-info-card {
+      background: var(--color-surface-raised);
+      border: 1px solid var(--slate-pale);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      position: sticky;
+      top: calc(var(--nav-h) + var(--space-6));
+    }
+
+    .profile-info-card-header {
+      background: var(--color-ink);
+      padding: var(--space-5) var(--space-6);
+      color: var(--color-surface-raised);
+      font-weight: 600;
+      font-size: 14px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .profile-info-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-4) var(--space-5);
+      border-bottom: 1px solid var(--color-surface-subtle);
+      font-size: 14px;
+    }
+    .profile-info-row:last-child { border-bottom: none; }
+    .profile-info-row i { color: var(--color-brand-light); width: 18px; text-align: center; flex-shrink: 0; }
+    .profile-info-row-label { color: var(--slate-light); font-size: 12px; }
+    .profile-info-row-val { font-weight: 500; color: var(--color-ink); }
+
+    .profile-social-row {
+      display: flex;
+      gap: var(--space-3);
+      padding: var(--space-4) var(--space-5);
+    }
+
+    .profile-social-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      text-decoration: none;
+      transition: all 200ms;
+    }
+    .profile-social-btn.facebook  { background: #e7f0fd; color: #1877f2; }
+    .profile-social-btn.instagram { background: #fde7f3; color: #e1306c; }
+    .profile-social-btn.linkedin  { background: #e7f3fd; color: #0a66c2; }
+    .profile-social-btn.website   { background: var(--gold-pale); color: var(--color-brand-light); }
+    .profile-social-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+
+    .profile-contact-btn {
+      display: block;
+      margin: 0 var(--space-5) var(--space-5);
+      padding: 14px;
+      background: linear-gradient(135deg, var(--color-brand-light), var(--gold-bright));
+      color: var(--color-ink);
+      font-weight: 700;
+      font-size: 15px;
+      border-radius: var(--radius-sm);
+      text-align: center;
+      text-decoration: none;
+      transition: all 200ms;
+    }
+    .profile-contact-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(200,146,42,0.35); }
+
+    /* ── Listings grid ───────────────────────────── */
+    .profile-listings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: var(--space-5);
+    }
+
+    /* ── Responsive ──────────────────────────────── */
+    @media (max-width: 768px) {
+      .profile-card { flex-direction: column; align-items: center; text-align: center; padding-bottom: var(--space-6); }
+      .profile-avatar, .profile-avatar-fallback { width: 110px; height: 110px; font-size: 40px; }
+      .profile-name { font-size: 28px; }
+      .profile-contact-row { justify-content: center; }
+      .profile-stats-inner { flex-wrap: wrap; }
+      .profile-stat { flex: 1 1 50%; }
+      .profile-body { grid-template-columns: 1fr; }
+      .profile-info-card { position: static; }
+      .profile-listings-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+<script defer src="/config.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script type="module" src="/js/cp-api.js"></script>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/index.html" class="nav-logo">
+      <div class="nav-logo-mark">C</div>
+      <div>
+        <div class="nav-logo-text">Choice Properties</div>
+        <div class="nav-logo-sub">Landlord Portal</div>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a href="/index.html" class="nav-link">View Listings →</a>
+      <button class="btn btn-ghost btn-sm" id="signOutBtn"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+    </div>
+  </div>
+</nav>
+
+<!-- Profile Hero -->
+<!-- Landlord Sidebar -->
+<div class="dashboard-layout">
+  <aside class="dashboard-sidebar">
+    <div class="sidebar-section-label">Menu</div>
+    <a href="/landlord/dashboard.html" class="sidebar-nav-item">
+      <i class="fas fa-th-large"></i> Dashboard
+    </a>
+    <a href="/landlord/new-listing.html" class="sidebar-nav-item">
+      <i class="fas fa-plus-circle"></i> Add Listing
+    </a>
+    <a href="/landlord/applications.html" class="sidebar-nav-item">
+      <i class="fas fa-file-alt"></i> Applications
+    </a>
+    <a href="/landlord/inquiries.html" class="sidebar-nav-item">
+      <i class="fas fa-envelope"></i> Inquiries
+    </a>
+    <div class="sidebar-section-label" style="margin-top:var(--s-4)">Account</div>
+    <a href="/landlord/settings.html" class="sidebar-nav-item">
+      <i class="fas fa-cog"></i> Settings
+    </a>
+    <a href="#" class="sidebar-nav-item sidebar-nav-item--active" id="viewProfileSide">
+      <i class="fas fa-id-badge"></i> My Profile
+    </a>
+    <a href="#" class="sidebar-nav-item" id="sideSignOut">
+      <i class="fas fa-sign-out-alt"></i> Sign Out
+    </a>
+    <div style="flex:1"></div>
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar" id="userAvatar">?</div>
+      <div>
+        <div class="sidebar-user-name" id="userName">Loading…</div>
+        <div class="sidebar-user-email" id="userEmail"></div>
+      </div>
+    </div>
+  </aside>
+  <div class="dashboard-main" style="overflow:auto">
+
+<div class="profile-hero">
+  <div class="profile-hero-bg"></div>
+  <div class="profile-hero-inner">
+    <div class="profile-card">
+      <div class="profile-avatar-wrap">
+        <div id="avatarEl" class="profile-avatar-fallback">?</div>
+        <div class="profile-verified-badge" id="verifiedBadge" style="display:none">
+          <i class="fas fa-check"></i>
+        </div>
+      </div>
+      <div class="profile-info">
+        <div class="profile-name" id="profileName">Loading…</div>
+        <div id="accountTypeBadge" style="display:none;margin:6px 0 4px"></div>
+        <div class="profile-tagline" id="profileTagline" style="display:none"></div>
+        <div class="profile-contact-row" id="profileContactRow"></div>
+      </div>
+    </div>
+  </div>
+  <div class="profile-stats-bar">
+    <div class="profile-stats-inner">
+      <div class="profile-stat">
+        <div class="profile-stat-value" id="statListings">—</div>
+        <div class="profile-stat-label">Active Listings</div>
+      </div>
+      <div class="profile-stat">
+        <div class="profile-stat-value" id="statViews">—</div>
+        <div class="profile-stat-label">Total Views</div>
+      </div>
+      <div class="profile-stat">
+        <div class="profile-stat-value" id="statYears">—</div>
+        <div class="profile-stat-label">Years Active</div>
+      </div>
+      <div class="profile-stat">
+        <div class="profile-stat-value" id="statApps">—</div>
+        <div class="profile-stat-label">Applications</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Profile Body -->
+<div style="background:var(--surface);min-height:60vh">
+
+  <!-- Tab navigation (P2-G) -->
+  <div style="max-width:900px;margin:0 auto;padding:0 var(--space-6)">
+    <div style="display:flex;gap:0;border-bottom:2px solid var(--slate-pale);padding-top:var(--space-4)">
+      <a href="/landlord/settings.html" style="padding:10px 22px;font-size:14px;font-weight:600;color:var(--slate);text-decoration:none;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color 150ms">
+        <i class="fas fa-cog" style="margin-right:6px"></i>Settings
+      </a>
+      <a href="#" id="tabProfileSelf" style="padding:10px 22px;font-size:14px;font-weight:700;color:var(--color-brand-light,#006AFF);border-bottom:2px solid var(--color-brand-light,#006AFF);margin-bottom:-2px;text-decoration:none">
+        <i class="fas fa-id-badge" style="margin-right:6px"></i>My Profile
+      </a>
+    </div>
+  </div>
+
+  <div class="profile-body">
+
+    <!-- Main Column -->
+    <div class="profile-main-col">
+
+      <!-- About -->
+      <div class="profile-section" id="bioSection" style="display:none">
+        <div class="profile-section-title">About</div>
+        <div class="profile-bio" id="profileBio"></div>
+      </div>
+
+      <!-- Specialties -->
+      <div class="profile-section" id="specSection" style="display:none">
+        <div class="profile-section-title">Specialties</div>
+        <div class="profile-specialties" id="profileSpecs"></div>
+      </div>
+
+      <!-- Active Listings -->
+      <div class="profile-section">
+        <div class="profile-section-title">Active Listings</div>
+        <div class="profile-listings-grid" id="listingsGrid">
+          <div style="grid-column:1/-1;text-align:center;padding:40px;color:#8892a2">
+            <i class="fas fa-spinner fa-pulse" style="font-size:28px;display:block;margin-bottom:12px"></i>
+            Loading listings…
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Sidebar -->
+    <div>
+      <div class="profile-info-card">
+        <div class="profile-info-card-header">Contact Information</div>
+        <div id="infoRows"></div>
+        <div id="socialRow" class="profile-social-row" style="display:none"></div>
+        <a href="#" class="profile-contact-btn" id="contactBtn" style="display:none">
+          <i class="fas fa-envelope"></i> Send Message
+        </a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-bottom" style="border-top:none;padding-top:0;justify-content:space-between">
+      <a href="/index.html" class="footer-brand-name" style="font-size:18px;text-decoration:none;color:white">Choice Properties</a>
+      <span style="font-size:13px">© 2026 Choice Properties. All rights reserved.</span>
+    </div>
+  </div>
+</footer>
+
+
+<script type="module">
+  import { supabase } from '../js/cp-api.js';
+  import { buildApplyURL } from '../js/cp-api.js';
+
+  // CSP-safe image error handling (inline onerror blocked by Cloudflare CSP nonce policy)
+  document.addEventListener('error', function(e) {
+    var t = e.target;
+    if (t.tagName !== 'IMG') return;
+    if (t.src !== location.origin + '/assets/placeholder-property.jpg') {
+      t.src = '/assets/placeholder-property.jpg';
+    }
+  }, true);
+
+  // Sign out wiring
+  async function doSignOut() {
+    await supabase.auth.signOut();
+    window.location.href = '/landlord/login.html';
+  }
+  document.getElementById('signOutBtn')?.addEventListener('click', doSignOut);
+  document.getElementById('sideSignOut')?.addEventListener('click', doSignOut);
+
+  // Load sidebar user info — only if a landlord is logged in
+  // Public visitors (tenants) can view this page without logging in
+  async function loadSidebarUser() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      // Hide landlord-only sidebar from public visitors
+      const sidebar = document.querySelector('.dashboard-sidebar');
+      if (sidebar) sidebar.style.display = 'none';
+      return;
+    }
+    const { data: profile } = await supabase.from('landlords').select('contact_name,business_name,email,id').eq('user_id', user.id).single();
+    if (profile) {
+      // If a logged-in landlord is viewing their OWN public profile URL,
+      // redirect them to their Settings page (P2-G).
+      if (profile.id === landlordId) {
+        window.location.replace('/landlord/settings.html?tab=profile');
+        return;
+      }
+      if (document.getElementById('userName'))        document.getElementById('userName').textContent        = profile.business_name || profile.contact_name;
+      if (document.getElementById('userEmail'))       document.getElementById('userEmail').textContent       = profile.email;
+      if (document.getElementById('userAvatar'))      document.getElementById('userAvatar').textContent      = (profile.contact_name || '?').charAt(0).toUpperCase();
+      if (document.getElementById('viewProfileSide')) document.getElementById('viewProfileSide').href        = `/landlord/profile.html?id=${profile.id}`;
+    }
+  }
+  loadSidebarUser();
+
+  const params     = new URLSearchParams(window.location.search);
+  const landlordId = params.get('id');
+
+  // Wire tab self-link
+  const tabProfileSelf = document.getElementById('tabProfileSelf');
+  if (tabProfileSelf && landlordId) tabProfileSelf.href = `/landlord/profile.html?id=${landlordId}`;
+
+  if (!landlordId) { window.location.href = '/index.html'; }
+  else { loadProfile(landlordId); }
+
+  async function loadProfile(id) {
+    // Load landlord profile from public view
+    const { data: landlord, error } = await supabase
+      .from('public_landlord_profiles')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error || !landlord) {
+      CP.UI.toast('Profile not found.', 'error');
+      setTimeout(() => window.location.href = '/index.html', 2000);
+      return;
+    }
+
+    renderProfile(landlord);
+
+    // Load their active listings
+    const { data: listings } = await supabase
+      .from('properties')
+      .select('*')
+      .eq('landlord_id', id)
+      .eq('status', 'active')
+      .order('created_at', { ascending: false });
+
+    renderStats(landlord, listings || []);
+    renderListings(listings || []);
+  }
+
+  function renderProfile(l) {
+    const displayName = l.business_name || l.contact_name;
+    document.title = `${displayName} — Choice Properties`;
+
+    // Dynamic OG / social meta tags
+    const setMetaId  = (id, attr, val) => { const el = document.getElementById(id); if (el) el.setAttribute(attr, val); };
+    const setMetaSel = (sel, attr, val) => { const el = document.querySelector(sel); if (el) el.setAttribute(attr, val); };
+    const ogDesc = `${displayName} — Landlord on Choice Properties. Browse their rental listings in Nationwide.`;
+    const ogImg  = CONFIG.img(l.avatar_url || '', 'og') || '/assets/placeholder-property.jpg';
+    setMetaSel('meta[name="description"]', 'content', ogDesc);
+    setMetaId('ogTitle',       'content', `${displayName} — Choice Properties`);
+    setMetaId('ogDescription', 'content', ogDesc);
+    setMetaId('ogUrl',         'content', window.location.href);
+    setMetaId('ogImage',       'content', ogImg);
+    setMetaId('twTitle',       'content', displayName);
+    setMetaId('twDescription', 'content', ogDesc);
+
+    // Avatar
+    const avatarEl = document.getElementById('avatarEl');
+    if (l.avatar_url) {
+      avatarEl.outerHTML = `<img id="avatarEl" class="profile-avatar" src="${CONFIG.img(l.avatar_url,'avatar_lg')}" alt="${displayName}" onerror="this.style.display='none'" loading="lazy">`;
+    } else {
+      avatarEl.textContent = displayName.charAt(0).toUpperCase();
+    }
+
+    // Verified badge
+    if (l.verified) document.getElementById('verifiedBadge').style.display = 'flex';
+
+    // Name
+    document.getElementById('profileName').textContent = displayName;
+
+    // Account type badge
+    if (l.account_type) {
+      const typeLabels = {
+        landlord: { label: 'Landlord', icon: 'fa-home' },
+        property_owner: { label: 'Property Owner', icon: 'fa-building' },
+        realtor: { label: 'Realtor', icon: 'fa-id-badge' },
+        brokerage: { label: 'Brokerage', icon: 'fa-briefcase' },
+        agency: { label: 'Agency', icon: 'fa-user-tie' },
+        llc: { label: 'LLC', icon: 'fa-landmark' },
+        property_management: { label: 'Property Management', icon: 'fa-city' },
+      };
+      const t = typeLabels[l.account_type] || { label: l.account_type, icon: 'fa-user' };
+      const badgeEl = document.getElementById('accountTypeBadge');
+      if (badgeEl) {
+        badgeEl.innerHTML = '<span style="display:inline-flex;align-items:center;gap:6px;background:rgba(212,160,23,0.18);color:#2563eb;border:1px solid rgba(212,160,23,0.35);padding:4px 12px;border-radius:20px;font-size:12.5px;font-weight:700;letter-spacing:.3px;text-transform:uppercase"><i class="fas ' + t.icon + '" style="font-size:11px"></i>' + t.label + '</span>';
+        badgeEl.style.display = '';
+      }
+    }
+
+    // Tagline
+    if (l.tagline) {
+      const tEl = document.getElementById('profileTagline');
+      tEl.textContent = l.tagline;
+      tEl.style.display = '';
+    }
+
+    // Contact row in hero
+    const contacts = [];
+    if (l.website) contacts.push(`<a href="${l.website}" target="_blank" class="profile-contact-item"><i class="fas fa-globe"></i>${l.website.replace(/^https?:\/\//, '')}</a>`);
+    document.getElementById('profileContactRow').innerHTML = contacts.join('');
+
+    // Bio
+    if (l.bio) {
+      document.getElementById('bioSection').style.display = '';
+      document.getElementById('profileBio').textContent = l.bio;
+    }
+
+    // Specialties
+    if (l.specialties?.length) {
+      document.getElementById('specSection').style.display = '';
+      document.getElementById('profileSpecs').innerHTML =
+        l.specialties.map(s => `<span class="specialty-tag">${s}</span>`).join('');
+    }
+
+    // Sidebar info rows
+    const rows = [];
+    if (l.contact_name && l.business_name) rows.push({ icon:'fa-user', label:'Contact', val: l.contact_name });
+    if (l.license_number)   rows.push({ icon:'fa-id-card', label:'License #', val: l.license_number });
+    if (l.years_experience) rows.push({ icon:'fa-briefcase', label:'Experience', val: `${l.years_experience} years` });
+    const memberSince = new Date(l.created_at).getFullYear();
+    rows.push({ icon:'fa-calendar', label:'Member Since', val: memberSince });
+
+    document.getElementById('infoRows').innerHTML = rows.map(r => `
+      <div class="profile-info-row">
+        <i class="fas ${r.icon}"></i>
+        <div>
+          <div class="profile-info-row-label">${r.label}</div>
+          ${r.href
+            ? `<a href="${r.href}" class="profile-info-row-val" style="text-decoration:none;color:#0e0e0f">${r.val}</a>`
+            : `<div class="profile-info-row-val">${r.val}</div>`}
+        </div>
+      </div>`).join('');
+
+    // Social links
+    const socials = [];
+    if (l.social_facebook)  socials.push(`<a href="${l.social_facebook}" target="_blank" class="profile-social-btn facebook"><i class="fab fa-facebook-f"></i></a>`);
+    if (l.social_instagram)  socials.push(`<a href="${l.social_instagram}" target="_blank" class="profile-social-btn instagram"><i class="fab fa-instagram"></i></a>`);
+    if (l.social_linkedin)   socials.push(`<a href="${l.social_linkedin}" target="_blank" class="profile-social-btn linkedin"><i class="fab fa-linkedin-in"></i></a>`);
+    if (l.website)           socials.push(`<a href="${l.website}" target="_blank" class="profile-social-btn website"><i class="fas fa-globe"></i></a>`);
+
+    if (socials.length) {
+      const sr = document.getElementById('socialRow');
+      sr.innerHTML = socials.join('');
+      sr.style.display = 'flex';
+    }
+
+  }
+
+  function renderStats(l, listings) {
+    const totalViews = listings.reduce((s, p) => s + (p.views_count || 0), 0);
+    const totalApps  = listings.reduce((s, p) => s + (p.applications_count || 0), 0);
+    const yearsActive = l.years_experience || (new Date().getFullYear() - new Date(l.created_at).getFullYear()) || 1;
+
+    document.getElementById('statListings').textContent = listings.length;
+    document.getElementById('statViews').textContent    = totalViews > 999 ? (totalViews/1000).toFixed(1)+'k' : totalViews;
+    document.getElementById('statYears').textContent    = yearsActive;
+    document.getElementById('statApps').textContent     = totalApps;
+  }
+
+  function renderListings(listings) {
+    const grid = document.getElementById('listingsGrid');
+    if (!listings.length) {
+      grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:#8892a2">
+        <i class="fas fa-home" style="font-size:40px;display:block;margin-bottom:12px;opacity:.2;color:#2563eb"></i>
+        <div style="font-weight:600;color:#0e0e0f">No active listings</div>
+        <p style="font-size:14px;margin-top:8px">Check back soon.</p>
+      </div>`;
+      return;
+    }
+
+    grid.innerHTML = listings.map(p => {
+      const photo   = p.photo_urls?.[0] || '/assets/placeholder-property.jpg';
+      const availNow = !p.available_date || new Date(p.available_date) <= new Date();
+      return `
+        <article class="property-card">
+          <a href="/property.html?id=${p.id}" class="property-card-img-link">
+            <div class="property-card-img">
+              <img src="${photo}" alt="${p.title}" loading="lazy">
+              <div class="property-card-badge">
+                <span class="badge badge-amber">${capitalize(p.property_type || 'Property')}</span>
+              </div>
+            </div>
+          </a>
+          <div class="property-card-body">
+            <div class="property-card-price">$${p.monthly_rent.toLocaleString()}<span>/mo</span></div>
+            <a href="/property.html?id=${p.id}" style="text-decoration:none">
+              <div class="property-card-title">${p.title}</div>
+            </a>
+            <div class="property-card-addr">
+              <i class="fas fa-map-marker-alt" style="color:#2563eb;font-size:11px"></i>
+              ${p.address}, ${p.city}
+            </div>
+            <div class="property-card-meta">
+              ${p.bedrooms != null ? `<div class="property-card-meta-item"><i class="fas fa-bed"></i>${p.bedrooms === 0 ? 'Studio' : p.bedrooms + ' Bed'}</div>` : ''}
+              ${p.bathrooms ? `<div class="property-card-meta-item"><i class="fas fa-bath"></i>${p.bathrooms} Bath</div>` : ''}
+              ${p.square_footage ? `<div class="property-card-meta-item"><i class="fas fa-ruler-combined"></i>${p.square_footage.toLocaleString()} sqft</div>` : ''}
+            </div>
+            <div class="property-card-footer">
+              <div class="property-card-avail">
+                <i class="fas fa-circle" style="color:${availNow ? '#1a7f5a' : 'var(--gold)'}"></i>
+                ${availNow ? 'Available Now' : 'Available ' + new Date(p.available_date).toLocaleDateString('en-US',{month:'short',day:'numeric'})}
+              </div>
+              <a href="/property.html?id=${p.id}" class="property-card-apply">
+                View <i class="fas fa-arrow-right" style="font-size:11px"></i>
+              </a>
+            </div>
+          </div>
+        </article>`;
+    }).join('');
+  }
+
+  function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }"></i>${msg}`;
+    c.appendChild(t);
+    setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 300ms'; setTimeout(() => t.remove(), 300); }, 3500);
+  }
+</script>
+
+
+  </div><!-- end dashboard-main -->
+</div><!-- end dashboard-layout -->
+
+<script>
+  const mn = document.getElementById('mainNav') || document.querySelector('.nav');
+  if (mn) window.addEventListener('scroll', () => mn.classList.toggle('scrolled', window.scrollY > 20), { passive: true });
+</script>
+</body>
+</html>

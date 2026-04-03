@@ -1,0 +1,68 @@
+<div class="nav-drawer-overlay" id="drawerOverlay"></div>
+
+<!-- ── Mobile Drawer ── -->
+<nav class="nav-drawer" id="navDrawer">
+  <div class="nav-drawer-header">
+    <a href="/index.html" class="nav-logo">
+      <div class="nav-logo-emblem">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 9.5L12 3L21 9.5V20C21 20.55 20.55 21 20 21H15V15H9V21H4C3.45 21 3 20.55 3 20V9.5Z" fill="white" opacity="0.9"/>
+          <circle cx="12" cy="11" r="2.5" fill="rgba(0,106,255,0.8)"/>
+        </svg>
+      </div>
+      <div class="nav-logo-text-wrap">
+        <div class="nav-logo-name">Choice Properties</div>
+        <div class="nav-logo-tagline">Rental Marketplace</div>
+      </div>
+    </a>
+    <button class="nav-drawer-close" id="drawerClose" aria-label="Close menu">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+  <div class="nav-drawer-body">
+    <a href="/listings.html" class="nav-drawer-link" data-nav-path="/listings.html"><i class="fas fa-home"></i> Browse Listings</a>
+    <a href="/how-to-apply.html" class="nav-drawer-link" data-nav-path="/how-to-apply.html"><i class="fas fa-question-circle"></i> How to Apply</a>
+    <a href="/faq.html" class="nav-drawer-link" data-nav-path="/faq.html"><i class="fas fa-life-ring"></i> FAQ</a>
+    <a href="/apply/dashboard.html" target="_blank" rel="noopener noreferrer" class="nav-drawer-link"><i class="fas fa-file-alt"></i> Track My Application</a>    <a href="/landlord/register.html" class="nav-drawer-link" data-nav-path="/landlord/register.html"><i class="fas fa-user-tie"></i> Landlord Portal</a>
+    <a href="/admin/login.html" class="nav-drawer-link" data-nav-path="/admin/login.html"><i class="fas fa-user-shield"></i> Admin Portal</a>    <div class="nav-drawer-divider"></div>
+    <a href="/how-it-works.html" class="nav-drawer-link" id="drawerListPropertyLink" data-nav-path="/how-it-works.html"><i class="fas fa-building"></i> For Landlords</a>
+    <a href="/about.html" class="nav-drawer-link" data-nav-path="/about.html"><i class="fas fa-info-circle"></i> About Us</a>
+  </div>
+  <div class="nav-drawer-cta">
+    <a href="/landlord/login.html" class="btn btn-primary btn-full" id="drawerAuthLink">Landlord Login</a>
+  </div>
+  <div class="nav-drawer-footer"><a id="drawerFooterEmail" href="mailto:support@choiceproperties.com">support@choiceproperties.com</a></div>
+</nav>
+
+<!-- ── Main Navigation ── -->
+<nav class="nav" id="mainNav">
+  <div class="nav-inner">
+    <a href="/index.html" class="nav-logo">
+      <div class="nav-logo-emblem">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 9.5L12 3L21 9.5V20C21 20.55 20.55 21 20 21H15V15H9V21H4C3.45 21 3 20.55 3 20V9.5Z" fill="white" opacity="0.9"/>
+          <circle cx="12" cy="11" r="2.5" fill="rgba(0,106,255,0.8)"/>
+        </svg>
+      </div>
+      <div class="nav-logo-text-wrap">
+        <div class="nav-logo-name">Choice Properties</div>
+        <div class="nav-logo-tagline">Rental Marketplace</div>
+      </div>
+    </a>
+
+    <div class="nav-links">
+      <a href="/listings.html" class="nav-link" data-nav-path="/listings.html">Browse Listings</a>
+      <a href="/how-to-apply.html" class="nav-link" data-nav-path="/how-to-apply.html">How to Apply</a>
+      <a href="/faq.html" class="nav-link" data-nav-path="/faq.html">FAQ</a>
+      <a href="/apply/dashboard.html" target="_blank" rel="noopener noreferrer" class="nav-link nav-link--track">
+        <i class="fas fa-file-alt" style="font-size:11px"></i> Track Application
+      </a>
+      <a href="/landlord/register.html" class="nav-link nav-link--landlord" data-nav-path="/landlord/register.html">Landlord Portal</a>
+      <a href="/admin/login.html" class="nav-link nav-link--admin" data-nav-path="/admin/login.html">Admin Portal</a>
+    </div>
+
+    <button class="nav-mobile-toggle" id="mobileToggle" aria-label="Open menu" aria-expanded="false" aria-controls="navDrawer">
+      <i class="fas fa-bars"></i>
+    </button>
+  </div>
+</nav>

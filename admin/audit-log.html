@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+  <meta name="theme-color" content="#006aff">
+  <link rel="manifest" href="/manifest.json"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Audit Log — Choice Properties Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <script defer src="/config.js"></script>
+<link rel="preload" href="/css/main.css?v=1775137055043" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/css/main.css?v=1775137055043"></noscript>
+<link rel="stylesheet" href="/assets/fontawesome.css">
+  <link rel="stylesheet" href="/css/admin.css?v=1775137055043">
+  <link rel="preload" href="/css/mobile.css?v=1775137055043" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/css/mobile.css?v=1775137055043"></noscript>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<style>
+  .filter-bar { display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom:20px; }
+  .filter-bar select, .filter-bar input { padding:8px 12px; border:1px solid var(--border,#e2e8f0); border-radius:8px; font-size:.85rem; background:var(--card,#fff); color:var(--text,#1a202c); min-width:160px; }
+  .filter-bar button { padding:8px 16px; border-radius:8px; font-size:.85rem; font-weight:600; cursor:pointer; border:none; }
+  .btn-reset { background:var(--surface,#f7f8fa); color:var(--muted,#8892a2); }
+  .btn-reset:hover { background:var(--border,#e2e8f0); }
+
+  .audit-table { width:100%; border-collapse:collapse; font-size:.83rem; }
+  .audit-table th { text-align:left; padding:10px 14px; font-weight:600; color:var(--muted,#8892a2); border-bottom:2px solid var(--border,#e2e8f0); white-space:nowrap; font-size:.78rem; text-transform:uppercase; letter-spacing:.04em; }
+  .audit-table td { padding:11px 14px; border-bottom:1px solid var(--border,#e2e8f0); vertical-align:top; }
+  .audit-table tr:last-child td { border-bottom:none; }
+  .audit-table tr:hover td { background:var(--surface,#f7f8fa); }
+
+  .action-badge { display:inline-block; padding:2px 9px; border-radius:20px; font-size:.75rem; font-weight:600; white-space:nowrap; }
+  .action-update_status    { background:#eff6ff; color:#1d4ed8; }
+  .action-mark_paid        { background:#f0fdf4; color:#15803d; }
+  .action-mark_movein      { background:#fdf4ff; color:#7e22ce; }
+  .action-generate_lease   { background:#fff7ed; color:#c2410c; }
+  .action-resend_lease     { background:#fff7ed; color:#c2410c; }
+  .action-void_lease       { background:#fef2f2; color:#b91c1c; }
+  .action-tenant_signed_lease    { background:#f0fdf4; color:#15803d; }
+  .action-co_applicant_signed_lease { background:#f0fdf4; color:#15803d; }
+
+  .target-link { color:var(--primary,#006aff); text-decoration:none; font-family:monospace; font-size:.8rem; }
+  .target-link:hover { text-decoration:underline; }
+
+  .meta-cell { max-width:240px; }
+  .meta-pill { display:inline-block; background:var(--surface,#f7f8fa); border:1px solid var(--border,#e2e8f0); border-radius:4px; padding:1px 6px; font-size:.72rem; font-family:monospace; margin:1px 2px 1px 0; white-space:nowrap; }
+
+  .actor-cell { font-size:.78rem; color:var(--muted,#8892a2); }
+  .actor-system { font-style:italic; }
+
+  .time-cell { white-space:nowrap; color:var(--muted,#8892a2); font-size:.78rem; }
+
+  .empty-state { text-align:center; padding:60px 20px; color:var(--muted,#8892a2); }
+  .empty-state i { font-size:2.5rem; margin-bottom:12px; display:block; }
+
+  .pagination { display:flex; gap:8px; align-items:center; justify-content:flex-end; margin-top:20px; font-size:.83rem; }
+  .pagination button { padding:6px 14px; border-radius:8px; border:1px solid var(--border,#e2e8f0); background:var(--card,#fff); cursor:pointer; font-size:.83rem; }
+  .pagination button:disabled { opacity:.4; cursor:not-allowed; }
+  .pagination button:not(:disabled):hover { background:var(--surface,#f7f8fa); }
+  .pagination .page-info { color:var(--muted,#8892a2); padding:0 4px; }
+
+  .loading-row td { text-align:center; color:var(--muted,#8892a2); padding:40px; }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="sidebar" id="adminSidebar">
+  <div class="sidebar-logo"><div class="name">Choice Properties</div><div class="sub">Admin Portal</div></div>
+  <nav>
+    <div class="nav-section">Overview</div>
+    <a class="nav-item" href="dashboard.html"><span class="icon">⊞</span> Dashboard</a>
+    <div class="nav-section">Applications</div>
+    <a class="nav-item" href="applications.html"><span class="icon">📋</span> All Applications</a>
+    <a class="nav-item" href="leases.html"><span class="icon">📄</span> Leases</a>
+    <a class="nav-item" href="move-ins.html"><span class="icon">🏠</span> Move-Ins</a>
+    <a class="nav-item" href="messages.html"><span class="icon">💬</span> Messages</a>
+    <div class="nav-section">Platform</div>
+    <a class="nav-item" href="landlords.html"><span class="icon">👤</span> Landlords</a>
+    <a class="nav-item" href="listings.html"><span class="icon">🏢</span> Listings</a>
+    <a class="nav-item" href="email-logs.html"><span class="icon">📧</span> Email Logs</a>
+    <a class="nav-item active" href="audit-log.html"><span class="icon">🔍</span> Audit Log</a>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="/index.html" target="_blank" style="display:block;font-size:12px;color:var(--muted,#8892a2);text-decoration:none;margin-bottom:8px;text-align:center"><i class="fas fa-external-link-alt" style="margin-right:4px"></i> View Live Site</a>
+    <div class="admin-name" id="admin-name">Loading…</div>
+    <button class="sign-out" onclick="CP.sb().auth.signOut().then(()=>location.href='login.html')">Sign Out</button>
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="main">
+  <div class="topbar">
+    <button class="mobile-menu-btn" id="menuBtn" aria-label="Open menu"><i class="fas fa-bars"></i></button>
+    <div>
+      <div class="page-title">Audit Log</div>
+      <div class="page-sub">Full history of all admin and system actions</div>
+    </div>
+    <div class="topbar-right">
+      <button class="btn btn-sm" onclick="loadPage(currentPage)" style="font-size:.78rem;padding:6px 12px"><i class="fas fa-sync-alt"></i> Refresh</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="card" style="padding:24px">
+
+      <!-- Filters -->
+      <div class="filter-bar">
+        <select id="filter-action" onchange="applyFilters()">
+          <option value="">All Actions</option>
+          <option value="update_status">Update Status</option>
+          <option value="mark_paid">Mark Paid</option>
+          <option value="mark_movein">Mark Move-In</option>
+          <option value="generate_lease">Generate Lease</option>
+          <option value="resend_lease">Resend Lease</option>
+          <option value="void_lease">Void Lease</option>
+          <option value="tenant_signed_lease">Tenant Signed</option>
+          <option value="co_applicant_signed_lease">Co-Applicant Signed</option>
+        </select>
+        <input id="filter-app-id" type="text" placeholder="Filter by App ID…" oninput="applyFilters()" style="text-transform:uppercase" maxlength="12">
+        <button class="btn-reset" onclick="resetFilters()"><i class="fas fa-times"></i> Reset</button>
+        <span id="result-count" style="font-size:.8rem;color:var(--muted,#8892a2);margin-left:auto"></span>
+      </div>
+
+      <!-- Table -->
+      <div style="overflow-x:auto">
+        <table class="audit-table">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Action</th>
+              <th>Target</th>
+              <th>Details</th>
+              <th>Actor</th>
+            </tr>
+          </thead>
+          <tbody id="audit-tbody">
+            <tr class="loading-row"><td colspan="5"><i class="fas fa-spinner fa-spin"></i> Loading audit log…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination">
+        <button id="btn-prev" onclick="loadPage(currentPage - 1)" disabled><i class="fas fa-chevron-left"></i> Prev</button>
+        <span class="page-info" id="page-info"></span>
+        <button id="btn-next" onclick="loadPage(currentPage + 1)" disabled>Next <i class="fas fa-chevron-right"></i></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/cp-api.js?v=1775137055043"></script>
+<script>
+const PAGE_SIZE = 50;
+let currentPage = 1;
+let totalCount  = 0;
+let activeAction = '';
+let activeAppId  = '';
+
+// Cache of user_id → email for display
+const userCache = {};
+
+async function init() {
+  await CP.Auth.requireAdmin();
+  const user = await CP.Auth.getUser();
+  document.getElementById('admin-name').textContent = user?.email || 'Admin';
+
+  // Mobile sidebar
+  document.getElementById('menuBtn').addEventListener('click', () => {
+    document.getElementById('adminSidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('active');
+  });
+  document.getElementById('sidebarOverlay').addEventListener('click', () => {
+    document.getElementById('adminSidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('active');
+  });
+
+  loadPage(1);
+}
+
+async function loadPage(page) {
+  currentPage = page;
+  const tbody = document.getElementById('audit-tbody');
+  tbody.innerHTML = '<tr class="loading-row"><td colspan="5"><i class="fas fa-spinner fa-spin"></i> Loading…</td></tr>';
+
+  const from = (page - 1) * PAGE_SIZE;
+  const to   = from + PAGE_SIZE - 1;
+
+  let query = CP.sb()
+    .from('admin_actions')
+    .select('*', { count: 'exact' })
+    .order('created_at', { ascending: false })
+    .range(from, to);
+
+  if (activeAction) query = query.eq('action', activeAction);
+  if (activeAppId)  query = query.eq('target_id', activeAppId.toUpperCase());
+
+  const { data: rows, count, error } = await query;
+
+  if (error) {
+    tbody.innerHTML = `<tr class="loading-row"><td colspan="5" style="color:#e53e3e"><i class="fas fa-exclamation-circle"></i> Failed to load: ${CP_esc(error.message)}</td></tr>`;
+    return;
+  }
+
+  totalCount = count || 0;
+  renderTable(rows || []);
+  renderPagination();
+  document.getElementById('result-count').textContent =
+    totalCount === 0 ? 'No results' : `${totalCount.toLocaleString()} total entries`;
+}
+
+function renderTable(rows) {
+  const tbody = document.getElementById('audit-tbody');
+  if (rows.length === 0) {
+    tbody.innerHTML = `
+      <tr><td colspan="5">
+        <div class="empty-state">
+          <i class="fas fa-clipboard-list"></i>
+          <div>No audit log entries found</div>
+          <div style="font-size:.8rem;margin-top:6px">Admin actions will appear here once they occur</div>
+        </div>
+      </td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = rows.map(row => {
+    const time     = formatTime(row.created_at);
+    const badge    = actionBadge(row.action);
+    const target   = row.target_id
+      ? `<a class="target-link" href="applications.html?id=${CP_esc(row.target_id)}" title="View application">${CP_esc(row.target_id)}</a>`
+      : `<span style="color:var(--muted)">${CP_esc(row.target_type || '—')}</span>`;
+    const meta     = formatMeta(row.metadata);
+    const actor    = row.user_id
+      ? `<span class="actor-cell">${CP_esc(row.user_id.slice(0, 8))}…</span>`
+      : `<span class="actor-cell actor-system">System / Tenant</span>`;
+
+    return `<tr>
+      <td class="time-cell" title="${CP_esc(row.created_at)}">${time}</td>
+      <td>${badge}</td>
+      <td>${target}</td>
+      <td class="meta-cell">${meta}</td>
+      <td>${actor}</td>
+    </tr>`;
+  }).join('');
+}
+
+function actionBadge(action) {
+  const labels = {
+    update_status:              'Update Status',
+    mark_paid:                  'Mark Paid',
+    mark_movein:                'Mark Move-In',
+    generate_lease:             'Generate Lease',
+    resend_lease:               'Resend Lease',
+    void_lease:                 'Void Lease',
+    tenant_signed_lease:        'Tenant Signed',
+    co_applicant_signed_lease:  'Co-Applicant Signed',
+  };
+  const label = labels[action] || action;
+  return `<span class="action-badge action-${CP_esc(action)}">${CP_esc(label)}</span>`;
+}
+
+function formatMeta(meta) {
+  if (!meta || typeof meta !== 'object') return '<span style="color:var(--muted)">—</span>';
+  const pills = Object.entries(meta)
+    .filter(([, v]) => v !== null && v !== undefined && v !== '')
+    .map(([k, v]) => `<span class="meta-pill">${CP_esc(k)}: ${CP_esc(String(v).slice(0, 40))}</span>`);
+  return pills.length ? pills.join('') : '<span style="color:var(--muted)">—</span>';
+}
+
+function formatTime(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  const now = new Date();
+  const diffMs = now - d;
+  const diffMin = Math.floor(diffMs / 60000);
+  const diffHr  = Math.floor(diffMs / 3600000);
+  const diffDay = Math.floor(diffMs / 86400000);
+
+  if (diffMin < 1)  return 'Just now';
+  if (diffMin < 60) return `${diffMin}m ago`;
+  if (diffHr  < 24) return `${diffHr}h ago`;
+  if (diffDay < 7)  return `${diffDay}d ago`;
+
+  return d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+
+function renderPagination() {
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+  document.getElementById('page-info').textContent =
+    totalPages > 1 ? `Page ${currentPage} of ${totalPages}` : '';
+  document.getElementById('btn-prev').disabled = currentPage <= 1;
+  document.getElementById('btn-next').disabled = currentPage >= totalPages;
+}
+
+function applyFilters() {
+  activeAction = document.getElementById('filter-action').value;
+  activeAppId  = document.getElementById('filter-app-id').value.trim();
+  loadPage(1);
+}
+
+function resetFilters() {
+  document.getElementById('filter-action').value = '';
+  document.getElementById('filter-app-id').value = '';
+  activeAction = '';
+  activeAppId  = '';
+  loadPage(1);
+}
+
+function CP_esc(s) {
+  return String(s ?? '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+  <meta name="theme-color" content="#006aff">
+  <link rel="manifest" href="/manifest.json"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin Login — Choice Properties Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <link rel="preload" href="/css/main.css?v=1775137055043" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/css/main.css?v=1775137055043"></noscript>
+<link rel="stylesheet" href="/assets/fontawesome.css">
+  <link rel="stylesheet" href="/css/admin.css?v=1775137055043">
+  <link rel="preload" href="/css/mobile.css?v=1775137055043" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/css/mobile.css?v=1775137055043"></noscript>
+<script defer src="/config.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Georgia',serif;background:#060d1a;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{background:#0d1b2e;border:1px solid #1e3a5f;border-radius:12px;padding:48px 40px;width:100%;max-width:420px}
+.logo{text-align:center;margin-bottom:36px}
+.logo-name{font-size:1.5rem;color:#c9a84c;letter-spacing:.12em;text-transform:uppercase;font-weight:700}
+.logo-sub{font-size:.72rem;color:#4a6a8a;letter-spacing:.2em;text-transform:uppercase;margin-top:4px}
+.divider{width:40px;height:2px;background:linear-gradient(90deg,#c9a84c,#a8863c);margin:16px auto}
+h2{font-size:1rem;color:#7a9ab5;text-align:center;margin-bottom:32px;font-weight:400;letter-spacing:.05em}
+label{display:block;font-size:.72rem;color:#4a6a8a;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+input{width:100%;background:#060d1a;border:1px solid #1e3a5f;border-radius:6px;color:#e8e0d0;padding:12px 16px;font-size:.9rem;outline:none;transition:border-color .2s;margin-bottom:20px}
+input:focus{border-color:#c9a84c}
+.btn{width:100%;background:linear-gradient(135deg,#c9a84c,#a8863c);color:#060d1a;border:none;border-radius:6px;padding:14px;font-weight:700;font-size:.9rem;cursor:pointer;letter-spacing:.08em;text-transform:uppercase;transition:opacity .2s;margin-top:4px}
+.btn:hover{opacity:.88}.btn:disabled{opacity:.4;cursor:not-allowed}
+.err{background:#1a0808;border:1px solid #5c1a1a;border-radius:6px;padding:12px 16px;color:#f87171;font-size:.82rem;margin-bottom:20px;display:none}
+.footer-note{text-align:center;font-size:.72rem;color:#2a4a6a;margin-top:24px}
+</style>
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <div class="logo-name">Choice Properties</div>
+    <div class="logo-sub">Administration Portal</div>
+    <div class="divider"></div>
+  </div>
+  <h2>Sign in to continue</h2>
+  <div class="err" id="err"></div>
+  <form onsubmit="event.preventDefault();login()">
+  <label>Email Address</label>
+  <input type="email" id="email" placeholder="admin@example.com" autocomplete="email">
+  <label>Password</label>
+  <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+  <button class="btn" id="btn" type="submit">Sign In</button>
+  </form>
+  <div style="text-align:center;margin-top:16px"><a href="#" id="forgotLink" style="font-size:.75rem;color:#4a6a8a;text-decoration:none">Forgot password?</a></div>
+  <div class="footer-note">Admin access only. Unauthorized access is prohibited.</div>
+</div>
+<script type="module" src="/js/cp-api.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  CP.Auth.isAdmin().then(is => { if (is) location.href = 'dashboard.html'; });
+  document.getElementById('forgotLink').addEventListener('click', async e => {
+    e.preventDefault();
+    const email = document.getElementById('email').value.trim();
+    if (!email) { showErr('Enter your email address above, then click "Forgot password?".'); return; }
+    const { error } = await CP.sb().auth.resetPasswordForEmail(email, { redirectTo: location.origin + '/admin/login.html' });
+    if (error) { showErr(error.message); }
+    else { document.getElementById('err').style.display='block'; document.getElementById('err').style.background='#0a1f0a'; document.getElementById('err').style.borderColor='#14532d'; document.getElementById('err').style.color='#86efac'; document.getElementById('err').textContent='Password reset email sent! Check your inbox.'; }
+  });
+});
+
+async function login() {
+  const email = document.getElementById('email').value.trim();
+  const pass  = document.getElementById('password').value;
+  const btn   = document.getElementById('btn');
+  const err   = document.getElementById('err');
+  err.style.display = 'none';
+  if (!email || !pass) { showErr('Please enter email and password.'); return; }
+  CP.UI.loading(btn, true);
+  const { error } = await CP.sb().auth.signInWithPassword({ email, password: pass });
+  if (error) { CP.UI.loading(btn, false); showErr(error.message); return; }
+  const isAdmin = await CP.Auth.isAdmin();
+  if (!isAdmin) { await CP.sb().auth.signOut(); CP.UI.loading(btn, false); showErr('Access denied. This account does not have admin privileges.'); return; }
+  location.href = 'dashboard.html';
+}
+function showErr(msg) { const e = document.getElementById('err'); e.textContent = msg; e.style.display = 'block'; }
+</script>
+</body>
+</html>

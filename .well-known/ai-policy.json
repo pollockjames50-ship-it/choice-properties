@@ -1,0 +1,61 @@
+{
+  "version": "1.0",
+  "project": "Choice Properties",
+  "type": "static-site",
+  "description": "Pure static website. No server. No runtime. Deployed via Cloudflare Pages only.",
+
+  "deployment": {
+    "method": "cloudflare-pages",
+    "trigger": "github-push",
+    "build_command": "node generate-config.js",
+    "build_output": ".",
+    "local_execution": false,
+    "local_server": false
+  },
+
+  "ai_agent_policy": {
+    "allowed_actions": [
+      "read any file",
+      "edit static HTML files",
+      "edit CSS files",
+      "edit frontend JavaScript files (except protected list)",
+      "edit Supabase Edge Functions in supabase/functions/"
+    ],
+    "prohibited_actions": [
+      "run npm install",
+      "run npm start",
+      "start any local server or dev server",
+      "create config.js",
+      "commit config.js",
+      "use DATABASE_URL or any PG* environment variable",
+      "install any ORM or database driver",
+      "run any database migration command",
+      "run wrangler or any Cloudflare CLI command",
+      "run git push or git commit",
+      "configure workflows or runtime environments",
+      "mock Supabase or simulate backend behavior"
+    ],
+    "protected_files": [
+      "generate-config.js",
+      "_headers",
+      "SETUP.sql",
+      "js/cp-api.js",
+      "js/apply.js",
+      "js/apply-files.js",
+      "js/apply-property.js",
+      "js/apply-submit.js",
+      "js/apply-validation.js",
+      "js/apply-translations.js"
+    ],
+    "rules_file": ".agents/instructions.md",
+    "enforcement": "strict"
+  },
+
+  "environment": {
+    "runtime_dependencies": false,
+    "local_database": false,
+    "local_server": false,
+    "requires_npm_install": false,
+    "gitignored_files": ["config.js", ".env", ".env.*", "node_modules/"]
+  }
+}

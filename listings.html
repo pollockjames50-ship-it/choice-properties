@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="theme-color" content="#006aff">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browse Rentals — Choice Properties</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <meta name="description" content="Browse verified rental listings across the United States. Filter by price, bedrooms, and more. Apply online in minutes.">
+  <meta property="og:title" content="Browse Rentals — Choice Properties">
+  <meta property="og:description" content="Verified rental listings nationwide. Apartments, houses, condos — apply in 15 minutes.">
+  <meta property="og:image" content="/assets/og-cover.jpg">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://choice-properties.pages.dev/listings">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Browse Rentals — Choice Properties">
+  <meta name="twitter:description" content="Verified rental listings nationwide. Apply online in minutes.">
+  <meta name="twitter:image" content="/assets/og-cover.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <link rel="preload" href="/css/main.css?v=1775137055043" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/css/main.css?v=1775137055043"></noscript>
+  <link rel="preload" href="/css/listings.css?v=1775137055043" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/css/listings.css?v=1775137055043"></noscript>
+  <link rel="stylesheet" href="/assets/fontawesome.css">
+  <style>
+    /* ── CRITICAL CSS — above-fold paint for listings.html ───────────────────
+       Inlined to eliminate render-blocking flash on slow mobile connections.
+       Covers: nav bar, listings toolbar, filter bar, card grid skeleton.
+    ─────────────────────────────────────────────────────────────────────── */
+    *,*::before,*::after{box-sizing:border-box}
+    html{-webkit-text-size-adjust:100%}
+    body{
+      margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      background:#f5f5f5;color:#1a1a1a;line-height:1.6;font-size:15px;
+    }
+    .nav{
+      position:fixed;top:0;left:0;right:0;height:64px;z-index:900;
+      background:rgba(255,255,255,0.97);
+      backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+      border-bottom:1px solid #e0e0e0;
+    }
+    .nav-inner{display:flex;align-items:center;justify-content:space-between;height:100%;padding:0 16px;max-width:1280px;margin:0 auto}
+    .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+    .nav-logo-emblem{width:34px;height:34px;border-radius:8px;background:#006aff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    #site-nav{height:64px}
+    .listings-page{padding-top:64px}
+    .listings-toolbar{
+      background:#fff;border-bottom:1px solid #e0e0e0;
+      padding:12px 16px;display:flex;align-items:center;gap:8px;
+    }
+    .search-bar{
+      display:flex;align-items:center;background:#fff;
+      border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;
+    }
+    .property-grid{display:grid;grid-template-columns:1fr;gap:16px;padding:16px}
+    .property-card{border-radius:12px;overflow:hidden;background:#fff;border:1px solid #e0e0e0}
+    .property-card-img{position:relative;aspect-ratio:4/3;width:100%;overflow:hidden;background:linear-gradient(145deg,#c8d8e8 0%,#b8cad8 50%,#a8bac8 100%)}
+  </style>
+<script defer src="/config.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script type="module" src="/js/cp-api.js"></script>
+<script defer src="/js/components.js"></script>
+<style>
+.listings-page-header {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  padding: 28px 0 20px;
+  margin-top: 64px;
+}
+.listings-page-header .container { max-width: var(--container-max); margin: 0 auto; padding: 0 var(--space-6); }
+.listings-page-title {
+  font-size: clamp(22px, 3vw, 28px);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em;
+  margin: 0 0 4px;
+}
+.listings-page-subtitle {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin: 0 0 18px;
+}
+.listings-page-subtitle strong {
+  color: var(--color-brand);
+  font-weight: 600;
+}
+.listings-search-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.listings-search-row .search-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--color-input-bg, #f5f5f7);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 0 14px;
+  height: 42px;
+  font-size: 14px;
+  color: var(--color-text-primary);
+  transition: border-color 0.15s;
+}
+.listings-search-row .search-field:focus-within { border-color: var(--color-brand); }
+.listings-search-row .search-field i { color: var(--color-text-muted); font-size: 12px; flex-shrink: 0; }
+.listings-search-row .search-field input,
+.listings-search-row .search-field select {
+  border: none; background: transparent; outline: none;
+  font-size: 14px; color: var(--color-text-primary); width: 100%;
+}
+.listings-search-row .search-field.sf-text { flex: 1; min-width: 180px; }
+.listings-search-row .search-field.sf-select { min-width: 120px; }
+.listings-search-btn {
+  height: 42px; padding: 0 20px;
+  background: var(--color-brand); color: #fff;
+  border: none; border-radius: var(--radius-lg);
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 7px;
+  transition: background 0.15s, opacity 0.15s;
+  white-space: nowrap;
+}
+.listings-search-btn:hover { background: var(--color-brand-dark, #0053cc); }
+@media (max-width: 640px) {
+  .listings-page-header { padding: 16px 0 14px; margin-top: 56px; }
+  .listings-search-row .search-field.sf-select { min-width: 100px; }
+  .listings-page-title { font-size: 20px; }
+}
+</style>
+
+  <!-- I-060: CollectionPage structured data for listings page -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "Rental Listings — Choice Properties",
+    "description": "Browse verified rental listings across the United States. Filter by price, bedrooms, and more.",
+    "url": "https://choice-properties.pages.dev/listings.html",
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "Choice Properties",
+      "url": "https://choice-properties.pages.dev/"
+    }
+  }
+  </script>
+</head>
+<body>
+
+<!-- ── Mobile Drawer Overlay ── -->
+<div id="site-nav"></div>
+<!-- ── Page Header ── -->
+<div class="listings-page-header">
+  <div class="container">
+    <h1 class="listings-page-title">Available Rentals</h1>
+    <p class="listings-page-subtitle">
+      <strong id="statListings">—</strong> verified properties nationwide
+    </p>
+    <div class="listings-search-row">
+      <div class="search-field sf-text">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchInput"
+          placeholder="City, zip code, or neighborhood…"
+          autocomplete="off" aria-label="Search listings">
+      </div>
+      <div class="search-field sf-select">
+        <i class="fas fa-bed"></i>
+        <select id="bedroomsFilter" aria-label="Bedrooms">
+          <option value="">Any beds</option>
+          <option value="0">Studio</option>
+          <option value="1">1 Bed</option>
+          <option value="2">2 Beds</option>
+          <option value="3">3 Beds</option>
+          <option value="4">4+ Beds</option>
+        </select>
+      </div>
+      <div class="search-field sf-select">
+        <i class="fas fa-dollar-sign"></i>
+        <select id="maxRentFilter" aria-label="Max rent">
+          <option value="">Any price</option>
+          <option value="700">Up to $700</option>
+          <option value="900">Up to $900</option>
+          <option value="1100">Up to $1,100</option>
+          <option value="1400">Up to $1,400</option>
+          <option value="1700">Up to $1,700</option>
+          <option value="2200">Up to $2,200</option>
+          <option value="2500">Up to $2,500</option>
+          <option value="3000">Up to $3,000</option>
+          <option value="3500">Up to $3,500</option>
+          <option value="4000">Up to $4,000</option>
+          <option value="5000">Up to $5,000</option>
+        </select>
+      </div>
+      <button class="listings-search-btn" id="searchBtn" aria-label="Search">
+        <i class="fas fa-search"></i> Search
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Filter Bar ── -->
+<div class="filter-bar">
+  <div class="filter-bar-inner">
+    <button class="filter-pill active" data-filter="all"><i class="fas fa-th"></i> All</button>
+    <button class="filter-pill" data-filter="apartment"><i class="fas fa-building"></i> Apartments</button>
+    <button class="filter-pill" data-filter="house"><i class="fas fa-home"></i> Houses</button>
+    <button class="filter-pill" data-filter="condo"><i class="fas fa-city"></i> Condos</button>
+    <button class="filter-pill" data-filter="townhouse"><i class="fas fa-house-user"></i> Townhomes</button>
+    <div class="filter-divider"></div>
+    <button class="filter-pill" data-filter="pets"><i class="fas fa-paw"></i> Pet Friendly</button>
+    <button class="filter-pill" data-filter="available"><i class="fas fa-calendar-check"></i> Move-in Ready</button>
+    <button class="filter-pill" data-filter="parking"><i class="fas fa-car"></i> Parking</button>
+
+    <div class="filter-dropdown-wrap" id="moreFiltersWrap">
+      <button class="filter-pill" id="moreFiltersBtn">
+        <i class="fas fa-sliders-h"></i> More Filters
+        <span class="filter-active-badge" id="filterActiveBadge" style="display:none"></span>
+      </button>
+      <div class="filter-dropdown" id="moreFiltersDropdown">
+        <div class="filter-dropdown-title">Advanced Filters</div>
+        <div class="filter-dropdown-row">
+          <label>Property Type</label>
+          <select id="advTypeFilter">
+            <option value="">Any type</option>
+            <option value="apartment">Apartment</option>
+            <option value="house">House</option>
+            <option value="condo">Condo</option>
+            <option value="townhouse">Townhouse</option>
+          </select>
+        </div>
+        <div class="filter-dropdown-row">
+          <label>Min Bedrooms</label>
+          <select id="advMinBeds">
+            <option value="">Any</option>
+            <option value="0">Studio</option>
+            <option value="1">1+</option>
+            <option value="2">2+</option>
+            <option value="3">3+</option>
+          </select>
+        </div>
+        <div class="filter-dropdown-row">
+          <label>Min Bathrooms</label>
+          <select id="advMinBaths">
+            <option value="">Any</option>
+            <option value="1">1+</option>
+            <option value="1.5">1.5+</option>
+            <option value="2">2+</option>
+          </select>
+        </div>
+        <div class="filter-dropdown-row">
+          <label>Min Price</label>
+          <input type="number" id="advMinRent" placeholder="e.g. 800" min="0" step="50">
+        </div>
+        <div class="filter-dropdown-row">
+          <label>Max Price</label>
+          <input type="number" id="advMaxRent" placeholder="e.g. 1500" min="0" step="50">
+        </div>
+        <div class="filter-dropdown-actions">
+          <button class="filter-btn-clear" id="clearAdvFilters">Clear</button>
+          <button class="filter-btn-apply" id="applyAdvFilters">Apply Filters</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-count" id="filterCount"></div>
+  </div>
+</div>
+
+<!-- ── Listings ── -->
+<section class="listings-section" id="listings">
+  <div class="container">
+    <div class="listings-header">
+      <div class="listings-header-left">
+        <h2 class="listings-heading" id="listingsHeading">Results</h2>
+        <div class="listings-subheading" id="listingsSubheading"></div>
+      </div>
+      <div class="listings-controls">
+        <div class="view-toggle">
+          <button class="view-toggle-btn active" id="btnListView" aria-label="Grid view">
+            <i class="fas fa-th-large"></i> Grid
+          </button>
+          <button class="view-toggle-btn" id="btnMapView" aria-label="Map view">
+            <i class="fas fa-map"></i> Map
+          </button>
+        </div>
+        <div class="listings-sort">
+          <select id="sortSelect" aria-label="Sort by">
+            <option value="newest">Newest</option>
+            <option value="price_asc">Price ↑</option>
+            <option value="price_desc">Price ↓</option>
+            <option value="beds_desc">Most Beds</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grid View -->
+    <div id="listPanel">
+      <div class="property-grid" id="propertyGrid">
+        <!-- Skeleton loaders -->
+        <div class="property-card property-card-skeleton">
+          <div class="property-card-img skeleton-img skeleton"></div>
+          <div class="property-card-body" style="gap:10px;padding:20px">
+            <div class="skeleton skeleton-line" style="height:26px;width:35%"></div>
+            <div class="skeleton skeleton-line" style="width:80%"></div>
+            <div class="skeleton skeleton-line" style="width:55%"></div>
+            <div class="skeleton skeleton-line" style="height:12px;width:40%;margin-top:8px"></div>
+          </div>
+        </div>
+        <div class="property-card property-card-skeleton">
+          <div class="property-card-img skeleton-img skeleton"></div>
+          <div class="property-card-body" style="gap:10px;padding:20px">
+            <div class="skeleton skeleton-line" style="height:26px;width:38%"></div>
+            <div class="skeleton skeleton-line" style="width:75%"></div>
+            <div class="skeleton skeleton-line" style="width:60%"></div>
+            <div class="skeleton skeleton-line" style="height:12px;width:45%;margin-top:8px"></div>
+          </div>
+        </div>
+        <div class="property-card property-card-skeleton">
+          <div class="property-card-img skeleton-img skeleton"></div>
+          <div class="property-card-body" style="gap:10px;padding:20px">
+            <div class="skeleton skeleton-line" style="height:26px;width:32%"></div>
+            <div class="skeleton skeleton-line" style="width:85%"></div>
+            <div class="skeleton skeleton-line" style="width:50%"></div>
+            <div class="skeleton skeleton-line" style="height:12px;width:42%;margin-top:8px"></div>
+          </div>
+        </div>
+        <div class="property-card property-card-skeleton">
+          <div class="property-card-img skeleton-img skeleton"></div>
+          <div class="property-card-body" style="gap:10px;padding:20px">
+            <div class="skeleton skeleton-line" style="height:26px;width:40%"></div>
+            <div class="skeleton skeleton-line" style="width:78%"></div>
+            <div class="skeleton skeleton-line" style="width:58%"></div>
+            <div class="skeleton skeleton-line" style="height:12px;width:38%;margin-top:8px"></div>
+          </div>
+        </div>
+        <div class="property-card property-card-skeleton">
+          <div class="property-card-img skeleton-img skeleton"></div>
+          <div class="property-card-body" style="gap:10px;padding:20px">
+            <div class="skeleton skeleton-line" style="height:26px;width:36%"></div>
+            <div class="skeleton skeleton-line" style="width:82%"></div>
+            <div class="skeleton skeleton-line" style="width:52%"></div>
+            <div class="skeleton skeleton-line" style="height:12px;width:43%;margin-top:8px"></div>
+          </div>
+        </div>
+        <div class="property-card property-card-skeleton">
+          <div class="property-card-img skeleton-img skeleton"></div>
+          <div class="property-card-body" style="gap:10px;padding:20px">
+            <div class="skeleton skeleton-line" style="height:26px;width:34%"></div>
+            <div class="skeleton skeleton-line" style="width:76%"></div>
+            <div class="skeleton skeleton-line" style="width:62%"></div>
+            <div class="skeleton skeleton-line" style="height:12px;width:46%;margin-top:8px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Map View -->
+    <div id="mapPanel">
+      <div id="listingsMap"></div>
+      <div id="mapLoadingSpinner" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; align-items: center; justify-content: center; flex-direction: column; gap: 12px;">
+        <div class="spinner" style="width: 40px; height: 40px;"></div>
+        <p style="color: var(--color-text-muted); font-size: 13px; margin: 0;">Loading map...</p>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div id="paginationBar" style="margin: 32px 0 8px; display:flex; justify-content:center;"></div>
+  </div>
+</section>
+
+<!-- ── Footer ── -->
+<div id="site-footer"></div>
+
+<div class="toast-container" id="toastContainer"></div>
+<button class="scroll-top" id="scrollTopBtn" aria-label="Back to top"><i class="fas fa-chevron-up"></i></button>
+
+<!-- Leaflet loaded lazily when user switches to Map View -->
+
+<script type="module">
+const esc = window.CP_esc || (s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'));
+
+// CSP-safe image load/error handling (inline onload/onerror blocked by Cloudflare CSP nonce policy)
+document.addEventListener('load', function(e) {
+  if (e.target.tagName === 'IMG') e.target.classList.add('cp-img-loaded');
+}, true);
+document.addEventListener('error', function(e) {
+  var t = e.target;
+  if (t.tagName !== 'IMG') return;
+  t.classList.add('cp-img-loaded');
+  if (t.src !== location.origin + '/assets/placeholder-property.jpg') {
+    t.src = '/assets/placeholder-property.jpg';
+  }
+}, true);
+
+// ── State ────────────────────────────────────────────────────────────────
+let activeType     = 'all';
+let activeBeds     = '';
+let activeMaxRent  = '';
+let activeMinRent  = '';
+let activeSearch   = '';
+let activeMinBaths = '';
+let sortBy         = 'newest';
+let currentPage    = 1;
+let totalPages     = 1;
+let totalCount     = 0;
+let currentView    = 'list';
+let isLoading      = false;
+let mapInstance    = null;
+let mapMarkers     = [];
+const savedIds     = new Set(JSON.parse(localStorage.getItem('cp_saved') || '[]'));
+const PER_PAGE     = 24;
+
+// ── Read URL → state ──────────────────────────────────────────────────────
+function readURL() {
+  const p = new URLSearchParams(window.location.search);
+  activeSearch   = p.get('q')        || '';
+  activeBeds     = p.get('beds')     || '';
+  activeMaxRent  = p.get('maxrent')  || '';
+  activeMinRent  = p.get('minrent')  || '';
+  activeMinBaths = p.get('minbaths') || '';
+  activeType     = p.get('type')     || 'all';
+  sortBy         = p.get('sort')     || 'newest';
+  currentPage    = parseInt(p.get('page') || '1', 10);
+}
+
+// ── Write state → URL ─────────────────────────────────────────────────────
+function pushURL(replace = false) {
+  const p = new URLSearchParams();
+  if (activeSearch)   p.set('q',        activeSearch);
+  if (activeBeds)     p.set('beds',     activeBeds);
+  if (activeMaxRent)  p.set('maxrent',  activeMaxRent);
+  if (activeMinRent)  p.set('minrent',  activeMinRent);
+  if (activeMinBaths) p.set('minbaths', activeMinBaths);
+  if (activeType && activeType !== 'all') p.set('type', activeType);
+  if (sortBy && sortBy !== 'newest') p.set('sort', sortBy);
+  if (currentPage > 1) p.set('page', currentPage);
+  const url = p.toString() ? `?${p}` : window.location.pathname;
+  if (replace) history.replaceState(null, '', url);
+  else         history.pushState(null, '', url);
+}
+
+// ── Sync UI controls to current state ────────────────────────────────────
+function syncControls() {
+  const si = document.getElementById('searchInput');
+  const bf = document.getElementById('bedroomsFilter');
+  const mf = document.getElementById('maxRentFilter');
+  const ss = document.getElementById('sortSelect');
+  if (si) si.value = activeSearch;
+  if (bf) bf.value = activeBeds;
+  if (mf) mf.value = activeMaxRent;
+  if (ss) ss.value = sortBy;
+  document.querySelectorAll('.filter-pill[data-filter]').forEach(pill => {
+    pill.classList.toggle('active', pill.dataset.filter === activeType);
+  });
+  const at    = document.getElementById('advTypeFilter');
+  const ab    = document.getElementById('advMinBeds');
+  const abath = document.getElementById('advMinBaths');
+  const amin  = document.getElementById('advMinRent');
+  const amax  = document.getElementById('advMaxRent');
+  if (at)    at.value    = ['apartment','house','condo','townhouse'].includes(activeType) ? activeType : '';
+  if (ab)    ab.value    = activeBeds;
+  if (abath) abath.value = activeMinBaths;
+  if (amin)  amin.value  = activeMinRent;
+  if (amax)  amax.value  = activeMaxRent;
+  updateFilterBadge();
+}
+
+// ── Boot ─────────────────────────────────────────────────────────────────
+(async () => {
+  setupScrollTop();
+  readURL();
+  syncControls();
+  setupFilters();
+  // Restore filter dropdown state from sessionStorage (for mobile progressive disclosure)
+  const filterDropdown = document.getElementById('moreFiltersDropdown');
+  if (filterDropdown && sessionStorage.getItem('filters_dropdown_open') === 'true') {
+    filterDropdown.classList.add('open');
+  }
+  await fetchAndRender();
+  window.addEventListener('popstate', async () => {
+    readURL();
+    syncControls();
+    await fetchAndRender();
+  });
+})();
+
+// ── Core fetch ────────────────────────────────────────────────────────────
+async function fetchAndRender() {
+  if (isLoading) return;
+  isLoading = true;
+  showSkeletons();
+  
+  // Update subheading with loading indicator
+  const subheading = document.getElementById('listingsSubheading');
+  if (subheading) {
+    subheading.innerHTML = '<i class="fas fa-spinner" style="animation:spin 1s linear infinite;display:inline-block;margin-right:6px;"></i><span style="font-size:0.9rem;">Searching...</span>';
+  }
+
+  try {
+    const result = await CP.Properties.getListings({
+      q:         activeSearch,
+      type:      activeType,
+      beds:      activeBeds,
+      min_baths: activeMinBaths,
+      min_rent:  activeMinRent,
+      max_rent:  activeMaxRent,
+      sort:      sortBy,
+      page:      currentPage,
+      per_page:  PER_PAGE,
+    });
+
+    if (!result.ok) {
+      console.error('Failed to load listings:', result.error);
+      if (subheading) {
+        subheading.innerHTML = '<span style="color:var(--color-error);font-size:0.9rem;"><i class="fas fa-exclamation-circle"></i> Unable to load listings. Please try again.</span>';
+      }
+      renderError();
+      return;
+    }
+
+    const { rows, total, total_pages } = result.data;
+    totalCount = total;
+    totalPages = total_pages;
+
+    const counter = document.getElementById('statListings');
+    if (counter) counter.textContent = total.toLocaleString();
+
+    // Update subheading with result count or no-results message
+    if (subheading) {
+      if (total === 0) {
+        subheading.innerHTML = '<span style="color:var(--color-text-secondary);font-size:0.9rem;">No listings match your filters. <a href="?">Clear filters</a></span>';
+      } else {
+        const plural = total === 1 ? 'listing' : 'listings';
+        subheading.textContent = `Showing ${rows.length} of ${total} ${plural}`;
+      }
+    }
+
+    renderProperties(rows);
+    renderPagination();
+    if (currentView === 'map') initMap(rows);
+  } catch (err) {
+    console.error('fetchAndRender error:', err);
+    if (subheading) {
+      subheading.innerHTML = '<span style="color:var(--color-error);font-size:0.9rem;"><i class="fas fa-exclamation-circle"></i> Something went wrong. Please try again.</span>';
+    }
+    renderError();
+  } finally {
+    isLoading = false;
+  }
+}
+
+// ── Trigger search (resets to page 1) ─────────────────────────────────────
+async function refreshResults() {
+  currentPage = 1;
+  pushURL();
+  await fetchAndRender();
+}
+
+// ── Skeletons ─────────────────────────────────────────────────────────────
+function showSkeletons() {
+  const grid = document.getElementById('propertyGrid');
+  const sk = (w1, w2, w3) => `
+    <div class="property-card property-card-skeleton">
+      <div class="property-card-img skeleton-img skeleton"></div>
+      <div class="property-card-body" style="gap:10px;padding:20px">
+        <div class="skeleton skeleton-line" style="height:26px;width:${w1}%"></div>
+        <div class="skeleton skeleton-line" style="width:${w2}%"></div>
+        <div class="skeleton skeleton-line" style="width:${w3}%"></div>
+        <div class="skeleton skeleton-line" style="height:12px;width:40%;margin-top:8px"></div>
+      </div>
+    </div>`;
+  grid.innerHTML = [sk(35,80,55),sk(38,75,60),sk(32,85,50),sk(40,78,58),sk(36,82,52),sk(34,76,62)].join('');
+  const pg = document.getElementById('paginationBar');
+  if (pg) pg.innerHTML = '';
+}
+
+// ── updateNav ─────────────────────────────────────────────────────────────
+async function updateNav() {
+  const session    = await CP.Auth.getSession();
+  const authLink   = document.getElementById('navAuthLink');
+  const drawerLink = document.getElementById('drawerAuthLink');
+  const drawerListLink = document.getElementById('drawerListPropertyLink');
+  const dest  = session ? '/landlord/dashboard.html' : '/landlord/login.html';
+  const label = session ? 'My Dashboard' : 'Landlord Login';
+  if (authLink)   { authLink.href = dest;   authLink.textContent = label; }
+  if (drawerLink) { drawerLink.href = dest; drawerLink.textContent = label; }
+  if (session && drawerListLink) drawerListLink.href = '/landlord/new-listing.html';
+  if (window.CONFIG) {
+    const footerEmail = document.getElementById('drawerFooterEmail');
+    if (footerEmail) { footerEmail.href = `mailto:${CONFIG.COMPANY_EMAIL}`; footerEmail.textContent = CONFIG.COMPANY_EMAIL; }
+    document.querySelectorAll('[data-cfg-email]').forEach(el => { el.href = `mailto:${CONFIG.COMPANY_EMAIL}`; el.textContent = CONFIG.COMPANY_EMAIL; });
+    document.querySelectorAll('[data-cfg-phone]').forEach(el => { el.href = `tel:${CONFIG.COMPANY_PHONE.replace(/\D/g,'')}`; el.textContent = CONFIG.COMPANY_PHONE; });
+  }
+}
+
+// ── renderProperties ──────────────────────────────────────────────────────
+function renderProperties(props) {
+  const grid      = document.getElementById('propertyGrid');
+  const heading   = document.getElementById('listingsHeading');
+  const subheading = document.getElementById('listingsSubheading');
+  const hasFilters = activeType !== 'all' || activeSearch || activeBeds || activeMaxRent || activeMinRent || activeMinBaths;
+  const start = (currentPage - 1) * PER_PAGE + 1;
+  const end   = Math.min(currentPage * PER_PAGE, totalCount);
+
+  if (heading) heading.textContent = hasFilters
+    ? `${totalCount.toLocaleString()} Result${totalCount !== 1 ? 's' : ''}`
+    : 'All Listings';
+  if (subheading) subheading.textContent = totalCount > 0
+    ? (totalPages > 1
+        ? `Showing ${start.toLocaleString()}–${end.toLocaleString()} of ${totalCount.toLocaleString()}`
+        : (hasFilters ? 'Matching your filters' : 'Sorted by newest first'))
+    : '';
+
+  if (!props.length) {
+    grid.innerHTML = `
+      <div class="empty-state" style="grid-column:1/-1;text-align:center;padding:var(--s-16) var(--s-6)">
+        <div class="empty-state-icon"><i class="fas fa-search" style="font-size:40px;color:var(--color-text-muted)"></i></div>
+        <h3 style="margin:var(--s-4) 0 var(--s-2)">No listings match your filters</h3>
+        <p style="color:var(--color-text-secondary)">Try adjusting your search or <button onclick="window.clearAllFilters()" style="background:none;border:none;color:var(--color-brand);cursor:pointer;font-size:inherit;padding:0;text-decoration:underline">clearing all filters</button></p>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = props.map(p => buildCard(p)).join('');
+
+  grid.querySelectorAll('.property-card-save').forEach(btn => {
+    const id = btn.dataset.id;
+    if (savedIds.has(id)) { btn.classList.add('saved'); btn.innerHTML = '<i class="fas fa-heart"></i>'; }
+    btn.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); toggleSave(id, btn); });
+  });
+  grid.querySelectorAll('.property-card').forEach(card => {
+    initCarousel(card);
+    card.addEventListener('click', e => {
+      if (e.target.closest('a, button')) return;
+      window.location.href = `/property.html?id=${card.dataset.id}`;
+    });
+  });
+  animateCards();
+}
+
+// ── Pagination ────────────────────────────────────────────────────────────
+function renderPagination() {
+  const bar = document.getElementById('paginationBar');
+  if (!bar) return;
+  if (totalPages <= 1) { bar.innerHTML = ''; return; }
+
+  const show   = new Set([1, totalPages, currentPage, currentPage - 1, currentPage + 1].filter(n => n >= 1 && n <= totalPages));
+  const sorted = [...show].sort((a, b) => a - b);
+
+  let html = `<div class="pagination">`;
+  html += `<button class="pg-btn pg-prev" ${currentPage === 1 ? 'disabled' : ''} data-page="${currentPage - 1}" aria-label="Previous page"><i class="fas fa-chevron-left"></i></button>`;
+  let prev = 0;
+  for (const n of sorted) {
+    if (prev && n - prev > 1) html += `<span class="pg-ellipsis">…</span>`;
+    html += `<button class="pg-btn${n === currentPage ? ' pg-active' : ''}" data-page="${n}">${n}</button>`;
+    prev = n;
+  }
+  html += `<button class="pg-btn pg-next" ${currentPage === totalPages ? 'disabled' : ''} data-page="${currentPage + 1}" aria-label="Next page"><i class="fas fa-chevron-right"></i></button>`;
+  html += `</div>`;
+  bar.innerHTML = html;
+
+  bar.querySelectorAll('.pg-btn[data-page]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (btn.disabled) return;
+      currentPage = parseInt(btn.dataset.page);
+      pushURL();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      await fetchAndRender();
+    });
+  });
+}
+
+/* ─── Build card ─── */
+function buildCard(p) {
+  const photos   = p.photo_urls?.length ? p.photo_urls : ['/assets/placeholder-property.jpg'];
+  const availNow = !p.available_date || new Date(p.available_date) <= new Date();
+  const applyURL = CP.buildApplyURL(p);
+  const imgSizes = '(max-width: 539px) calc(100vw - 32px), (max-width: 899px) calc(50vw - 28px), (max-width: 1319px) calc(33vw - 32px), calc(25vw - 32px)';
+
+  const slidesHtml = photos.map((url, i) => {
+    const lqip = CP.UI.lqipUrl(url);
+    const lqipStyle = lqip ? ` style="background-image:url('${lqip}');background-size:cover;background-position:center"` : '';
+    return `<div class="property-card-slide"${lqipStyle}><img src="${CONFIG.img(url,'card')}" srcset="${CONFIG.srcset(url,'card','card_2x')}" alt="${p.title} photo ${i+1}" sizes="${imgSizes}" loading="${i===0?'eager':'lazy'}" ${i===0?'fetchpriority="high"':''} decoding="async"></div>`;
+  }).join('');
+
+  const tags = [];
+  if (p.pets_allowed) tags.push(`<span class="property-card-tag tag-pet"><i class="fas fa-paw"></i> Pets OK</span>`);
+  if (p.parking) tags.push(`<span class="property-card-tag tag-parking"><i class="fas fa-car"></i> Parking</span>`);
+  if (Array.isArray(p.utilities_included) ? p.utilities_included.length > 0 : !!p.utilities_included) tags.push(`<span class="property-card-tag tag-utilities"><i class="fas fa-bolt"></i> Utilities</span>`);
+
+  const addrLine = [p.address, p.city, p.state].filter(Boolean).join(', ');
+
+  const specParts = [];
+  if (p.bedrooms != null) specParts.push(`<span class="property-card-spec-item"><i class="fas fa-bed"></i>${p.bedrooms === 0 ? 'Studio' : p.bedrooms + ' Bed'}</span>`);
+  if (p.bathrooms)        specParts.push(`<span class="property-card-spec-item"><i class="fas fa-bath"></i>${p.bathrooms} Bath</span>`);
+  if (p.square_footage)   specParts.push(`<span class="property-card-spec-item">${p.square_footage.toLocaleString()} sqft</span>`);
+  const specsHtml = specParts.map((s, i) => i === 0 ? s : `<span class="property-card-spec-sep">·</span>${s}`).join('');
+
+  const ageDays = p.created_at ? Math.floor((Date.now() - new Date(p.created_at).getTime()) / 86400000) : 999;
+  let badge = '';
+  if (p.featured) {
+    badge = `<div class="property-card-badge badge-featured"><i class="fas fa-star"></i> Featured</div>`;
+  } else if (ageDays <= 3) {
+    badge = `<div class="property-card-badge badge-hot"><i class="fas fa-fire"></i> Hot Deal</div>`;
+  } else if (ageDays <= 7) {
+    badge = `<div class="property-card-badge badge-new"><i class="fas fa-tag"></i> New Listing</div>`;
+  } else if (p.landlords?.verified) {
+    badge = `<div class="property-card-badge badge-verified"><i class="fas fa-shield-halved"></i> Verified</div>`;
+  } else if (availNow || !p.available_date) {
+    badge = `<div class="property-card-badge badge-available"><i class="fas fa-circle-check"></i> Available Now</div>`;
+  } else {
+    const availLabel = new Date(p.available_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    badge = `<div class="property-card-badge badge-available"><i class="fas fa-calendar"></i> Avail. ${availLabel}</div>`;
+  }
+  const photoCountHtml = photos.length > 1 ? `<div class="property-card-photo-count"><i class="fas fa-camera"></i> ${photos.length}</div>` : '';
+
+  return `
+    <article class="property-card" data-id="${p.id}">
+      <a href="/property.html?id=${p.id}" style="display:block;text-decoration:none" tabindex="-1" aria-hidden="true">
+        <div class="property-card-img">
+          <div class="property-card-slides">${slidesHtml}</div>
+          ${photos.length > 1 ? `
+            <button class="property-card-nav prev" data-dir="-1" aria-label="Previous photo"><i class="fas fa-chevron-left"></i></button>
+            <button class="property-card-nav next" data-dir="1"  aria-label="Next photo"><i class="fas fa-chevron-right"></i></button>
+          ` : ''}
+          ${badge}
+          ${photoCountHtml}
+        </div>
+      </a>
+      <button class="property-card-save" data-id="${p.id}" aria-label="Save property"><i class="far fa-heart"></i></button>
+      <div class="property-card-body">
+        <div class="property-card-price">$${p.monthly_rent.toLocaleString()}<span class="property-card-price-unit">/mo</span></div>
+        ${specsHtml ? `<div class="property-card-specs">${specsHtml}</div>` : ''}
+        <a href="/property.html?id=${p.id}" style="text-decoration:none">
+          <div class="property-card-title">${p.title}</div>
+        </a>
+        <div class="property-card-addr"><i class="fas fa-location-dot"></i>${addrLine}</div>
+        ${tags.length ? `<div class="property-card-tags">${tags.join('')}</div>` : ''}
+      </div>
+      <div class="property-card-footer">
+        <a href="/property.html?id=${p.id}" class="property-card-view">View Details</a>
+        <a href="${applyURL}" class="property-card-cta" onclick="window.trackApply && window.trackApply('${esc(p.id)}')">Apply Now <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </article>`;
+}
+
+/* ─── Animate Cards ─── */
+function animateCards() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.querySelectorAll('.property-card:not(.property-card-skeleton)').forEach(c => c.classList.add('cp-card-visible'));
+    return;
+  }
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('cp-card-visible'); observer.unobserve(e.target); }
+    });
+  }, { threshold: 0.06 });
+  let i = 0;
+  document.querySelectorAll('.property-card:not(.property-card-skeleton)').forEach(card => {
+    card.style.setProperty('--cp-delay', Math.min(i * 55, 320) + 'ms');
+    observer.observe(card);
+    i++;
+  });
+}
+
+/* ─── Carousel ─── */
+function initCarousel(card) {
+  const slides  = card.querySelector('.property-card-slides');
+  const navBtns = card.querySelectorAll('.property-card-nav');
+  if (!slides || !navBtns.length) return;
+  let idx = 0;
+  const total = card.querySelectorAll('.property-card-slide').length;
+  function goTo(n) {
+    idx = (n + total) % total;
+    slides.style.transform = `translateX(-${idx * 100}%)`;
+  }
+  navBtns.forEach(btn => {
+    btn.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); goTo(idx + parseInt(btn.dataset.dir)); });
+  });
+  let touchX = 0;
+  slides.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, { passive: true });
+  slides.addEventListener('touchend', e => {
+    const diff = touchX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 40) goTo(idx + (diff > 0 ? 1 : -1));
+  }, { passive: true });
+}
+
+/* ─── Map ─── */
+// M-10: Leaflet CSS+JS (~180KB gzipped) is loaded on demand only when the
+// user clicks "Map View". Saves bandwidth on every listing page visit.
+const _LEAFLET_CSS = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';
+const _LEAFLET_JS  = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
+
+function loadLeaflet() {
+  return new Promise((resolve, reject) => {
+    if (window.L) { resolve(); return; }
+    if (!document.querySelector(`link[href="${_LEAFLET_CSS}"]`)) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = _LEAFLET_CSS;
+      link.crossOrigin = 'anonymous';
+      document.head.appendChild(link);
+    }
+    const script = document.createElement('script');
+    script.src = _LEAFLET_JS;
+    script.crossOrigin = 'anonymous';
+    script.onload = () => {
+      // Remove map loading spinner when Leaflet loads
+      const mapSpinner = document.getElementById('mapLoadingSpinner');
+      if (mapSpinner) mapSpinner.style.display = 'none';
+      resolve();
+    };
+    script.onerror = () => {
+      // Hide spinner on error  
+      const mapSpinner = document.getElementById('mapLoadingSpinner');
+      if (mapSpinner) mapSpinner.style.display = 'none';
+      reject();
+    };
+    document.head.appendChild(script);
+  });
+}
+
+function initMap(props) {
+  if (!mapInstance) {
+    mapInstance = L.map('listingsMap', { zoomControl: false }).setView([39.5, -98.35], 4);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://carto.com/">CARTO</a>', maxZoom: 18
+    }).addTo(mapInstance);
+    L.control.zoom({ position: 'bottomright' }).addTo(mapInstance);
+  }
+  mapMarkers.forEach(m => m.remove()); mapMarkers = [];
+  const bounds = [];
+  props.forEach(p => {
+    if (!p.lat || !p.lng) return;
+    const lat = parseFloat(p.lat), lng = parseFloat(p.lng);
+    if (isNaN(lat) || isNaN(lng)) return;
+    bounds.push([lat, lng]);
+    const icon = L.divIcon({
+      className: '',
+      html: `<div class="map-marker-price">$${(p.monthly_rent/1000).toFixed(p.monthly_rent >= 1000 ? 1 : 0)}${p.monthly_rent >= 1000 ? 'k' : ''}</div>`,
+      iconAnchor: [30, 16], iconSize: [60, 32],
+    });
+    const marker = L.marker([lat, lng], { icon }).addTo(mapInstance);
+    marker.bindPopup(`
+      <a href="/property.html?id=${p.id}" class="map-popup-card">
+        <img class="map-popup-img" src="${CONFIG.img(p.photo_urls?.[0] || '','card')}" alt="${p.title}" loading="lazy">
+        <div class="map-popup-body">
+          <div class="map-popup-price">$${p.monthly_rent.toLocaleString()}<span>/mo</span></div>
+          <div class="map-popup-title">${p.title}</div>
+          <div class="map-popup-meta">
+            ${p.bedrooms != null ? `<span>${p.bedrooms === 0 ? 'Studio' : p.bedrooms + ' bd'}</span>` : ''}
+            ${p.bathrooms ? `<span>${p.bathrooms} ba</span>` : ''}
+          </div>
+          <a href="/property.html?id=${p.id}" class="map-popup-apply">View Property →</a>
+        </div>
+      </a>`, { maxWidth: 260 });
+    mapMarkers.push(marker);
+  });
+  if (bounds.length) mapInstance.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
+  setTimeout(() => mapInstance.invalidateSize(), 50);
+}
+
+/* ─── View toggle ─── */
+document.getElementById('btnListView').addEventListener('click', () => {
+  currentView = 'list';
+  document.getElementById('listPanel').style.display = '';
+  document.getElementById('mapPanel').style.display = 'none';
+  document.getElementById('btnListView').classList.add('active');
+  document.getElementById('btnMapView').classList.remove('active');
+});
+document.getElementById('btnMapView').addEventListener('click', async () => {
+  currentView = 'map';
+  document.getElementById('listPanel').style.display = 'none';
+  document.getElementById('mapPanel').style.display = 'block';
+  document.getElementById('btnMapView').classList.add('active');
+  document.getElementById('btnListView').classList.remove('active');
+  // Show loading spinner while Leaflet loads
+  const mapSpinner = document.getElementById('mapLoadingSpinner');
+  if (mapSpinner) mapSpinner.style.display = 'flex';
+  // Lazy-load Leaflet on first map view, then fetch and render markers
+  await loadLeaflet();
+  const result = await CP.Properties.getListings({
+    q: activeSearch, type: activeType, beds: activeBeds,
+    min_baths: activeMinBaths, min_rent: activeMinRent, max_rent: activeMaxRent,
+    sort: sortBy, page: currentPage, per_page: PER_PAGE,
+  });
+  if (result.ok) initMap(result.data.rows);
+});
+
+/* ─── Filters ─── */
+function setupFilters() {
+  document.querySelectorAll('.filter-pill[data-filter]').forEach(pill => {
+    pill.addEventListener('click', () => {
+      activeType = pill.dataset.filter;
+      refreshResults();
+    });
+  });
+
+  document.getElementById('searchBtn').addEventListener('click', doSearch);
+  document.getElementById('searchInput').addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+  document.getElementById('bedroomsFilter').addEventListener('change', e => { activeBeds = e.target.value; refreshResults(); });
+  document.getElementById('maxRentFilter').addEventListener('change', e => { activeMaxRent = e.target.value; refreshResults(); });
+  document.getElementById('sortSelect').addEventListener('change', e => { sortBy = e.target.value; refreshResults(); });
+
+  document.getElementById('moreFiltersBtn').addEventListener('click', e => {
+    e.stopPropagation();
+    const dropdown = document.getElementById('moreFiltersDropdown');
+    dropdown.classList.toggle('open');
+    // Persist filter dropdown state to sessionStorage on mobile
+    const isOpen = dropdown.classList.contains('open');
+    sessionStorage.setItem('filters_dropdown_open', isOpen ? 'true' : 'false');
+  });
+  document.addEventListener('click', e => {
+    if (!document.getElementById('moreFiltersWrap').contains(e.target)) {
+      document.getElementById('moreFiltersDropdown').classList.remove('open');
+      sessionStorage.setItem('filters_dropdown_open', 'false');
+    }
+  });
+
+  document.getElementById('applyAdvFilters').addEventListener('click', () => {
+    activeMinRent  = document.getElementById('advMinRent').value;
+    activeMaxRent  = document.getElementById('advMaxRent').value || activeMaxRent;
+    activeMinBaths = document.getElementById('advMinBaths').value;
+    const advType = document.getElementById('advTypeFilter').value;
+    const advBeds = document.getElementById('advMinBeds').value;
+    if (advType) activeType = advType;
+    if (advBeds !== '') activeBeds = advBeds;
+    document.getElementById('moreFiltersDropdown').classList.remove('open');
+    sessionStorage.setItem('filters_dropdown_open', 'false');
+    refreshResults();
+    showToast('Filters applied', 'success');
+  });
+
+  document.getElementById('clearAdvFilters').addEventListener('click', () => {
+    ['advTypeFilter','advMinBeds','advMinBaths','advMinRent','advMaxRent'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    window.clearAllFilters();
+    document.getElementById('moreFiltersDropdown').classList.remove('open');
+    sessionStorage.setItem('filters_dropdown_open', 'false');
+  });
+}
+
+window.clearAllFilters = function() {
+  activeType = 'all'; activeSearch = ''; activeBeds = '';
+  activeMaxRent = ''; activeMinRent = ''; activeMinBaths = '';
+  sortBy = 'newest'; currentPage = 1;
+  syncControls();
+  pushURL(true);
+  fetchAndRender();
+};
+
+function doSearch() {
+  activeSearch = document.getElementById('searchInput').value.trim();
+  refreshResults();
+}
+
+function updateFilterBadge() {
+  const badge = document.getElementById('filterActiveBadge');
+  if (!badge) return;
+  const count = [activeType && activeType !== 'all', !!activeBeds, !!activeMaxRent, !!activeMinRent, !!activeMinBaths, !!activeSearch].filter(Boolean).length;
+  if (count > 0) { badge.textContent = count; badge.style.display = 'inline-flex'; }
+  else badge.style.display = 'none';
+}
+
+/* ─── Utilities ─── */
+
+function setupScrollTop() {
+  const btn = document.getElementById('scrollTopBtn');
+  if (!btn) return;
+  window.addEventListener('scroll', () => btn.classList.toggle('visible', window.scrollY > 400), { passive: true });
+  btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+}
+
+function renderError(errorMsg = 'Failed to load listings') {
+  const grid = document.getElementById('propertyGrid');
+  if (!grid) return;
+  grid.innerHTML = `
+    <div class="empty-state" style="grid-column:1/-1;text-align:center;padding:var(--space-16) var(--space-6)">
+      <div class="empty-state-icon"><i class="fas fa-exclamation-triangle" style="font-size:48px;color:var(--color-error);margin-bottom:16px;opacity:0.7"></i></div>
+      <h3 style="margin:var(--space-4) 0 var(--space-2);color:var(--color-text-primary);font-size:1.1rem">Something went wrong</h3>
+      <p style="color:var(--color-text-secondary);margin-bottom:24px;max-width:360px;margin-left:auto;margin-right:auto;line-height:1.5">
+        ${errorMsg || 'We couldn\'t load listings from the server. Please check your connection and try again.'}
+      </p>
+      <button onclick="location.reload()" style="background:var(--color-brand);color:#fff;border:none;border-radius:8px;padding:12px 28px;cursor:pointer;font-size:0.9rem;font-weight:500;transition:background 160ms ease">
+        <i class="fas fa-redo" style="margin-right:6px"></i>Retry
+      </button>
+    </div>`;
+}
+
+
+function showToast(msg, type = 'info') {
+  const c = document.getElementById('toastContainer');
+  if (!c) return;
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  const icons = { success: 'check-circle', error: 'exclamation-circle', info: 'info-circle' };
+  t.innerHTML = `<i class="fas fa-${icons[type] || 'info-circle'}"></i> ${msg}`;
+  c.appendChild(t);
+  const duration = type === 'error' ? 5000 : 3200;
+  setTimeout(() => {
+    t.style.opacity = '0';
+    t.style.transform = 'translateY(6px) scale(0.97)';
+    t.style.transition = 'all 280ms';
+    setTimeout(() => t.remove(), 280);
+  }, duration);
+}
+
+function toggleSave(id, btn) {
+  if (savedIds.has(id)) {
+    savedIds.delete(id);
+    btn.classList.remove('saved');
+    btn.innerHTML = '<i class="far fa-heart"></i>';
+  } else {
+    savedIds.add(id);
+    btn.classList.add('saved');
+    btn.innerHTML = '<i class="fas fa-heart"></i>';
+    showToast('Property saved!', 'success');
+  }
+  localStorage.setItem('cp_saved', JSON.stringify([...savedIds]));
+}
+
+/* ─── Mobile Drawer ─── */
+</script>
+</body>
+</html>

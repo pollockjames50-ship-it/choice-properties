@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="theme-color" content="#006aff">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Create Account — Choice Properties</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="stylesheet" href="/assets/fontawesome.css">
+    <link rel="preload" href="/css/main.css?v=1775137055043" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/css/main.css?v=1775137055043"></noscript>
+  <link rel="stylesheet" href="/css/landlord.css?v=1775137055043">
+  <link rel="stylesheet" href="/css/admin.css?v=1775137055043">
+  <link rel="preload" href="/css/mobile.css?v=1775137055043" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/css/mobile.css?v=1775137055043"></noscript>
+  <style>
+    .pw-strength-bar { height:4px; border-radius:2px; background:var(--slate-pale); margin-top:8px; overflow:hidden; }
+    .pw-strength-fill { height:100%; border-radius:2px; transition:width 300ms,background 300ms; width:0%; }
+    .pw-strength-label { font-size:12px; margin-top:4px; font-weight:500; }
+    .auth-divider { display:flex; align-items:center; gap:var(--space-3); color:var(--slate-light); font-size:13px; margin:var(--space-4) 0; }
+    .auth-divider::before, .auth-divider::after { content:''; flex:1; height:1px; background:var(--slate-pale); }
+    .form-group { margin-bottom:var(--space-4); }
+
+    /* Account type grid */
+    .acct-type-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:4px; }
+    .acct-type-option { position:relative; }
+    .acct-type-option input[type=radio] { position:absolute; opacity:0; width:0; height:0; }
+    .acct-type-label {
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:6px; padding:14px 10px; border:1.5px solid var(--slate-pale);
+      border-radius:var(--radius-sm); cursor:pointer; text-align:center;
+      font-size:12.5px; font-weight:600; color:var(--slate);
+      transition:border-color 150ms, background 150ms, color 150ms;
+      background:#fff;
+    }
+    .acct-type-label i { font-size:18px; color:var(--slate-light); transition:color 150ms; }
+    .acct-type-option input:checked + .acct-type-label {
+      border-color:var(--color-brand-light); background:var(--gold-pale); color:#8a6000;
+    }
+    .acct-type-option input:checked + .acct-type-label i { color:var(--color-brand-light); }
+    .acct-type-label:hover { border-color:#c8a040; background:#fffdf0; }
+
+    /* Avatar upload */
+    .avatar-upload-wrap { display:flex; align-items:center; gap:var(--space-5); margin-bottom:var(--space-4); }
+    .avatar-preview {
+      width:80px; height:80px; border-radius:50%; border:2.5px solid var(--slate-pale);
+      object-fit:cover; background:var(--color-surface-page); display:flex; align-items:center;
+      justify-content:center; font-size:28px; color:var(--slate-light); flex-shrink:0;
+      overflow:hidden;
+    }
+    .avatar-preview img { width:100%; height:100%; object-fit:cover; display:none; }
+    .avatar-upload-btn {
+      display:inline-flex; align-items:center; gap:8px; padding:8px 16px;
+      border:1.5px solid var(--slate-pale); border-radius:var(--radius-sm); background:#fff;
+      font-size:13px; font-weight:600; color:var(--slate); cursor:pointer;
+      transition:border-color 150ms, background 150ms;
+    }
+    .avatar-upload-btn:hover { border-color:var(--color-brand-light); background:var(--gold-pale); color:#8a6000; }
+    .avatar-upload-hint { font-size:12px; color:var(--slate-light); margin-top:4px; }
+  </style>
+<script defer src="/config.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script type="module" src="/js/cp-api.js"></script>
+</head>
+<body>
+
+<div class="auth-page">
+  <div class="auth-side">
+    <div class="auth-side-bg"></div>
+    <a href="/index.html" class="auth-side-logo">
+      <div class="nav-logo-mark">C</div>
+      <div>
+        <div class="nav-logo-text">Choice Properties</div>
+        <div class="nav-logo-sub">Join the Marketplace</div>
+      </div>
+    </a>
+    <div class="auth-side-content">
+      <h2 class="auth-side-title">Reach <em>Qualified</em><br>Tenants Faster</h2>
+      <p class="auth-side-desc">Join America's fastest-growing rental marketplace. List your property today and start receiving applications in 24 hours.</p>
+      <ul class="auth-side-features">
+        <li><div class="auth-feature-icon"><i class="fas fa-check"></i></div><span>Free to create an account and list your first property</span></li>
+        <li><div class="auth-feature-icon"><i class="fas fa-check"></i></div><span>Online applications with built-in screening flow</span></li>
+        <li><div class="auth-feature-icon"><i class="fas fa-check"></i></div><span>Digital lease signing — no printing required</span></li>
+        <li><div class="auth-feature-icon"><i class="fas fa-check"></i></div><span>24/7 support from our nationwide team</span></li>
+      </ul>
+    </div>
+    <div class="auth-side-foot">© 2026 Choice Properties. All rights reserved.</div>
+  </div>
+
+  <div class="auth-form-wrap">
+    <div class="auth-form-inner">
+      <div class="auth-form-title">Create your account</div>
+      <p class="auth-form-subtitle">Already have an account? <a href="/landlord/login.html">Sign in →</a></p>
+
+      <div id="errorBox" style="display:none;background:#fef2f2;border:1px solid #fecaca;border-radius:var(--r);padding:12px 16px;font-size:14px;color:var(--crimson);margin-bottom:var(--s-5);gap:8px;align-items:center">
+        <i class="fas fa-exclamation-circle"></i>
+        <span id="errorMsg"></span>
+      </div>
+
+      <form id="registerForm" onsubmit="event.preventDefault(); document.getElementById('registerBtn').click()">
+
+      <!-- Account Type -->
+      <div class="form-group">
+        <label class="form-label">Account Type *</label>
+        <div class="acct-type-grid">
+          <div class="acct-type-option">
+            <input type="radio" name="accountType" id="at_landlord" value="landlord" checked>
+            <label class="acct-type-label" for="at_landlord">
+              <i class="fas fa-home"></i>Landlord
+            </label>
+          </div>
+          <div class="acct-type-option">
+            <input type="radio" name="accountType" id="at_owner" value="property_owner">
+            <label class="acct-type-label" for="at_owner">
+              <i class="fas fa-building"></i>Property Owner
+            </label>
+          </div>
+          <div class="acct-type-option">
+            <input type="radio" name="accountType" id="at_realtor" value="realtor">
+            <label class="acct-type-label" for="at_realtor">
+              <i class="fas fa-id-badge"></i>Realtor
+            </label>
+          </div>
+          <div class="acct-type-option">
+            <input type="radio" name="accountType" id="at_brokerage" value="brokerage">
+            <label class="acct-type-label" for="at_brokerage">
+              <i class="fas fa-briefcase"></i>Brokerage
+            </label>
+          </div>
+          <div class="acct-type-option">
+            <input type="radio" name="accountType" id="at_agency" value="agency">
+            <label class="acct-type-label" for="at_agency">
+              <i class="fas fa-user-tie"></i>Agency
+            </label>
+          </div>
+          <div class="acct-type-option">
+            <input type="radio" name="accountType" id="at_llc" value="llc">
+            <label class="acct-type-label" for="at_llc">
+              <i class="fas fa-landmark"></i>LLC
+            </label>
+          </div>
+          <div class="acct-type-option" style="grid-column:1/-1">
+            <input type="radio" name="accountType" id="at_pm" value="property_management">
+            <label class="acct-type-label" for="at_pm" style="flex-direction:row;justify-content:center;gap:10px">
+              <i class="fas fa-city"></i>Property Management Company
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Avatar Upload -->
+      <div class="form-group">
+        <label class="form-label">Profile Photo <span style="font-weight:400;color:#8892a2">(optional)</span></label>
+        <div class="avatar-upload-wrap">
+          <div class="avatar-preview" id="avatarPreview">
+            <img id="avatarImg" src="" alt="" loading="lazy">
+            <i class="fas fa-user" id="avatarIcon"></i>
+          </div>
+          <div>
+            <label class="avatar-upload-btn" for="avatarFile">
+              <i class="fas fa-camera"></i> Upload Photo
+            </label>
+            <input type="file" id="avatarFile" accept="image/*" style="display:none">
+            <div class="avatar-upload-hint">JPG or PNG · Max 5MB</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="auth-form-row">
+        <div class="form-group">
+          <label class="form-label">First Name *</label>
+          <input type="text" class="form-input" id="firstName" placeholder="John" autocomplete="given-name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Last Name *</label>
+          <input type="text" class="form-input" id="lastName" placeholder="Smith" autocomplete="family-name">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Business / Company Name <span style="font-weight:400;color:#8892a2">(optional)</span></label>
+        <input type="text" class="form-input" id="businessName" placeholder="Smith Properties LLC">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Email Address *</label>
+        <input type="email" class="form-input" id="emailInput" placeholder="you@example.com" autocomplete="email">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Phone Number *</label>
+        <input type="tel" class="form-input" id="phoneInput" placeholder="(555) 000-0000" autocomplete="tel">
+      </div>
+
+      <div class="form-group" style="position:relative">
+        <label class="form-label">Password *</label>
+        <input type="password" class="form-input" id="passwordInput" placeholder="At least 8 characters" autocomplete="new-password">
+        <button type="button" id="togglePw" style="position:absolute;right:14px;top:38px;background:none;border:none;color:#8892a2;cursor:pointer;font-size:15px">
+          <i class="fas fa-eye"></i>
+        </button>
+        <div class="pw-strength-bar"><div class="pw-strength-fill" id="strengthFill"></div></div>
+        <div class="pw-strength-label" id="strengthLabel" style="color:var(--slate-light)"></div>
+      </div>
+
+      <div class="form-group" style="position:relative">
+        <label class="form-label">Confirm Password *</label>
+        <input type="password" class="form-input" id="passwordConfirm" placeholder="Re-enter your password" autocomplete="new-password">
+        <button type="button" id="togglePw2" style="position:absolute;right:14px;top:38px;background:none;border:none;color:#8892a2;cursor:pointer;font-size:15px">
+          <i class="fas fa-eye"></i>
+        </button>
+        <div id="matchMsg" style="font-size:12px;margin-top:4px;font-weight:500"></div>
+      </div>
+
+      <div style="display:flex;align-items:flex-start;gap:var(--s-3);margin-bottom:var(--s-6)">
+        <input type="checkbox" id="termsCheck" style="margin-top:3px;accent-color:#2563eb;flex-shrink:0">
+        <label for="termsCheck" style="font-size:13px;color:var(--slate);line-height:1.5;cursor:pointer">
+          I agree to the <a href="/terms.html" target="_blank" style="color:var(--gold)">Terms of Service</a> and
+          <a href="/privacy.html" target="_blank" style="color:var(--gold)">Privacy Policy</a>. I confirm I am a property owner or authorized representative.
+        </label>
+      </div>
+
+      <button class="btn btn-dark btn-full btn-lg" id="registerBtn">
+        <i class="fas fa-user-plus"></i> Create Account
+      </button>
+
+      </form>
+
+      <p style="margin-top:var(--s-5);font-size:13px;color:#8892a2;text-align:center;line-height:1.6">
+        After registration you can log in immediately and submit your first listing.
+      </p>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { signUp, getSession } from '../js/cp-api.js';
+  import { supabase } from '../js/cp-api.js';
+
+  getSession().then(s => { if (s) window.location.href = '/landlord/dashboard.html'; });
+
+  // Avatar preview
+  const avatarFile = document.getElementById('avatarFile');
+  const avatarImg  = document.getElementById('avatarImg');
+  const avatarIcon = document.getElementById('avatarIcon');
+  let avatarDataUrl = null;
+
+  avatarFile.addEventListener('change', () => {
+    const file = avatarFile.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { showError('Avatar must be under 5MB.'); avatarFile.value=''; return; }
+    const reader = new FileReader();
+    reader.onload = e => {
+      avatarDataUrl = e.target.result;
+      avatarImg.src = avatarDataUrl;
+      avatarImg.style.display = 'block';
+      avatarIcon.style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // Toggle password visibility
+  function makeToggle(btnId, inputId) {
+    document.getElementById(btnId).addEventListener('click', () => {
+      const inp  = document.getElementById(inputId);
+      const icon = document.querySelector(`#${btnId} i`);
+      inp.type   = inp.type === 'password' ? 'text' : 'password';
+      icon.className = inp.type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+    });
+  }
+  makeToggle('togglePw', 'passwordInput');
+  makeToggle('togglePw2', 'passwordConfirm');
+
+  // Password strength
+  const pwInput   = document.getElementById('passwordInput');
+  const fillEl    = document.getElementById('strengthFill');
+  const labelEl   = document.getElementById('strengthLabel');
+  pwInput.addEventListener('input', () => {
+    const pw = pwInput.value;
+    let score = 0;
+    if (pw.length >= 8)  score++;
+    if (pw.length >= 12) score++;
+    if (/[A-Z]/.test(pw)) score++;
+    if (/[0-9]/.test(pw)) score++;
+    if (/[^A-Za-z0-9]/.test(pw)) score++;
+    const levels = [
+      { pct:'0%',   color:'var(--slate-pale)', label:'',            labelColor:'var(--slate-light)' },
+      { pct:'25%',  color:'var(--crimson)',     label:'Weak',        labelColor:'var(--crimson)' },
+      { pct:'50%',  color:'#f59e0b',            label:'Fair',        labelColor:'#b45309' },
+      { pct:'75%',  color:'var(--gold)',         label:'Good',        labelColor:'var(--gold)' },
+      { pct:'90%',  color:'#22c55e',             label:'Strong',      labelColor:'#15803d' },
+      { pct:'100%', color:'#16a34a',             label:'Very Strong', labelColor:'#14532d' },
+    ];
+    const level = levels[Math.min(score, 5)];
+    fillEl.style.width      = pw.length ? level.pct : '0%';
+    fillEl.style.background = level.color;
+    labelEl.textContent     = pw.length ? level.label : '';
+    labelEl.style.color     = level.labelColor;
+  });
+
+  // Password match
+  const pwConfirm = document.getElementById('passwordConfirm');
+  const matchMsg  = document.getElementById('matchMsg');
+  function checkMatch() {
+    if (!pwConfirm.value) { matchMsg.textContent = ''; return; }
+    if (pwInput.value === pwConfirm.value) {
+      matchMsg.textContent = '✓ Passwords match'; matchMsg.style.color = 'var(--emerald)';
+    } else {
+      matchMsg.textContent = '✗ Passwords do not match'; matchMsg.style.color = 'var(--crimson)';
+    }
+  }
+  pwConfirm.addEventListener('input', checkMatch);
+  pwInput.addEventListener('input', () => { if (pwConfirm.value) checkMatch(); });
+
+  // Register
+  document.getElementById('registerBtn').addEventListener('click', async () => {
+    const firstName    = document.getElementById('firstName').value.trim();
+    const lastName     = document.getElementById('lastName').value.trim();
+    const businessName = document.getElementById('businessName').value.trim();
+    const email        = document.getElementById('emailInput').value.trim();
+    const phone        = document.getElementById('phoneInput').value.trim();
+    const password     = pwInput.value;
+    const confirm      = pwConfirm.value;
+    const terms        = document.getElementById('termsCheck').checked;
+    const accountType  = document.querySelector('input[name="accountType"]:checked')?.value || 'landlord';
+
+    if (!firstName || !lastName) return showError('Please enter your full name.');
+    if (!email)                  return showError('Please enter your email address.');
+    if (!phone)                  return showError('Please enter your phone number.');
+    if (password.length < 8)     return showError('Password must be at least 8 characters.');
+    if (password !== confirm)    return showError('Passwords do not match.');
+    if (!terms)                  return showError('Please agree to the terms to continue.');
+
+    const btn = document.getElementById('registerBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Creating account…';
+
+    try {
+      const result = await signUp(email, password, {
+        contact_name  : `${firstName} ${lastName}`,
+        business_name : businessName || null,
+        phone,
+        account_type  : accountType,
+        avatar_url    : null
+      });
+
+      // Upload avatar AFTER account is created — prevents orphaned files if signUp fails
+      // I-068: Avatar upload error handling — don't block signup if upload fails
+      if (avatarFile.files[0] && supabase && result?.user) {
+        const file = avatarFile.files[0];
+        const ext  = file.name.split('.').pop();
+        const path = `avatars/${result.user.id}.${ext}`;
+        try {
+          const { data: uploadData, error: uploadErr } = await supabase.storage
+            .from('profile-photos').upload(path, file, { cacheControl:'3600', upsert:false });
+          if (!uploadErr && uploadData) {
+            try {
+              const { data: urlData } = supabase.storage.from('profile-photos').getPublicUrl(path);
+              const avatarUrl = urlData?.publicUrl || null;
+              if (avatarUrl) {
+                await supabase.from('landlords').update({ avatar_url: avatarUrl }).eq('user_id', result.user.id);
+              }
+            } catch (e) {
+              console.warn('Avatar URL update failed:', e);
+            }
+          } else if (uploadErr) {
+            console.warn('Avatar upload failed:', uploadErr);
+            CP.UI.toast('Account created! Your profile photo couldn\'t be uploaded. You can add it later in Settings.', 'warning');
+          }
+        } catch (avatarErr) {
+          console.error('Avatar upload encountered an error:', avatarErr);
+          CP.UI.toast('Account created! Your profile photo couldn\'t be uploaded. You can add it later in Settings.', 'warning');
+        }
+      }
+
+      // Check if Supabase returned an active session (email confirmation disabled)
+      // or if it needs email confirmation first
+      const hasSession = !!(result?.session);
+
+      if (hasSession) {
+        // Session is live — go straight to dashboard
+        window.location.href = '/landlord/dashboard.html';
+        return;
+      }
+
+      // P1-F: Email confirmation required — show full-page success state with resend option
+      document.querySelector('.auth-form-inner').innerHTML = `
+        <div style="text-align:center;padding:var(--s-8) 0">
+          <div style="width:72px;height:72px;background:#dbeafe;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto var(--s-5);font-size:28px;color:#2563eb">
+            <i class="fas fa-envelope"></i>
+          </div>
+          <h2 style="font-family:var(--font-display);font-size:28px;color:#0e0e0f;margin-bottom:var(--s-3)">Check Your Email</h2>
+          <p style="color:var(--slate);font-size:15px;line-height:1.6;max-width:380px;margin:0 auto var(--s-4)">
+            We sent a confirmation link to <strong>${email}</strong>. Click it to activate your account, then sign in.
+          </p>
+          <p style="color:#8892a2;font-size:13px;max-width:340px;margin:0 auto var(--s-4)">
+            Don't see it? Check your spam folder. The link expires in 24 hours.
+          </p>
+          <div id="resendMsg" style="display:none;margin:0 auto var(--s-4);max-width:340px;font-size:13px;padding:10px 14px;border-radius:6px;background:#e8f8f0;border:1px solid #6ee7b7;color:#065f46"></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+            <a href="/landlord/login.html" class="btn btn-dark btn-lg">
+              <i class="fas fa-sign-in-alt"></i> Go to Sign In
+            </a>
+            <button id="resendBtn" style="background:none;border:none;color:#2563eb;font-size:13px;cursor:pointer;text-decoration:underline;padding:4px 8px">
+              Resend confirmation email
+            </button>
+          </div>
+        </div>`;
+
+      // P1-F: Wire up the resend button using supabase.auth.resend()
+      document.getElementById('resendBtn').addEventListener('click', async () => {
+        const btn = document.getElementById('resendBtn');
+        const msgEl = document.getElementById('resendMsg');
+        btn.disabled = true;
+        btn.textContent = 'Sending…';
+        try {
+          const { error } = await supabase.auth.resend({ type: 'signup', email });
+          if (error) throw error;
+          msgEl.style.display = 'block';
+          msgEl.textContent = 'Confirmation email resent! Check your inbox (and spam folder).';
+          btn.textContent = 'Email resent';
+        } catch (err) {
+          msgEl.style.display = 'block';
+          msgEl.style.background = '#fef2f2';
+          msgEl.style.borderColor = '#fecaca';
+          msgEl.style.color = 'var(--crimson)';
+          msgEl.textContent = err.message || 'Failed to resend. Please try again in a moment.';
+          btn.disabled = false;
+          btn.textContent = 'Resend confirmation email';
+        }
+      });
+    } catch (err) {
+      showError(err.message || 'Registration failed. Please try again.');
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-user-plus"></i> Create Account';
+    }
+  });
+
+  function showError(msg) {
+    const box = document.getElementById('errorBox');
+    box.style.display = 'flex';
+    document.getElementById('errorMsg').textContent = msg;
+  }
+</script>
+
+</body>
+</html>

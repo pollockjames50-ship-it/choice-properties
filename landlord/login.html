@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="theme-color" content="#006aff">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="preconnect" id="sb-preconnect"><!-- set by config.js -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Landlord Login — Choice Properties</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="stylesheet" href="/assets/fontawesome.css">
+    <link rel="preload" href="/css/main.css?v=1775137055043" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/css/main.css?v=1775137055043"></noscript>
+  <link rel="stylesheet" href="/css/landlord.css?v=1775137055043">
+  <link rel="stylesheet" href="/css/admin.css?v=1775137055043">
+  <link rel="preload" href="/css/mobile.css?v=1775137055043" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/css/mobile.css?v=1775137055043"></noscript>
+<style>
+    .auth-divider { display:flex; align-items:center; gap:var(--space-3); color:var(--slate-light); font-size:13px; margin: var(--space-4) 0; }
+    .auth-divider::before, .auth-divider::after { content:''; flex:1; height:1px; background:var(--slate-pale); }
+    .auth-error { display:none; background:var(--crimson-bg); border:1px solid rgba(192,57,43,0.2); border-radius:var(--radius-sm); padding:12px 16px; font-size:13.5px; color:var(--crimson); margin-bottom:var(--space-5); gap:8px; align-items:center; }
+    .auth-error.visible { display:flex; }
+    .form-group { margin-bottom: var(--space-4); }
+  </style>
+<script defer src="/config.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script type="module" src="/js/cp-api.js"></script>
+</head>
+<body>
+
+<div class="auth-page">
+
+  <!-- Left side -->
+  <div class="auth-side">
+    <div class="auth-side-bg"></div>
+    <a href="/index.html" class="auth-side-logo">
+      <div class="nav-logo-mark">C</div>
+      <div>
+        <div class="nav-logo-text">Choice Properties</div>
+        <div class="nav-logo-sub">Landlord Portal</div>
+      </div>
+    </a>
+
+    <div class="auth-side-content">
+      <h2 class="auth-side-title">
+        Manage Your<br><em>Properties</em><br>With Ease
+      </h2>
+      <p class="auth-side-desc">
+        List your rentals, receive qualified applications, and track everything in one place.
+      </p>
+      <ul class="auth-side-features">
+        <li>
+          <div class="auth-feature-icon"><i class="fas fa-check"></i></div>
+          <span>Receive and review tenant applications instantly</span>
+        </li>
+        <li>
+          <div class="auth-feature-icon"><i class="fas fa-check"></i></div>
+          <span>Manage listings with photos, pricing, and availability</span>
+        </li>
+        <li>
+          <div class="auth-feature-icon"><i class="fas fa-check"></i></div>
+          <span>Send digital leases and track signatures</span>
+        </li>
+        <li>
+          <div class="auth-feature-icon"><i class="fas fa-check"></i></div>
+          <span>Free to list — pay only when you find a tenant</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="auth-side-foot">© 2026 Choice Properties. </div>
+  </div>
+
+  <!-- Right side — form -->
+  <div class="auth-form-wrap">
+    <div class="auth-form-inner">
+      <div class="auth-form-title">Welcome back</div>
+      <p class="auth-form-subtitle">
+        Sign in to manage your listings.
+        No account? <a href="/landlord/register.html">Create one free →</a>
+      </p>
+
+      <div id="errorBox" class="auth-error">
+        <i class="fas fa-exclamation-circle"></i>
+        <span id="errorMsg"></span>
+      </div>
+
+      <form id="loginForm" onsubmit="event.preventDefault(); document.getElementById('loginBtn').click()">
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" class="form-input" id="emailInput" placeholder="you@example.com" autocomplete="email">
+      </div>
+
+      <div class="form-group" style="position:relative">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-input" id="passwordInput" placeholder="Your password" autocomplete="current-password">
+        <button type="button" id="togglePw" style="position:absolute;right:14px;top:38px;background:none;border:none;color:#8892a2;cursor:pointer;font-size:15px">
+          <i class="fas fa-eye"></i>
+        </button>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;margin-top:-8px;margin-bottom:var(--s-5)">
+        <a href="#" id="forgotLink" style="font-size:13px;color:#2563eb">Forgot password?</a>
+      </div>
+
+      <button type="submit" class="btn btn-dark btn-full btn-lg" id="loginBtn">
+        <i class="fas fa-sign-in-alt"></i> Sign In
+      </button>
+      </form>
+
+      <div class="auth-divider">or</div>
+
+      <a href="/landlord/register.html" class="btn btn-outline btn-full" style="justify-content:center">
+        Create a Landlord Account
+      </a>
+
+      <p style="margin-top:var(--s-6);font-size:13px;color:#8892a2;text-align:center">
+        <i class="fas fa-shield-alt" style="color:var(--gold)"></i>
+        Your account is secured with industry-standard encryption.
+      </p>
+    </div>
+  </div>
+
+</div>
+
+<script type="module">
+  import { signIn, resetPassword, getSession } from '../js/cp-api.js';
+
+  // ── Password Recovery Handler ─────────────────────────────────────────────
+  // Supabase appends #access_token=...&type=recovery to the redirectTo URL.
+  // We parse that hash here and swap the login form for a "set new password" UI.
+  const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+  if (hashParams.get('type') === 'recovery') {
+    const accessToken = hashParams.get('access_token');
+    // Swap the form inner content immediately so the user sees the right UI
+    document.querySelector('.auth-form-inner').innerHTML = `
+      <div class="auth-form-title">Set New Password</div>
+      <p class="auth-form-subtitle">Choose a new password for your account.</p>
+
+      <div id="resetErrorBox" class="auth-error" style="display:none">
+        <i class="fas fa-exclamation-circle"></i>
+        <span id="resetErrorMsg"></span>
+      </div>
+
+      <div class="form-group" style="position:relative">
+        <label class="form-label">New Password</label>
+        <input type="password" class="form-input" id="newPwInput" placeholder="At least 8 characters" autocomplete="new-password">
+        <button type="button" id="toggleNewPw" style="position:absolute;right:14px;top:38px;background:none;border:none;color:#8892a2;cursor:pointer;font-size:15px">
+          <i class="fas fa-eye"></i>
+        </button>
+      </div>
+
+      <div class="form-group" style="position:relative">
+        <label class="form-label">Confirm New Password</label>
+        <input type="password" class="form-input" id="confirmPwInput" placeholder="Re-enter new password" autocomplete="new-password">
+        <button type="button" id="toggleConfirmPw" style="position:absolute;right:14px;top:38px;background:none;border:none;color:#8892a2;cursor:pointer;font-size:15px">
+          <i class="fas fa-eye"></i>
+        </button>
+      </div>
+
+      <button class="btn btn-dark btn-full btn-lg" id="setPasswordBtn">
+        <i class="fas fa-key"></i> Set New Password
+      </button>
+
+      <p style="margin-top:var(--s-4);font-size:13px;color:#8892a2;text-align:center">
+        <a href="/landlord/login.html" style="color:var(--blue)">← Back to sign in</a>
+      </p>
+    `;
+
+    // Wire toggle buttons
+    function makeToggle(btnId, inputId) {
+      document.getElementById(btnId)?.addEventListener('click', () => {
+        const inp = document.getElementById(inputId);
+        const icon = document.querySelector(`#${btnId} i`);
+        inp.type = inp.type === 'password' ? 'text' : 'password';
+        icon.className = inp.type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+      });
+    }
+    makeToggle('toggleNewPw', 'newPwInput');
+    makeToggle('toggleConfirmPw', 'confirmPwInput');
+
+    function showResetError(msg, type = 'error') {
+      const box = document.getElementById('resetErrorBox');
+      box.style.display = 'flex';
+      if (type === 'success') {
+        box.style.background = '#e8f8f0';
+        box.style.borderColor = '#6ee7b7';
+        box.style.color = 'var(--emerald)';
+        box.querySelector('i').className = 'fas fa-check-circle';
+      } else {
+        box.style.background = '';
+        box.style.borderColor = '';
+        box.style.color = '';
+        box.querySelector('i').className = 'fas fa-exclamation-circle';
+      }
+      document.getElementById('resetErrorMsg').textContent = msg;
+    }
+
+    document.getElementById('setPasswordBtn').addEventListener('click', async () => {
+      const pw  = document.getElementById('newPwInput').value;
+      const pw2 = document.getElementById('confirmPwInput').value;
+      if (!pw || pw.length < 8)  return showResetError('Password must be at least 8 characters.');
+      if (pw !== pw2)             return showResetError('Passwords do not match.');
+
+      const btn = document.getElementById('setPasswordBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Saving…';
+
+      try {
+        // Set the session from the recovery token so updateUser works
+        const supabase = CP.sb();
+        const { error: sessionErr } = await supabase.auth.setSession({
+          access_token:  accessToken,
+          refresh_token: hashParams.get('refresh_token') || '',
+        });
+        if (sessionErr) throw sessionErr;
+
+        const { error } = await supabase.auth.updateUser({ password: pw });
+        if (error) throw error;
+
+        showResetError('Password updated! Redirecting to sign in…', 'success');
+        setTimeout(() => {
+          window.location.href = '/landlord/login.html';
+        }, 2000);
+      } catch (err) {
+        showResetError(err.message || 'Failed to update password. The link may have expired.');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-key"></i> Set New Password';
+      }
+    });
+
+    // Stop here — don't run the regular login logic below
+    throw new Error('Recovery mode — login script halted intentionally.');
+  }
+
+  // ── Normal Login Flow ─────────────────────────────────────────────────────
+
+  // Already logged in? Go to dashboard
+  getSession().then(session => {
+    if (session) window.location.href = '/landlord/dashboard.html';
+  });
+
+  // Toggle password visibility
+  document.getElementById('togglePw').addEventListener('click', () => {
+    const input = document.getElementById('passwordInput');
+    const icon  = document.querySelector('#togglePw i');
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.className = 'fas fa-eye-slash';
+    } else {
+      input.type = 'password';
+      icon.className = 'fas fa-eye';
+    }
+  });
+
+  // Sign in
+  document.getElementById('loginBtn').addEventListener('click', async () => {
+    const email    = document.getElementById('emailInput').value.trim();
+    const password = document.getElementById('passwordInput').value;
+
+    if (!email || !password) return showError('Please enter your email and password.');
+
+    const btn = document.getElementById('loginBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Signing in…';
+
+    try {
+      await signIn(email, password);
+      window.location.href = '/landlord/dashboard.html';
+    } catch (err) {
+      showError(err.message || 'Invalid email or password. Please try again.');
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In';
+    }
+  });
+
+  // Enter key — email focuses password; password submits
+  document.getElementById('emailInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('passwordInput').focus();
+  });
+  document.getElementById('passwordInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('loginBtn').click();
+  });
+
+  // Forgot password
+  document.getElementById('forgotLink').addEventListener('click', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('emailInput').value.trim();
+    if (!email) return showError('Enter your email address first.');
+    try {
+      await resetPassword(email);
+      showError('Password reset email sent! Check your inbox.', 'success');
+    } catch (err) {
+      showError(err.message || 'Failed to send reset email.');
+    }
+  });
+
+  function showError(msg, type = 'error') {
+    const box = document.getElementById('errorBox');
+    box.classList.add('visible'); box.style.display = 'flex';
+    if (type === 'success') {
+      box.style.background = '#e8f8f0';
+      box.style.borderColor = '#6ee7b7';
+      box.style.color = 'var(--emerald)';
+      box.querySelector('i').className = 'fas fa-check-circle';
+    }
+    document.getElementById('errorMsg').textContent = msg;
+  }
+</script>
+
+</body>
+</html>

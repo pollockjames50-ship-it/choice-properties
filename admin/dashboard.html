@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+  <meta name="theme-color" content="#006aff">
+  <link rel="manifest" href="/manifest.json"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin Dashboard — Choice Properties</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <script defer src="/config.js"></script>
+<link rel="preload" href="/css/main.css?v=1775137055043" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/css/main.css?v=1775137055043"></noscript>
+<link rel="stylesheet" href="/assets/fontawesome.css">
+  <link rel="stylesheet" href="/css/admin.css?v=1775137055043">
+  <link rel="preload" href="/css/mobile.css?v=1775137055043" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/css/mobile.css?v=1775137055043"></noscript>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="sidebar" id="adminSidebar">
+  <div class="sidebar-logo"><div class="name">Choice Properties</div><div class="sub">Admin Portal</div></div>
+  <nav>
+    <div class="nav-section">Overview</div>
+    <a class="nav-item active" href="dashboard.html"><span class="icon">⊞</span> Dashboard</a>
+    <div class="nav-section">Applications</div>
+    <a class="nav-item" href="applications.html"><span class="icon">📋</span> All Applications</a>
+    <a class="nav-item" href="leases.html"><span class="icon">📄</span> Leases</a>
+    <a class="nav-item" href="move-ins.html"><span class="icon">🏠</span> Move-Ins</a>
+    <a class="nav-item" href="messages.html"><span class="icon">💬</span> Messages</a>
+    <div class="nav-section">Platform</div>
+    <a class="nav-item" href="landlords.html"><span class="icon">👤</span> Landlords</a>
+    <a class="nav-item" href="listings.html"><span class="icon">🏢</span> Listings</a>
+    <a class="nav-item" href="email-logs.html"><span class="icon">📧</span> Email Logs</a>
+    <a class="nav-item" href="audit-log.html"><span class="icon">🔍</span> Audit Log</a>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="/index.html" target="_blank" style="display:block;font-size:12px;color:var(--muted,#8892a2);text-decoration:none;margin-bottom:8px;text-align:center"><i class="fas fa-external-link-alt" style="margin-right:4px"></i> View Live Site</a>
+    <div class="admin-name" id="admin-name">Loading…</div>
+    <button class="sign-out" onclick="CP.sb().auth.signOut().then(()=>location.href='login.html')">Sign Out</button>
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="main">
+  <div class="topbar">
+    <button class="mobile-menu-btn" id="menuBtn" aria-label="Open menu"><i class="fas fa-bars"></i></button>
+    <div><div class="page-title">Dashboard</div><div class="page-sub">Welcome back — live overview of all activity</div></div>
+    <div class="topbar-right"><div class="live-dot" title="Live updates active"></div><span style="font-size:.72rem;color:var(--muted)">Live</span></div>
+  </div>
+  <div class="content">
+
+    <!-- Stats -->
+    <div class="stats-grid" id="stats">
+      <div class="stat-card"><div class="stat-label">Total Applications</div><div class="stat-value gold" id="s-total">—</div><div class="stat-sub">All time</div></div>
+      <div class="stat-card"><div class="stat-label">Pending Review</div><div class="stat-value" id="s-pending">—</div><div class="stat-sub">Awaiting action</div></div>
+      <div class="stat-card"><div class="stat-label">Fee Unpaid</div><div class="stat-value red" id="s-unpaid">—</div><div class="stat-sub">Needs collection</div></div>
+      <div class="stat-card"><div class="stat-label">Approved</div><div class="stat-value green" id="s-approved">—</div><div class="stat-sub">All time</div></div>
+      <div class="stat-card"><div class="stat-label">Leases Sent</div><div class="stat-value blue" id="s-leases">—</div><div class="stat-sub">Awaiting signature · <span id="s-leases-signed">—</span> executed</div></div>
+      <div class="stat-card"><div class="stat-label">Active Listings</div><div class="stat-value gold" id="s-listings">—</div><div class="stat-sub">Live on platform</div></div>
+    </div>
+    <div id="stats-refresh-ts" style="font-size:11px;color:var(--text-muted,#6b7280);text-align:right;margin-top:-10px;margin-bottom:16px;"></div>
+
+    <div class="dash-two-col">
+
+      <!-- Recent Applications -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Recent Applications</span>
+          <a href="applications.html" class="btn btn-ghost btn-sm">View All</a>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Applicant</th><th>Status</th><th>Fee</th><th>Date</th></tr></thead>
+            <tbody id="recent-apps"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Lease Pipeline -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Lease Pipeline</span>
+          <a href="leases.html" class="btn btn-ghost btn-sm">View All</a>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Applicant</th><th>Lease Status</th><th>Rent</th></tr></thead>
+            <tbody id="lease-pipe"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="card">
+      <div class="card-header"><span class="card-title">Quick Actions</span></div>
+      <div class="card-body" style="display:flex;gap:12px;flex-wrap:wrap">
+        <a href="applications.html?filter=pending" class="btn btn-ghost">📋 Pending Applications</a>
+        <a href="applications.html?filter=approved" class="btn btn-ghost">✅ Approved — Awaiting Lease</a>
+        <a href="leases.html?filter=sent" class="btn btn-ghost">✍️ Leases Awaiting Signature</a>
+        <a href="move-ins.html" class="btn btn-ghost">🏠 Confirm Move-Ins</a>
+        <a href="messages.html" class="btn btn-ghost">💬 Tenant Messages</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script type="module" src="/js/cp-api.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  const ok = await CP.Auth.requireAdmin();
+  if (!ok) return;
+  const user = await CP.Auth.getUser();
+  document.getElementById('admin-name').textContent = user?.email || 'Admin';
+
+  // Load stats
+  const [appsRes, listingsRes] = await Promise.all([
+    CP.sb().from('applications').select('status,payment_status,lease_status,created_at'),
+    CP.sb().from('properties').select('status'),
+  ]);
+
+  const apps = appsRes.data || [];
+
+  document.getElementById('s-total').textContent    = apps.length;
+  document.getElementById('s-pending').textContent  = apps.filter(a => a.status === 'pending').length;
+  document.getElementById('s-unpaid').textContent   = apps.filter(a => a.payment_status === 'unpaid').length;
+  document.getElementById('s-approved').textContent = apps.filter(a => a.status === 'approved').length;
+  document.getElementById('s-leases').textContent        = apps.filter(a => a.lease_status === 'sent').length;
+  document.getElementById('s-leases-signed').textContent = apps.filter(a => a.lease_status === 'signed' || a.lease_status === 'co_signed').length;
+  document.getElementById('s-listings').textContent = (listingsRes.data || []).filter(l => l.status === 'active').length;
+  document.getElementById('stats-refresh-ts').textContent = 'Last updated: ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+
+  // Recent applications
+  const tbody = document.getElementById('recent-apps');
+  tbody.innerHTML = CP.UI.skeletonRows(4, 4);
+  const { data: recent, error: recentErr } = await CP.sb().from('applications').select('app_id,first_name,last_name,status,payment_status,created_at').order('created_at',{ascending:false}).limit(8);
+  if (recentErr) { tbody.innerHTML = CP.UI.errorState('Failed to load.', 4); }
+  else if (!recent?.length) { tbody.innerHTML = CP.UI.emptyState('No applications yet', '📋', 4); }
+  else tbody.innerHTML = recent.map(a => `<tr>
+    <td><a href="applications.html?id=${a.app_id}" style="color:var(--gold);text-decoration:none">${a.first_name} ${a.last_name}</a><br><span class="text-muted mono" style="font-size:.68rem">${a.app_id}</span></td>
+    <td>${CP.UI.statusBadge(a.status)}</td>
+    <td>${CP.UI.paymentBadge(a.payment_status)}</td>
+    <td class="text-muted">${CP.UI.fmt.date(a.created_at)}</td>
+  </tr>`).join('');
+
+  // Failed email alert — check for any failed emails in the last 48 hours
+  const cutoff48h = new Date(Date.now() - 172800000).toISOString();
+  const { data: failedEmails } = await CP.sb().from('email_logs').select('id,type,recipient,created_at,error_msg').eq('status','failed').gte('created_at', cutoff48h).order('created_at',{ascending:false}).limit(20);
+  if (failedEmails?.length) {
+    const banner = document.createElement('div');
+    banner.style.cssText = 'background:#1a0a0a;border:1px solid #7f1d1d;border-radius:8px;padding:16px 20px;margin-bottom:24px;';
+    banner.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:1.2rem">⚠️</span>
+          <div>
+            <div style="color:#fca5a5;font-weight:700;font-size:.85rem">${failedEmails.length} Failed Email${failedEmails.length > 1 ? 's' : ''} in the Last 48 Hours</div>
+            <div style="color:#f87171;font-size:.75rem;margin-top:2px">${failedEmails.slice(0,3).map(e => `${e.type} → ${e.recipient}`).join(' · ')}${failedEmails.length > 3 ? ` · +${failedEmails.length - 3} more` : ''}</div>
+          </div>
+        </div>
+        <a href="email-logs.html?status=failed" style="background:#7f1d1d;color:#fca5a5;border:1px solid #991b1b;border-radius:6px;padding:7px 14px;font-size:.75rem;font-weight:700;text-decoration:none;white-space:nowrap;">View Failed Logs →</a>
+      </div>`;
+    // Insert banner before the stats grid
+    const statsGrid = document.querySelector('.stats-grid');
+    if (statsGrid) statsGrid.parentNode.insertBefore(banner, statsGrid);
+  }
+
+  // Lease pipeline
+  const lbody = document.getElementById('lease-pipe');
+  lbody.innerHTML = CP.UI.skeletonRows(3, 3);
+  const { data: leases, error: leasesErr } = await CP.sb().from('applications').select('app_id,first_name,last_name,lease_status,monthly_rent').neq('lease_status','none').order('lease_sent_date',{ascending:false}).limit(8);
+  if (leasesErr) { lbody.innerHTML = CP.UI.errorState('Failed to load.', 3); }
+  else if (!leases?.length) { lbody.innerHTML = CP.UI.emptyState('No leases in pipeline', '📄', 3); }
+  else lbody.innerHTML = leases.map(a => `<tr>
+    <td><a href="leases.html?id=${a.app_id}" style="color:var(--gold);text-decoration:none">${a.first_name} ${a.last_name}</a></td>
+    <td>${CP.UI.leaseBadge(a.lease_status)}</td>
+    <td class="text-success">${CP.UI.fmt.currency(a.monthly_rent)}/mo</td>
+  </tr>`).join('');
+
+  // Realtime
+  CP.subscribeToApplications(() => location.reload());
+})();
+</script>
+
+<script>
+// Mobile sidebar toggle
+(function(){
+  var btn = document.getElementById('menuBtn');
+  var sidebar = document.getElementById('adminSidebar');
+  var overlay = document.getElementById('sidebarOverlay');
+  if(!btn) return;
+  function open(){ sidebar.classList.add('open'); overlay.classList.add('open'); }
+  function close(){ sidebar.classList.remove('open'); overlay.classList.remove('open'); }
+  btn.addEventListener('click', open);
+  overlay.addEventListener('click', close);
+  // sidebarToggle marker
+})();
+</script>
+</body>
+</html>

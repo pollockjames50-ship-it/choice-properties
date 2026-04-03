@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+  <meta name="theme-color" content="#006aff">
+  <link rel="manifest" href="/manifest.json"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Applications — Choice Properties Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <script defer src="/config.js"></script>
+<link rel="preload" href="/css/main.css?v=1775137055043" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/css/main.css?v=1775137055043"></noscript>
+<link rel="stylesheet" href="/assets/fontawesome.css">
+  <link rel="stylesheet" href="/css/admin.css?v=1775137055043">
+  <link rel="preload" href="/css/mobile.css?v=1775137055043" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/css/mobile.css?v=1775137055043"></noscript>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<style>
+.app-card{background:var(--surface2);border:1px solid var(--color-border);border-radius:10px;padding:20px;margin-bottom:14px;transition:border-color .15s}
+.app-card:hover{border-color:rgba(201,168,76,.3)}
+.app-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.app-id{font-family:monospace;font-size:.72rem;color:var(--muted);margin-bottom:4px}
+.app-name{font-size:1rem;font-weight:700;color:var(--text)}
+.app-contact{font-size:.78rem;color:var(--muted2);margin-top:3px}
+.app-badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.app-card-mid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0;padding:14px 0;border-top:1px solid var(--color-border);border-bottom:1px solid var(--color-border)}
+.app-meta-item{font-size:.75rem}.app-meta-label{color:var(--muted);margin-bottom:2px;font-size:.65rem;text-transform:uppercase;letter-spacing:.06em}
+.app-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.detail-panel{background:var(--bg);border:1px solid var(--color-border);border-radius:8px;padding:16px;margin-top:14px;display:none;font-size:.78rem}
+.detail-panel.open{display:block}
+.detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px}
+.detail-row{display:flex;flex-direction:column;gap:2px;padding:6px 0;border-bottom:1px solid rgba(30,58,95,.3)}
+.detail-row:last-child{border-bottom:none}
+.detail-key{color:var(--muted);font-size:.65rem;text-transform:uppercase;letter-spacing:.06em}
+.detail-val{color:var(--text)}
+</style>
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="sidebar" id="adminSidebar">
+  <div class="sidebar-logo"><div class="name">Choice Properties</div><div class="sub">Admin Portal</div></div>
+  <nav>
+    <div class="nav-section">Overview</div>
+    <a class="nav-item" href="dashboard.html"><span class="icon">⊞</span> Dashboard</a>
+    <div class="nav-section">Applications</div>
+    <a class="nav-item active" href="applications.html"><span class="icon">📋</span> All Applications</a>
+    <a class="nav-item" href="leases.html"><span class="icon">📄</span> Leases</a>
+    <a class="nav-item" href="move-ins.html"><span class="icon">🏠</span> Move-Ins</a>
+    <a class="nav-item" href="messages.html"><span class="icon">💬</span> Messages</a>
+    <div class="nav-section">Platform</div>
+    <a class="nav-item" href="landlords.html"><span class="icon">👤</span> Landlords</a>
+    <a class="nav-item" href="listings.html"><span class="icon">🏢</span> Listings</a>
+    <a class="nav-item" href="email-logs.html"><span class="icon">📧</span> Email Logs</a>
+    <a class="nav-item" href="audit-log.html"><span class="icon">🔍</span> Audit Log</a>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="/index.html" target="_blank" style="display:block;font-size:12px;color:#8892a2;text-decoration:none;margin-bottom:8px;text-align:center"><i class="fas fa-external-link-alt" style="margin-right:4px"></i> View Live Site</a>
+    <div class="admin-name" id="admin-name">Loading…</div>
+    <button class="sign-out" onclick="CP.sb().auth.signOut().then(()=>location.href='login.html')">Sign Out</button>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <button class="mobile-menu-btn" id="menuBtn" aria-label="Open menu"><i class="fas fa-bars"></i></button>
+    <div><div class="page-title">All Applications</div><div class="page-sub" id="count-label">Loading…</div></div>
+    <div class="topbar-right"><div class="live-dot"></div><span style="font-size:.72rem;color:var(--muted)">Live</span></div>
+  </div>
+  <div class="content">
+
+    <div class="filter-bar">
+      <input type="text" id="search" placeholder="Search name, email, App ID…" style="min-width:220px" oninput="applyFilter()">
+      <select id="f-status" onchange="applyFilter()">
+        <option value="">All Statuses</option>
+        <option value="pending">Pending</option>
+        <option value="under_review">Under Review</option>
+        <option value="approved">Approved</option>
+        <option value="denied">Denied</option>
+        <option value="withdrawn">Withdrawn</option>
+      </select>
+      <select id="f-payment" onchange="applyFilter()">
+        <option value="">All Payments</option>
+        <option value="unpaid">Unpaid</option>
+        <option value="paid">Paid</option>
+      </select>
+      <select id="f-lease" onchange="applyFilter()">
+        <option value="">All Leases</option>
+        <option value="none">No Lease</option>
+        <option value="sent">Lease Sent</option>
+        <option value="signed">Signed</option>
+        <option value="co_signed">Co-Signed (Executed)</option>
+        <option value="voided">Voided</option>
+        <option value="expired">Expired</option>
+      </select>
+      <button class="filter-btn" onclick="clearFilters()">Clear</button>
+    </div>
+
+    <div id="app-list"></div>
+  </div>
+</div>
+
+<!-- Status Modal -->
+<div class="modal-overlay" id="status-modal">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">Update Application Status</span><button class="modal-close" onclick="closeModal('status-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="field-label">New Status</label>
+        <select id="m-status" style="width:100%">
+          <option value="pending">Pending</option>
+          <option value="under_review">Under Review</option>
+          <option value="approved">Approved</option>
+          <option value="denied">Denied</option>
+          <option value="withdrawn">Withdrawn</option>
+          <option value="waitlisted">Waitlisted</option>
+        </select></div>
+      <div class="form-group"><label class="field-label">Notes (shown in status email)</label><textarea id="m-status-notes" style="width:100%;height:80px"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('status-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitStatus()">Update Status</button>
+    </div>
+  </div>
+</div>
+
+<!-- Lease Modal -->
+<div class="modal-overlay" id="lease-modal">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title" id="lease-modal-title">Send Lease Agreement</span><button class="modal-close" onclick="closeModal('lease-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label class="field-label">Monthly Rent ($)</label><input type="number" id="m-rent" placeholder="1500"></div>
+        <div class="form-group"><label class="field-label">Security Deposit ($)</label><input type="number" id="m-deposit" placeholder="1500"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="field-label">Lease Start Date</label><input type="date" id="m-start"></div>
+        <div class="form-group"><label class="field-label">Link Expires (days)</label><input type="number" id="m-expiry" value="7"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="field-label">Late Fee — Flat ($)</label><input type="number" id="m-late-flat" value="50"></div>
+        <div class="form-group"><label class="field-label">Late Fee — Daily ($)</label><input type="number" id="m-late-daily" value="10"></div>
+      </div>
+      <div class="form-group"><label class="field-label">Internal Notes</label><textarea id="m-lease-notes" style="width:100%;height:70px" placeholder="Optional notes for this lease…"></textarea></div>
+      <div style="background:rgba(201,168,76,.07);border:1px solid rgba(201,168,76,.2);border-radius:6px;padding:12px;font-size:.75rem;color:var(--muted2)">
+        Move-In Total = Monthly Rent + Security Deposit. The lease link will be emailed to the tenant and co-applicant (if any).
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('lease-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitLease()">Send Lease</button>
+    </div>
+  </div>
+</div>
+
+<!-- Message Modal -->
+<div class="modal-overlay" id="msg-modal">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">Send Message to Tenant</span><button class="modal-close" onclick="closeModal('msg-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="field-label">Message</label><textarea id="m-msg" style="width:100%;height:120px" placeholder="Type your message to the tenant…"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('msg-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitMessage()">Send Message</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="/js/cp-api.js"></script>
+<script>
+let allApps = [], currentAppId = null;
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const ok = await CP.Auth.requireAdmin();
+  if (!ok) return;
+  const user = await CP.Auth.getUser();
+  document.getElementById('admin-name').textContent = user?.email || 'Admin';
+
+  // Check URL params
+  const params = new URLSearchParams(location.search);
+  if (params.get('filter')) document.getElementById('f-status').value = params.get('filter');
+
+  await loadApps();
+  CP.subscribeToApplications(loadApps);
+
+  // Deep-link to a specific application — scroll into view and expand details
+  const targetId = params.get('id');
+  if (targetId) {
+    const card = document.getElementById(`card-${targetId}`);
+    if (card) {
+      card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Open the detail panel if it's collapsed
+      const detail = document.getElementById(`detail-${targetId}`);
+      if (detail && !detail.classList.contains('open')) detail.classList.add('open');
+    }
+  }
+});
+
+async function loadApps() {
+  const { data } = await CP.sb().from('admin_application_view').select('*').order('created_at', { ascending: false }).limit(500);
+  allApps = data || [];
+  applyFilter();
+}
+
+function applyFilter() {
+  const search  = document.getElementById('search').value.toLowerCase();
+  const status  = document.getElementById('f-status').value;
+  const payment = document.getElementById('f-payment').value;
+  const lease   = document.getElementById('f-lease').value;
+
+  let filtered = allApps.filter(a => {
+    if (status  && a.status !== status) return false;
+    if (payment && a.payment_status !== payment) return false;
+    if (lease   && a.lease_status !== lease) return false;
+    if (search) {
+      const hay = `${a.first_name} ${a.last_name} ${a.email} ${a.app_id} ${a.property_address}`.toLowerCase();
+      if (!hay.includes(search)) return false;
+    }
+    return true;
+  });
+
+  document.getElementById('count-label').textContent = `${filtered.length} of ${allApps.length} applications`;
+  renderApps(filtered);
+}
+
+function clearFilters() {
+  ['search','f-status','f-payment','f-lease'].forEach(id => { const el = document.getElementById(id); el.value = ''; });
+  applyFilter();
+}
+
+function renderApps(apps) {
+  const el = document.getElementById('app-list');
+  if (!apps.length) { el.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div>No applications match your filters.</div>'; return; }
+  el.innerHTML = apps.map(a => `
+    <div class="app-card" id="card-${a.app_id}">
+      <div class="app-card-top">
+        <div>
+          <div class="app-id">${a.app_id}</div>
+          <div class="app-name">${CP_esc(a.first_name)} ${CP_esc(a.last_name)}${a.has_co_applicant ? ' <span style="font-size:.7rem;color:var(--muted2)">+ Co-Applicant</span>' : ''}</div>
+          <div class="app-contact">📧 ${CP_esc(a.email)} &nbsp;·&nbsp; 📱 ${CP_esc(a.phone)}</div>
+          <div class="app-badges">
+            ${CP.UI.statusBadge(a.status)}
+            ${CP.UI.paymentBadge(a.payment_status)}
+            ${CP.UI.leaseBadge(a.lease_status)}
+          </div>
+        </div>
+        <div style="text-align:right;font-size:.72rem;color:var(--muted);white-space:nowrap">
+          ${CP.UI.fmt.date(a.created_at)}<br>
+          ${a.property_address ? `<span style="color:var(--muted2)">${CP_esc(a.property_address.substring(0,40))}${a.property_address.length>40?'…':''}</span>` : ''}
+        </div>
+      </div>
+      <div class="app-card-mid">
+        <div class="app-meta-item"><div class="app-meta-label">Move-In</div>${a.requested_move_in_date || '—'}</div>
+        <div class="app-meta-item"><div class="app-meta-label">Lease Term</div>${a.desired_lease_term || '—'}</div>
+        <div class="app-meta-item"><div class="app-meta-label">Employment</div>${CP_esc(a.employer || a.employment_status || '—')}</div>
+        <div class="app-meta-item"><div class="app-meta-label">Income</div>${a.monthly_income ? CP.UI.fmt.currency(a.monthly_income)+'/mo' : '—'}</div>
+        <div class="app-meta-item"><div class="app-meta-label">Payment Pref.</div>${a.primary_payment_method || '—'}</div>
+        <div class="app-meta-item"><div class="app-meta-label">Rent</div>${a.monthly_rent ? CP.UI.fmt.currency(a.monthly_rent)+'/mo' : '—'}</div>
+        <div class="app-meta-item"><div class="app-meta-label">App Fee</div>${a.application_fee > 0 ? CP.UI.fmt.currency(a.application_fee) : '<span style="color:var(--muted2)">Free</span>'}</div>
+      </div>
+      <div class="app-actions">
+        <button class="btn btn-ghost btn-sm" onclick="toggleDetail('${a.app_id}')">🔍 View Details</button>
+        <button class="btn btn-ghost btn-sm" onclick="openStatusModal('${a.app_id}','${a.status}')">✏️ Status</button>
+        ${a.payment_status === 'unpaid' ? `<button class="btn btn-success btn-sm" onclick="markPaid('${a.app_id}')">💵 Mark Paid</button>` : ''}
+        ${a.status === 'approved' && a.lease_status === 'none' ? `<button class="btn btn-primary btn-sm" onclick="openLeaseModal('${a.app_id}','${a.first_name} ${a.last_name}',false,${a.monthly_rent||0},${a.security_deposit||0},'${a.requested_move_in_date||''}')">📄 Send Lease</button>` : ''}
+        ${a.lease_status === 'sent' ? `<button class="btn btn-ghost btn-sm" onclick="openLeaseModal('${a.app_id}','${a.first_name} ${a.last_name}',true,${a.monthly_rent||0},${a.security_deposit||0},'${a.requested_move_in_date||''}')">🔄 Resend Lease</button>` : ''}
+        ${(a.lease_status === 'voided' || a.lease_status === 'expired') ? `<button class="btn btn-primary btn-sm" onclick="openLeaseModal('${a.app_id}','${a.first_name} ${a.last_name}',false,${a.monthly_rent||0},${a.security_deposit||0},'${a.requested_move_in_date||''}')">📄 Send New Lease</button>` : ''}
+        ${(a.lease_status && a.lease_status !== 'none' && a.lease_status !== 'voided' && a.lease_status !== 'expired' && a.lease_status !== 'co_signed') ? `<button class="btn btn-sm" style="background:#991b1b" onclick="voidLease('${a.app_id}')">✕ Void Lease</button>` : ''}
+        ${(a.lease_status === 'signed' || a.lease_status === 'co_signed') && !a.move_in_status ? `<a href="move-ins.html?id=${a.app_id}" class="btn btn-sm" style="background:#065f46;color:#fff">🏠 Move-In</a>` : ''}
+        <button class="btn btn-ghost btn-sm" onclick="openMsgModal('${a.app_id}')">💬 Message</button>
+        <a href="email-logs.html?app=${a.app_id}" class="btn btn-ghost btn-sm">📧 Emails</a>
+      </div>
+      <div class="detail-panel" id="detail-${a.app_id}">
+        <div class="detail-grid">
+          <div><div class="detail-row"><div class="detail-key">DOB</div><div class="detail-val">${a.dob || '—'}</div></div>
+               <div class="detail-row"><div class="detail-key">SSN (Last 4)</div><div class="detail-val">${a.ssn || '—'}</div></div>
+               <div class="detail-row"><div class="detail-key">Current Address</div><div class="detail-val">${a.current_address || '—'}</div></div>
+               <div class="detail-row"><div class="detail-key">Residency Duration</div><div class="detail-val">${a.residency_duration || '—'}</div></div>
+               <div class="detail-row"><div class="detail-key">Current Rent</div><div class="detail-val">${a.current_rent_amount || '—'}</div></div>
+               <div class="detail-row"><div class="detail-key">Reason Leaving</div><div class="detail-val">${a.reason_for_leaving || '—'}</div></div>
+          </div>
+          <div><div class="detail-row"><div class="detail-key">Employer</div><div class="detail-val">${a.employer || '—'}</div></div>
+               <div class="detail-row"><div class="detail-key">Job Title</div><div class="detail-val">${a.job_title || '—'}</div></div>
+               <div class="detail-row"><div class="detail-key">Employment Duration</div><div class="detail-val">${a.employment_duration || '—'}</div></div>
+               <div class="detail-row"><div class="detail-key">Supervisor</div><div class="detail-val">${a.supervisor_name || '—'} ${a.supervisor_phone ? '· '+a.supervisor_phone : ''}</div></div>
+               <div class="detail-row"><div class="detail-key">Other Income</div><div class="detail-val">${a.other_income || '—'}</div></div>
+               <div class="detail-row"><div class="detail-key">Evicted?</div><div class="detail-val">${a.ever_evicted ? '⚠️ Yes' : 'No'}</div></div>
+          </div>
+          <div><div class="detail-row"><div class="detail-key">Reference 1</div><div class="detail-val">${a.reference_1_name || '—'} ${a.reference_1_phone ? '· '+a.reference_1_phone : ''}</div></div>
+               <div class="detail-row"><div class="detail-key">Reference 2</div><div class="detail-val">${a.reference_2_name || '—'} ${a.reference_2_phone ? '· '+a.reference_2_phone : ''}</div></div>
+               <div class="detail-row"><div class="detail-key">Emergency Contact</div><div class="detail-val">${a.emergency_contact_name || '—'} (${a.emergency_contact_relationship || '—'})<br>${a.emergency_contact_phone || ''}</div></div>
+               <div class="detail-row"><div class="detail-key">Pets</div><div class="detail-val">${a.has_pets ? '🐾 Yes — '+a.pet_details : 'No'}</div></div>
+               <div class="detail-row"><div class="detail-key">Smoker</div><div class="detail-val">${a.smoker ? '⚠️ Yes' : 'No'}</div></div>
+               <div class="detail-row"><div class="detail-key">Occupants</div><div class="detail-val">${a.total_occupants || '—'}</div></div>
+          </div>
+        </div>
+        ${a.admin_notes ? `<div style="margin-top:12px;background:rgba(201,168,76,.07);border-left:3px solid var(--gold);padding:10px 14px;font-size:.78rem"><strong>Admin Notes:</strong> ${CP_esc(a.admin_notes)}</div>` : ''}
+        ${(Array.isArray(a.document_urls) && a.document_urls.length > 0) ? `
+          <div style="margin-top:12px;padding:10px 14px;background:rgba(0,106,255,.04);border-left:3px solid var(--color-brand,#006AFF);border-radius:0 6px 6px 0">
+            <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#8892a2;margin-bottom:8px">📎 Uploaded Documents (${a.document_urls.length})</div>
+            ${a.document_urls.map((path, i) => {
+              const label = path.includes('photo_id') ? '🪪 Photo ID' : path.includes('proof_of_income') ? '💼 Proof of Income' : path.includes('additional') ? '📄 Additional Document' : `📎 Document ${i+1}`;
+              return `<div style="margin-bottom:4px"><a href="#" onclick="openDoc('${path}',this);return false;" style="color:#006AFF;font-size:.8rem;font-weight:600;text-decoration:none">${label}</a></div>`;
+            }).join('')}
+          </div>` : (a.document_url ? `<div style="margin-top:10px"><a href="${a.document_url}" target="_blank" class="btn btn-ghost btn-sm">📎 View Document (legacy)</a></div>` : '')}
+      </div>
+    </div>`).join('');
+}
+
+async function openDoc(storagePath, linkEl) {
+  linkEl.textContent = 'Loading…';
+  try {
+    const { data, error } = await CP.sb().storage.from('application-docs').createSignedUrl(storagePath, 3600);
+    if (error || !data?.signedUrl) { CP.UI.toast('Could not generate document link', 'error'); linkEl.textContent = '⚠ Link failed — try again'; return; }
+    window.open(data.signedUrl, '_blank');
+    const label = storagePath.includes('photo_id') ? '🪪 Photo ID' : storagePath.includes('proof_of_income') ? '💼 Proof of Income' : storagePath.includes('additional') ? '📄 Additional Document' : '📎 Document';
+    linkEl.textContent = label;
+  } catch(e) { CP.UI.toast('Error opening document', 'error'); linkEl.textContent = '⚠ Error'; }
+}
+
+function toggleDetail(appId) {
+  const el = document.getElementById(`detail-${appId}`);
+  el.classList.toggle('open');
+}
+
+function openStatusModal(appId, currentStatus) {
+  currentAppId = appId;
+  document.getElementById('m-status').value = currentStatus;
+  document.getElementById('m-status-notes').value = '';
+  document.getElementById('status-modal').classList.add('open');
+}
+
+async function submitStatus() {
+  const btn = document.querySelector('#status-modal .btn-primary');
+  if (btn) { btn.disabled = true; btn.textContent = 'Updating…'; }
+  const status = document.getElementById('m-status').value;
+  const notes  = document.getElementById('m-status-notes').value;
+  const res = await CP.Applications.updateStatus(currentAppId, status, notes);
+  if (btn) { btn.disabled = false; btn.textContent = 'Update Status'; }
+  if (res.ok) { closeModal('status-modal'); CP.UI.toast('Status updated', 'success'); await loadApps(); }
+  else CP.UI.toast('Error: ' + res.error, 'error');
+}
+
+async function markPaid(appId) {
+  if (!await CP.UI.cpConfirm('Mark this application fee as paid?', { confirmLabel: 'Mark Paid' })) return;
+  const res = await CP.Applications.markPaid(appId);
+  if (res.ok) { CP.UI.toast('Marked as paid. Payment confirmation email sent.', 'success'); await loadApps(); }
+  else CP.UI.toast('Error: ' + res.error, 'error');
+}
+
+let isResend = false;
+function openLeaseModal(appId, name, resend, prefillRent, prefillDeposit, prefillMoveIn) {
+  currentAppId = appId; isResend = resend;
+  document.getElementById('lease-modal-title').textContent = resend ? `Resend Lease — ${name}` : `Send Lease — ${name}`;
+  // Default start date to today; override with applicant's requested move-in if available
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('m-start').value = (prefillMoveIn && prefillMoveIn !== 'null' && prefillMoveIn !== 'undefined' && prefillMoveIn.trim()) ? prefillMoveIn : today;
+  // Auto-fill financial fields from application data when not a resend
+  if (!resend) {
+    if (prefillRent    && prefillRent    > 0) document.getElementById('m-rent').value    = prefillRent;
+    if (prefillDeposit && prefillDeposit > 0) document.getElementById('m-deposit').value = prefillDeposit;
+  }
+  document.getElementById('lease-modal').classList.add('open');
+}
+
+async function voidLease(appId) {
+  if (!await CP.UI.cpConfirm(`Void the lease for application <strong>${appId}</strong>?<br><br>This cannot be undone. The tenant will see "Lease Voided" when they open their link and must be contacted manually.`, { confirmLabel: 'Void Lease', cancelLabel: 'Keep Lease', danger: true })) return;
+  const res = await callEdgeFunction('sign-lease', { action: 'void', app_id: appId });
+  if (res.ok) { CP.UI.toast('Lease voided.', 'success'); await loadApps(); }
+  else CP.UI.toast('Error: ' + res.error, 'error');
+}
+
+async function submitLease() {
+  const payload = { app_id: currentAppId, monthly_rent: document.getElementById('m-rent').value, security_deposit: document.getElementById('m-deposit').value,
+    lease_start_date: document.getElementById('m-start').value, expiry_days: document.getElementById('m-expiry').value,
+    late_fee_flat: document.getElementById('m-late-flat').value, late_fee_daily: document.getElementById('m-late-daily').value,
+    lease_notes: document.getElementById('m-lease-notes').value, resend: isResend };
+  if (!payload.monthly_rent || !payload.security_deposit) { CP.UI.toast('Enter rent and deposit amounts.', 'error'); return; }
+  // H-03: Disable button immediately to prevent double-click race condition
+  const leaseBtn = document.querySelector('#lease-modal .btn-primary');
+  if (leaseBtn) { leaseBtn.disabled = true; leaseBtn.textContent = 'Sending…'; }
+  const res = await CP.Applications.generateLease(payload);
+  if (res.ok) { closeModal('lease-modal'); CP.UI.toast('Lease sent to tenant!', 'success'); await loadApps(); }
+  else {
+    CP.UI.toast('Error: ' + res.error, 'error');
+    // Re-enable button so admin can correct and retry
+    if (leaseBtn) { leaseBtn.disabled = false; leaseBtn.textContent = 'Send Lease'; }
+  }
+}
+
+function openMsgModal(appId) { currentAppId = appId; document.getElementById('m-msg').value = ''; document.getElementById('msg-modal').classList.add('open'); }
+
+async function submitMessage() {
+  const msg = document.getElementById('m-msg').value.trim();
+  if (!msg) return;
+  const btn = document.querySelector('#msg-modal .btn-primary');
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+  const res = await CP.Applications.sendMessage(currentAppId, msg, 'admin', 'Choice Properties');
+  if (btn) { btn.disabled = false; btn.textContent = 'Send Message'; }
+  if (res.ok) { closeModal('msg-modal'); CP.UI.toast('Message sent to tenant.', 'success'); }
+  else CP.UI.toast('Error: ' + res.error, 'error');
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); }));
+</script>
+
+<script>
+// Mobile sidebar toggle
+(function(){
+  var btn = document.getElementById('menuBtn');
+  var sidebar = document.getElementById('adminSidebar');
+  var overlay = document.getElementById('sidebarOverlay');
+  if(!btn) return;
+  function open(){ sidebar.classList.add('open'); overlay.classList.add('open'); }
+  function close(){ sidebar.classList.remove('open'); overlay.classList.remove('open'); }
+  btn.addEventListener('click', open);
+  overlay.addEventListener('click', close);
+  // sidebarToggle marker
+})();
+</script>
+</body>
+</html>

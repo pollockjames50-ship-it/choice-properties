@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+  <rect width="800" height="500" fill="#f1f5f9"/>
+  <rect x="250" y="150" width="300" height="200" fill="#cbd5e1" rx="4"/>
+  <polygon points="250,150 400,60 550,150" fill="#94a3b8"/>
+  <rect x="340" y="240" width="120" height="110" fill="#e2e8f0"/>
+  <text x="400" y="430" text-anchor="middle" font-family="sans-serif" font-size="18" fill="#64748b">Property Photo</text>
+</svg>

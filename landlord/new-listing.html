@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="theme-color" content="#006aff">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="preconnect" id="sb-preconnect"><!-- set by config.js -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Add a new rental property listing on Choice Properties.">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Add New Listing — Choice Properties</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="stylesheet" href="/assets/fontawesome.css">
+  <noscript><link rel="stylesheet" href="/assets/fontawesome.css">
+  </noscript>
+  <link rel="preload" href="/css/main.css?v=1775137055043" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/css/main.css?v=1775137055043"></noscript>
+  <link rel="stylesheet" href="/css/landlord.css?v=1775137055043">
+  <link rel="stylesheet" href="/css/admin.css?v=1775137055043">
+  <link rel="preload" href="/css/mobile.css?v=1775137055043" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/css/mobile.css?v=1775137055043"></noscript>
+<script defer src="/config.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script type="module" src="/js/cp-api.js"></script>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/index.html" class="nav-logo">
+      <div class="nav-logo-mark">C</div>
+      <div>
+        <div class="nav-logo-text">Choice Properties</div>
+        <div class="nav-logo-sub">Add Listing</div>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a href="/landlord/dashboard.html" class="nav-link">← Back to Dashboard</a>
+    </div>
+  </div>
+</nav>
+
+<div style="background:var(--surface);padding:var(--s-8) 0 var(--s-16)">
+<div class="container">
+
+  <div class="listing-form-container">
+
+<div style="margin-bottom:var(--s-6)">
+  <div class="section-eyebrow">New Property</div>
+  <h1 class="section-title" style="font-size:28px">Add a Listing</h1>
+  <p style="color:var(--slate);font-size:15px;margin-top:var(--s-2)">
+    Fill in your property details. Your listing goes live immediately once submitted.
+  </p>
+</div>
+
+<!-- Step indicators -->
+<div class="listing-steps" id="stepIndicators">
+  <div class="listing-step active" data-step="1">
+    <div class="step-num">1</div>
+    <div class="step-label">Basics</div>
+  </div>
+  <div class="listing-step" data-step="2">
+    <div class="step-num">2</div>
+    <div class="step-label">Details</div>
+  </div>
+  <div class="listing-step" data-step="3">
+    <div class="step-num">3</div>
+    <div class="step-label">Features</div>
+  </div>
+  <div class="listing-step" data-step="4">
+    <div class="step-num">4</div>
+    <div class="step-label">Photos</div>
+  </div>
+  <div class="listing-step" data-step="5">
+    <div class="step-num">5</div>
+    <div class="step-label">Description</div>
+  </div>
+  <div class="listing-step" data-step="6">
+    <div class="step-num">6</div>
+    <div class="step-label">Review</div>
+  </div>
+</div>
+
+<div class="listing-form-card">
+
+  <!-- Draft Resume Banner (P2-C) -->
+  <div id="resumeBanner" style="display:none;background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:var(--s-4) var(--s-5);margin-bottom:var(--s-5)">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--s-3)">
+      <div>
+        <span style="font-weight:600;color:#92400e"><i class="fas fa-history" style="margin-right:6px"></i>Unsaved Draft Found</span>
+        <span id="resumeBannerAge" style="font-size:13px;color:#78350f;margin-left:8px"></span>
+        <div style="font-size:13px;font-weight:600;color:#92400e;margin-top:6px"><i class="fas fa-exclamation-triangle" style="margin-right:5px"></i>Photos are not saved in drafts — you will need to re-upload them after resuming.</div>
+      </div>
+      <div style="display:flex;gap:var(--s-3)">
+        <button class="btn btn-ghost" id="discardDraftBtn" style="font-size:13px;padding:6px 14px">Discard</button>
+        <button class="btn btn-primary" id="resumeDraftBtn" style="font-size:13px;padding:6px 14px">Resume Draft</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Step 1: Basic Info ─────────────────────────── -->
+  <div class="form-section active" id="step1">
+    <div class="form-section-title">Basic Information</div>
+    <div class="form-section-subtitle">Tell us the essentials about your property.</div>
+
+    <div class="form-group">
+      <label class="form-label">Listing Title *</label>
+      <input type="text" class="form-input" id="title" placeholder="e.g. Bright 2BR Apartment in Downtown Austin" maxlength="120">
+      <div class="form-hint">Write a headline that highlights the best feature. Be specific. (<span id="titleCount">0</span>/120)</div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Property Type *</label>
+      <select class="form-select" id="propertyType">
+        <option value="">Select type</option>
+        <option value="apartment">Apartment</option>
+        <option value="house">House</option>
+        <option value="condo">Condo</option>
+        <option value="townhouse">Townhouse</option>
+        <option value="duplex">Duplex / Multi-family</option>
+        <option value="studio">Studio</option>
+        <option value="basement">Basement Unit</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Street Address *</label>
+      <input type="text" class="form-input" id="address" placeholder="123 Main Street">
+    </div>
+
+    <div class="form-grid-3">
+      <div class="form-group">
+        <label class="form-label">City *</label>
+        <input type="text" class="form-input" id="city" placeholder="e.g. Austin">
+      </div>
+      <div class="form-group">
+        <label class="form-label">State *</label>
+        <select class="form-select" id="state">
+          <option value="">Select State</option>
+          <option value="AL">Alabama</option>
+          <option value="AK">Alaska</option>
+          <option value="AZ">Arizona</option>
+          <option value="AR">Arkansas</option>
+          <option value="CA">California</option>
+          <option value="CO">Colorado</option>
+          <option value="CT">Connecticut</option>
+          <option value="DE">Delaware</option>
+          <option value="FL">Florida</option>
+          <option value="GA">Georgia</option>
+          <option value="HI">Hawaii</option>
+          <option value="ID">Idaho</option>
+          <option value="IL">Illinois</option>
+          <option value="IN">Indiana</option>
+          <option value="IA">Iowa</option>
+          <option value="KS">Kansas</option>
+          <option value="KY">Kentucky</option>
+          <option value="LA">Louisiana</option>
+          <option value="ME">Maine</option>
+          <option value="MD">Maryland</option>
+          <option value="MA">Massachusetts</option>
+          <option value="MI">Michigan</option>
+          <option value="MN">Minnesota</option>
+          <option value="MS">Mississippi</option>
+          <option value="MO">Missouri</option>
+          <option value="MT">Montana</option>
+          <option value="NE">Nebraska</option>
+          <option value="NV">Nevada</option>
+          <option value="NH">New Hampshire</option>
+          <option value="NJ">New Jersey</option>
+          <option value="NM">New Mexico</option>
+          <option value="NY">New York</option>
+          <option value="NC">North Carolina</option>
+          <option value="ND">North Dakota</option>
+          <option value="OH">Ohio</option>
+          <option value="OK">Oklahoma</option>
+          <option value="OR">Oregon</option>
+          <option value="PA">Pennsylvania</option>
+          <option value="RI">Rhode Island</option>
+          <option value="SC">South Carolina</option>
+          <option value="SD">South Dakota</option>
+          <option value="TN">Tennessee</option>
+          <option value="TX">Texas</option>
+          <option value="UT">Utah</option>
+          <option value="VT">Vermont</option>
+          <option value="VA">Virginia</option>
+          <option value="WA">Washington</option>
+          <option value="WV">West Virginia</option>
+          <option value="WI">Wisconsin</option>
+          <option value="WY">Wyoming</option>
+          <option value="DC">Washington D.C.</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">ZIP Code *</label>
+        <input type="text" class="form-input" id="zip" placeholder="e.g. 78701" maxlength="10" pattern="\d{5}(-\d{4})?">
+      </div>
+    </div>
+
+    <div class="form-nav">
+      <div></div>
+      <button class="btn btn-primary" id="next1">
+        Next: Details <i class="fas fa-arrow-right"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Step 2: Details ────────────────────────────── -->
+  <div class="form-section" id="step2">
+    <div class="form-section-title">Property Details</div>
+    <div class="form-section-subtitle">Size, pricing, and availability.</div>
+
+    <div class="form-grid-3">
+      <div class="form-group">
+        <label class="form-label">Bedrooms *</label>
+        <select class="form-select" id="bedrooms">
+          <option value="">Select</option>
+          <option value="0">Studio</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5+</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Bathrooms *</label>
+        <select class="form-select" id="bathrooms">
+          <option value="">Select</option>
+          <option value="1">1</option>
+          <option value="1.5">1.5</option>
+          <option value="2">2</option>
+          <option value="2.5">2.5</option>
+          <option value="3">3+</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Sq. Footage</label>
+        <input type="number" class="form-input" id="sqft" placeholder="850" min="0">
+      </div>
+    </div>
+
+    <div class="form-grid-2">
+      <div class="form-group">
+        <label class="form-label">Monthly Rent *</label>
+        <div style="position:relative">
+          <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#8892a2;font-size:15px">$</span>
+          <input type="number" class="form-input" id="rent" placeholder="1200" style="padding-left:28px" min="1">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Security Deposit</label>
+        <div style="position:relative">
+          <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#8892a2;font-size:15px">$</span>
+          <input type="number" class="form-input" id="deposit" placeholder="1200" style="padding-left:28px" min="0">
+        </div>
+      </div>
+    </div>
+
+    <div class="form-grid-2">
+      <div class="form-group">
+        <label class="form-label">Available Date</label>
+        <input type="date" class="form-input" id="availDate">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Application Fee <span style="color:#8892a2;font-weight:400;font-size:13px">(charged to applicant)</span></label>
+        <div style="position:relative">
+          <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#8892a2;font-size:15px">$</span>
+          <input type="number" class="form-input" id="appFee" style="padding-left:28px" min="0" placeholder="0">
+        </div>
+        <div class="form-hint" id="appFeeHint">Enter 0 if you don't charge an application fee. This amount will be shown to applicants before they apply.</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Lease Terms Offered</label>
+      <div class="checkbox-group">
+        <label class="checkbox-pill"><input type="checkbox" value="Month-to-month"> Month-to-month</label>
+        <label class="checkbox-pill"><input type="checkbox" value="6 months"> 6 Months</label>
+        <label class="checkbox-pill"><input type="checkbox" value="12 months" checked> 12 Months</label>
+        <label class="checkbox-pill"><input type="checkbox" value="24 months"> 24 Months</label>
+      </div>
+    </div>
+
+    <div class="form-nav">
+      <button class="btn btn-ghost" id="prev2"><i class="fas fa-arrow-left"></i> Back</button>
+      <button class="btn btn-primary" id="next2">Next: Features <i class="fas fa-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ── Step 3: Features ───────────────────────────── -->
+  <div class="form-section" id="step3">
+    <div class="form-section-title">Features & Policies</div>
+    <div class="form-section-subtitle">Let tenants know what's included.</div>
+
+    <div class="form-group">
+      <label class="form-label">Pets</label>
+      <div style="display:flex;gap:var(--s-3)">
+        <label class="checkbox-pill" style="flex:1;justify-content:center">
+          <input type="radio" name="pets" value="true"> <i class="fas fa-paw"></i> Pets Allowed
+        </label>
+        <label class="checkbox-pill" style="flex:1;justify-content:center">
+          <input type="radio" name="pets" value="false" checked> <i class="fas fa-ban"></i> No Pets
+        </label>
+      </div>
+      <div id="petDetailsWrap" style="display:none;margin-top:var(--s-3)">
+        <input type="text" class="form-input" id="petDetails" placeholder="e.g. Dogs up to 40 lbs, cats OK, pet deposit required">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Parking</label>
+      <select class="form-select" id="parking">
+        <option value="">Select parking</option>
+        <option value="None">No Parking</option>
+        <option value="Street">Street Parking</option>
+        <option value="1 car garage">1-Car Garage</option>
+        <option value="2 car garage">2-Car Garage</option>
+        <option value="Driveway">Driveway</option>
+        <option value="Parking lot">Parking Lot</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Utilities Included in Rent</label>
+      <div class="checkbox-group" id="utilitiesGroup">
+        <label class="checkbox-pill"><input type="checkbox" value="Water"> Water</label>
+        <label class="checkbox-pill"><input type="checkbox" value="Gas"> Gas</label>
+        <label class="checkbox-pill"><input type="checkbox" value="Electric"> Electric</label>
+        <label class="checkbox-pill"><input type="checkbox" value="Trash"> Trash</label>
+        <label class="checkbox-pill"><input type="checkbox" value="Internet"> Internet</label>
+        <label class="checkbox-pill"><input type="checkbox" value="Heat"> Heat</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Amenities</label>
+      <div class="checkbox-group" id="amenitiesGroup">
+        <label class="checkbox-pill"><input type="checkbox" value="Washer/Dryer"> Washer/Dryer</label>
+        <label class="checkbox-pill"><input type="checkbox" value="Dishwasher"> Dishwasher</label>
+        <label class="checkbox-pill"><input type="checkbox" value="Central A/C"> Central A/C</label>
+        <label class="checkbox-pill"><input type="checkbox" value="Hardwood Floors"> Hardwood Floors</label>
+        <label class="checkbox-pill"><input type="checkbox" value="Balcony/Patio"> Balcony/Patio</label>
+        <label class="checkbox-pill"><input type="checkbox" value="Basement"> Basement</label>
+        <label class="checkbox-pill"><input type="checkbox" value="Pool"> Pool</label>
+        <label class="checkbox-pill"><input type="checkbox" value="Gym"> Gym</label>
+        <label class="checkbox-pill"><input type="checkbox" value="Fireplace"> Fireplace</label>
+        <label class="checkbox-pill"><input type="checkbox" value="Stainless Appliances"> Stainless Appliances</label>
+        <label class="checkbox-pill"><input type="checkbox" value="Granite Counters"> Granite Counters</label>
+        <label class="checkbox-pill"><input type="checkbox" value="Smart Home"> Smart Home</label>
+      </div>
+    </div>
+
+    <div class="form-nav">
+      <button class="btn btn-ghost" id="prev3"><i class="fas fa-arrow-left"></i> Back</button>
+      <button class="btn btn-primary" id="next3">Next: Photos <i class="fas fa-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ── Step 4: Photos ─────────────────────────────── -->
+  <div class="form-section" id="step4">
+    <div class="form-section-title">Property Photos</div>
+    <div class="form-section-subtitle">Upload at least 3 high-quality photos. Great photos attract more applications.</div>
+
+    <div class="photo-dropzone" id="photoDropzone">
+      <div class="photo-dropzone-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+      <h4>Drag & drop photos here</h4>
+      <p>JPG, PNG, WEBP — up to 10MB each &nbsp;·&nbsp; <strong>iPhone users:</strong> Settings → Camera → Formats → Most Compatible</p>
+      <input type="file" id="photoInput" multiple accept="image/*" style="opacity:0;position:absolute;width:0;height:0;pointer-events:none;">
+    </div>
+
+    <div class="photo-preview-grid" id="photoPreviewGrid"></div>
+
+    <div id="uploadProgress" style="display:none;margin-top:var(--s-4)">
+      <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--slate);margin-bottom:4px">
+        <span id="uploadStatusText">Uploading photos…</span>
+        <span id="uploadPct">0%</span>
+      </div>
+      <div class="photo-upload-progress">
+        <div class="photo-upload-bar" id="uploadBar" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="form-nav">
+      <button class="btn btn-ghost" id="prev4"><i class="fas fa-arrow-left"></i> Back</button>
+      <button class="btn btn-primary" id="next4">Next: Description <i class="fas fa-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ── Step 5: Description ────────────────────────── -->
+  <div class="form-section" id="step5">
+    <div class="form-section-title">Description</div>
+    <div class="form-section-subtitle">Tell tenants what makes this property special. Be specific and honest.</div>
+
+    <div class="form-group">
+      <label class="form-label">Property Description *</label>
+      <textarea class="form-textarea" id="description" rows="8" placeholder="Describe the property — layout, condition, neighborhood highlights, what's nearby, what makes it great for tenants…" style="min-height:180px" maxlength="2000"></textarea>
+      <div style="display:flex;justify-content:flex-end;font-size:12px;color:#8892a2;margin-top:4px">
+        <span id="descCount">0</span> / 2000 characters
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Showing Instructions <span style="font-weight:400;color:#8892a2">(optional)</span></label>
+      <input type="text" class="form-input" id="showingInstructions" placeholder="e.g. Contact to schedule, lockbox available, by appointment only">
+    </div>
+
+    <div class="form-nav">
+      <button class="btn btn-ghost" id="prev5"><i class="fas fa-arrow-left"></i> Back</button>
+      <button class="btn btn-primary" id="next5">Review & Submit <i class="fas fa-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ── Step 6: Review ─────────────────────────────── -->
+  <div class="form-section" id="step6">
+    <div class="form-section-title">Review & Submit</div>
+    <div class="form-section-subtitle">Everything look good? Your listing goes live immediately once you submit.</div>
+
+    <div id="reviewSummary" style="background:var(--surface);border-radius:var(--r-lg);padding:var(--s-6);margin-bottom:var(--s-6);border:1px solid var(--slate-pale)">
+      <!-- Populated by JS -->
+    </div>
+
+    <div style="background:var(--gold-pale);border:1px solid rgba(200,146,42,0.3);border-radius:var(--r);padding:var(--s-4);margin-bottom:var(--s-6);font-size:14px;display:flex;gap:var(--s-3);align-items:flex-start">
+      <i class="fas fa-info-circle" style="color:#2563eb;margin-top:2px"></i>
+      <span><strong>Your listing goes live immediately.</strong> Once you click Submit, it will appear instantly in search results on Choice Properties. You can edit or manage it any time from your Landlord Dashboard.</span>
+    </div>
+
+    <div class="form-nav" style="flex-wrap:wrap;gap:var(--s-3)">
+      <button class="btn btn-ghost" id="prev6"><i class="fas fa-arrow-left"></i> Back</button>
+      <div style="display:flex;gap:var(--s-3)">
+        <button class="btn btn-ghost" id="previewBtn" type="button">
+          <i class="fas fa-eye"></i> Preview as Tenant
+        </button>
+        <button class="btn btn-primary btn-lg" id="submitBtn">
+          <i class="fas fa-paper-plane"></i> Submit Listing
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /listing-form-card -->
+
+  </div><!-- /listing-form-container -->
+</div><!-- /container -->
+</div>
+
+
+<script type="module">
+  import { requireAuth, getLandlordProfile } from '../js/cp-api.js';
+  import { uploadMultipleToImageKit } from '../js/imagekit.js';
+
+  await requireAuth('/landlord/login.html');
+  const profile = await getLandlordProfile();
+  if (!profile) { window.location.href = '/landlord/login.html'; throw new Error(); }
+
+  let currentStep = 1;
+  const totalSteps = 6;
+  const uploadedPhotoUrls = [];
+  const pendingFiles = [];
+  let geocodedLat = null;
+  let geocodedLng = null;
+  let _geocodePromise = null; // tracks in-flight geocode so submit can await it
+
+  // ── Geocode address via Nominatim (free, no API key) ──
+  // I-019: Reset coords on every call so a failed geocode never leaves stale
+  // lat/lng from a previous address. Debounced listeners below re-fire this
+  // whenever any address field changes — not just on step navigation.
+  function geocodeAddress() {
+    const addr = `${v('address')}, ${v('city')}, ${v('state')} ${v('zip')}`.trim();
+    geocodedLat = null;
+    geocodedLng = null;
+    if (!addr || addr.length < 10) return;
+    _geocodePromise = (async () => {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addr)}&limit=1&countrycodes=us`,
+          { headers: { 'User-Agent': 'ChoiceProperties/1.0' } }
+        );
+        const data = await res.json();
+        if (data && data[0]) {
+          geocodedLat = parseFloat(data[0].lat);
+          geocodedLng = parseFloat(data[0].lon);
+        }
+      } catch (e) { /* silent — map will fall back to Google embed */ }
+    })();
+  }
+
+  // I-019: Re-geocode on any address field change (debounced 800ms).
+  // submitListing() awaits _geocodePromise so the freshest result is always used.
+  let _geocodeDebounce = null;
+  function _scheduleGeocode() { clearTimeout(_geocodeDebounce); _geocodeDebounce = setTimeout(geocodeAddress, 800); }
+  ['address', 'city', 'zip'].forEach(id => { document.getElementById(id).addEventListener('input', _scheduleGeocode); });
+  document.getElementById('state').addEventListener('change', _scheduleGeocode);
+
+  // ── App fee — landlord sets their own amount ───────────
+  const appFeeInput = document.getElementById('appFee');
+  appFeeInput.value = '';
+  document.getElementById('appFeeHint').textContent =
+    'Enter 0 if free to apply. This amount will be shown to applicants before they submit.';
+
+  // ── Title character counter ────────────────────────────
+  document.getElementById('title').addEventListener('input', e => {
+    document.getElementById('titleCount').textContent = e.target.value.length;
+  });
+
+  // propId is generated at submit time — not at page load — to avoid
+  // consuming IDs for abandoned sessions.  See submitListing() below.
+  let propId = null;
+
+  // ── Autosave all steps to localStorage ───────────────
+  let _draftDirty = false;
+
+  function autosaveDraft() {
+    _draftDirty = true;
+    const draft = {
+      savedAt:       Date.now(),
+      title:         document.getElementById('title').value,
+      propertyType:  document.getElementById('propertyType').value,
+      address:       document.getElementById('address').value,
+      city:          document.getElementById('city').value,
+      state:         document.getElementById('state').value,
+      zip:           document.getElementById('zip').value,
+      bedrooms:      document.getElementById('bedrooms').value,
+      bathrooms:     document.getElementById('bathrooms').value,
+      sqft:          document.getElementById('sqft').value,
+      rent:          document.getElementById('rent').value,
+      deposit:       document.getElementById('deposit').value,
+      availDate:     document.getElementById('availDate').value,
+      appFee:        document.getElementById('appFee').value,
+      parking:       document.getElementById('parking').value,
+      petDetails:    document.getElementById('petDetails').value,
+      description:   document.getElementById('description').value,
+      showingInstructions: document.getElementById('showingInstructions').value,
+      petsAllowed:   document.querySelector('input[name="pets"]:checked')?.value || 'false',
+      leaseTerms:    [...document.querySelectorAll('#step2 .checkbox-group input:checked')].map(c => c.value),
+      utilities:     [...document.querySelectorAll('#utilitiesGroup input:checked')].map(c => c.value),
+      amenities:     [...document.querySelectorAll('#amenitiesGroup input:checked')].map(c => c.value),
+    };
+    localStorage.setItem('cp_draft_s1', JSON.stringify(draft));
+  }
+
+  // Wire autosave to all text/select inputs across steps
+  ['title','address','city','zip','sqft','rent','deposit','availDate','appFee','petDetails','description','showingInstructions']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener('input', autosaveDraft); });
+  ['propertyType','state','bedrooms','bathrooms','parking']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener('change', autosaveDraft); });
+  document.querySelectorAll('#step2 .checkbox-group input, #utilitiesGroup input, #amenitiesGroup input, input[name="pets"]')
+    .forEach(el => el.addEventListener('change', autosaveDraft));
+
+  // beforeunload guard — warn if draft has unsaved changes
+  window.addEventListener('beforeunload', (e) => {
+    if (_draftDirty && currentStep < 6) {
+      e.preventDefault();
+      e.returnValue = '';
+    }
+  });
+
+  // ── Draft restore helper ───────────────────────────────
+  function applyDraftToForm(s1) {
+    if (s1.title)        { document.getElementById('title').value = s1.title; document.getElementById('titleCount').textContent = s1.title.length; }
+    if (s1.propertyType) document.getElementById('propertyType').value = s1.propertyType;
+    if (s1.address)      document.getElementById('address').value = s1.address;
+    if (s1.city)         document.getElementById('city').value = s1.city;
+    if (s1.state)        document.getElementById('state').value = s1.state;
+    if (s1.zip)          document.getElementById('zip').value = s1.zip;
+    if (s1.bedrooms)     document.getElementById('bedrooms').value = s1.bedrooms;
+    if (s1.bathrooms)    document.getElementById('bathrooms').value = s1.bathrooms;
+    if (s1.sqft)         document.getElementById('sqft').value = s1.sqft;
+    if (s1.rent)         document.getElementById('rent').value = s1.rent;
+    if (s1.deposit)      document.getElementById('deposit').value = s1.deposit;
+    if (s1.availDate)    document.getElementById('availDate').value = s1.availDate;
+    if (s1.appFee !== undefined) document.getElementById('appFee').value = s1.appFee;
+    if (s1.parking)      document.getElementById('parking').value = s1.parking;
+    if (s1.petDetails)   document.getElementById('petDetails').value = s1.petDetails;
+    if (s1.petsAllowed) {
+      const petsRadio = document.querySelector(`input[name="pets"][value="${s1.petsAllowed}"]`);
+      if (petsRadio) { petsRadio.checked = true; document.getElementById('petDetailsWrap').style.display = s1.petsAllowed === 'true' ? '' : 'none'; }
+    }
+    if (Array.isArray(s1.leaseTerms) && s1.leaseTerms.length) {
+      document.querySelectorAll('#step2 .checkbox-group input').forEach(cb => { cb.checked = s1.leaseTerms.includes(cb.value); });
+    }
+    if (Array.isArray(s1.utilities) && s1.utilities.length) {
+      document.querySelectorAll('#utilitiesGroup input').forEach(cb => { cb.checked = s1.utilities.includes(cb.value); });
+    }
+    if (Array.isArray(s1.amenities) && s1.amenities.length) {
+      document.querySelectorAll('#amenitiesGroup input').forEach(cb => { cb.checked = s1.amenities.includes(cb.value); });
+    }
+    if (s1.description) {
+      document.getElementById('description').value = s1.description;
+      document.getElementById('descCount').textContent = s1.description.length;
+    }
+    if (s1.showingInstructions)  document.getElementById('showingInstructions').value = s1.showingInstructions;
+  }
+
+  // ── Check for saved draft on page load ────────────────
+  // Show resume banner if draft exists and is < 7 days old; clear it if stale.
+  try {
+    const s1 = JSON.parse(localStorage.getItem('cp_draft_s1') || 'null');
+    if (s1) {
+      const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
+      const age        = Date.now() - (s1.savedAt || 0);
+
+      if (age >= SEVEN_DAYS) {
+        // Draft is stale — clear it silently
+        localStorage.removeItem('cp_draft_s1');
+        localStorage.removeItem('cp_draft_propid');
+      } else {
+        // Draft is fresh — show "Resume Draft?" banner
+        const banner     = document.getElementById('resumeBanner');
+        const ageEl      = document.getElementById('resumeBannerAge');
+        const daysOld    = Math.floor(age / (24 * 60 * 60 * 1000));
+        const hoursOld   = Math.floor(age / (60 * 60 * 1000));
+        const minsOld    = Math.floor(age / (60 * 1000));
+        ageEl.textContent = daysOld  >= 1 ? `(saved ${daysOld}d ago)`
+                          : hoursOld >= 1 ? `(saved ${hoursOld}h ago)`
+                          : minsOld  >= 1 ? `(saved ${minsOld}m ago)`
+                          : '(just saved)';
+        banner.style.display = 'block';
+
+        document.getElementById('resumeDraftBtn').addEventListener('click', () => {
+          applyDraftToForm(s1);
+          banner.style.display = 'none';
+          _draftDirty = false;
+          CP.UI.toast('Draft restored.', 'success');
+        });
+
+        document.getElementById('discardDraftBtn').addEventListener('click', () => {
+          localStorage.removeItem('cp_draft_s1');
+          localStorage.removeItem('cp_draft_propid');
+          banner.style.display = 'none';
+          CP.UI.toast('Draft discarded.', 'info');
+        });
+      }
+    }
+  } catch(e) {}
+
+  // ── Navigation ─────────────────────────────────────────
+  // I-041: Prevent past dates in the Available Date picker
+  document.getElementById('availDate').min = new Date().toISOString().split('T')[0];
+  document.getElementById('next1').addEventListener('click', () => validate1() && goTo(2));
+  document.getElementById('next2').addEventListener('click', () => validate2() && goTo(3));
+  document.getElementById('next3').addEventListener('click', () => validate3() && goTo(4));
+  document.getElementById('next4').addEventListener('click', () => validatePhotos() && goTo(5));
+  document.getElementById('next5').addEventListener('click', () => validate5() && goTo(6));
+  document.getElementById('prev2').addEventListener('click', () => goTo(1));
+  document.getElementById('prev3').addEventListener('click', () => goTo(2));
+  document.getElementById('prev4').addEventListener('click', () => goTo(3));
+  document.getElementById('prev5').addEventListener('click', () => goTo(4));
+  document.getElementById('prev6').addEventListener('click', () => goTo(5));
+  document.getElementById('submitBtn').addEventListener('click', submitListing);
+
+  // ── Preview listing (P2-E) ─────────────────────────────
+  document.getElementById('previewBtn').addEventListener('click', () => {
+    const getChecked = (groupId) =>
+      [...document.querySelectorAll(`#${groupId} input:checked`)].map(c => c.value);
+    const leaseTerms = [...document.querySelectorAll('#step2 .checkbox-group input:checked')].map(c => c.value);
+
+    const previewData = {
+      title:             v('title') || 'Untitled Listing',
+      property_type:     v('propertyType'),
+      address:           v('address'),
+      city:              v('city'),
+      state:             v('state'),
+      zip:               v('zip'),
+      bedrooms:          v('bedrooms') ? parseInt(v('bedrooms')) : null,
+      bathrooms:         v('bathrooms') ? parseFloat(v('bathrooms')) : null,
+      square_footage:    v('sqft') ? parseInt(v('sqft')) : null,
+      monthly_rent:      v('rent') ? parseInt(v('rent')) : 0,
+      security_deposit:  v('deposit') ? parseInt(v('deposit')) : null,
+      available_date:    v('availDate') || null,
+      application_fee:   v('appFee') !== null && v('appFee') !== '' ? parseInt(v('appFee')) : 0,
+      lease_terms:       leaseTerms,
+      pets_allowed:      document.querySelector('input[name="pets"]:checked')?.value === 'true',
+      pet_details:       v('petDetails') || null,
+      parking:           v('parking') || null,
+      utilities_included: getChecked('utilitiesGroup'),
+      amenities:         getChecked('amenitiesGroup'),
+      description:       v('description'),
+      showing_instructions: v('showingInstructions') || null,
+      photo_urls:        pendingPreviews.slice(0, 5), // I-050: data URLs work cross-tab (blob: URLs are tab-scoped and break on iOS Safari)
+      status:            'preview',
+      landlords:         { contact_name: profile.contact_name, business_name: profile.business_name, tagline: profile.tagline, avatar_url: profile.avatar_url, verified: profile.verified },
+    };
+    sessionStorage.setItem('cp_listing_preview', JSON.stringify(previewData));
+    // Use same-tab navigation — window.open() is blocked by iOS Safari popup blocker (L-03)
+    window.location.href = '/property.html?preview=true';
+  });
+
+  // Pets toggle
+  document.querySelectorAll('input[name="pets"]').forEach(r => {
+    r.addEventListener('change', () => {
+      document.getElementById('petDetailsWrap').style.display =
+        document.querySelector('input[name="pets"]:checked')?.value === 'true' ? '' : 'none';
+    });
+  });
+
+  // Description counter
+  document.getElementById('description').addEventListener('input', e => {
+    document.getElementById('descCount').textContent = e.target.value.length;
+  });
+
+  // ── Photo upload ──────────────────────────────────────
+  const dropzone  = document.getElementById('photoDropzone');
+  const photoInput = document.getElementById('photoInput');
+
+  dropzone.addEventListener('click', () => photoInput.click());
+  photoInput.addEventListener('click', e => e.stopPropagation());
+  photoInput.addEventListener('change', e => handleFiles([...e.target.files]));
+
+  dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
+  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+  dropzone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropzone.classList.remove('drag-over');
+    handleFiles([...e.dataTransfer.files]);
+  });
+
+  function handleFiles(files) {
+    const MAX_PHOTOS = 20;
+    files.forEach(file => {
+      if (!file.type.startsWith('image/')) return;
+
+      // I-050: Reject HEIC/HEIF immediately — createImageBitmap() and canvas
+      // compression both fail on HEIC in most browsers, so we cannot compress
+      // or re-encode it. Reject early with a clear, actionable message.
+      if (['image/heic', 'image/heif'].includes(file.type.toLowerCase()) ||
+          /\.heic$/i.test(file.name)) {
+        err(`"${file.name}" is in HEIC format (iPhone default). Go to Settings → Camera → Formats → Most Compatible to shoot in JPG, then re-upload.`);
+        return;
+      }
+
+      if (file.size > 10 * 1024 * 1024) {
+        err(`"${file.name}" is too large (${fmtSize(file.size)}). Maximum photo size is 10 MB.`);
+        return;
+      }
+
+      if (pendingFiles.length >= MAX_PHOTOS) {
+        err(`Maximum ${MAX_PHOTOS} photos allowed.`);
+        return;
+      }
+
+      // I-050: Skip duplicate files (same name + size = same file selected twice)
+      if (pendingFiles.find(f => f.name === file.name && f.size === file.size)) return;
+
+      pendingFiles.push(file);
+      const reader = new FileReader();
+      reader.onload = (e) => addPhotoPreview(e.target.result, file);
+      reader.readAsDataURL(file);
+    });
+    // Reset the file input so the same file can be re-selected after removal
+    photoInput.value = '';
+  }
+
+  // I-025: Re-render the full photo grid so cover badge and set-as-cover
+  // button stay accurate after any add / remove / reorder operation.
+  // pendingFiles[] is the source of truth; pendingPreviews[] holds the
+  // corresponding data-URL strings in the same order.
+  const pendingPreviews = []; // parallel to pendingFiles — data URLs for display
+
+  // I-050: Format bytes as human-readable size for thumbnail badges
+  function fmtSize(bytes) {
+    return bytes >= 1_048_576
+      ? (bytes / 1_048_576).toFixed(1) + ' MB'
+      : Math.round(bytes / 1024) + ' KB';
+  }
+
+  function renderPhotoGrid() {
+    const grid = document.getElementById('photoPreviewGrid');
+    grid.innerHTML = '';
+    pendingFiles.forEach((file, i) => {
+      const item = document.createElement('div');
+      item.className = 'photo-preview-item' + (i === 0 ? ' is-cover' : '');
+      item.innerHTML = `
+        <img src="${pendingPreviews[i]}" alt="Preview" loading="lazy">
+        ${i === 0 ? '<div class="new-cover-label">Cover</div>' : ''}
+        <div class="photo-size-badge">${fmtSize(file.size)}</div>
+        <div class="photo-action-bar">
+          ${i !== 0 ? `<button class="photo-action-btn new-cover-btn" title="Set as cover" type="button"><i class="fas fa-star"></i></button>` : ''}
+          <button class="photo-action-btn new-delete-btn" title="Remove" type="button"><i class="fas fa-times"></i></button>
+        </div>`;
+      if (i !== 0) {
+        item.querySelector('.new-cover-btn').addEventListener('click', () => {
+          pendingFiles.unshift(pendingFiles.splice(i, 1)[0]);
+          pendingPreviews.unshift(pendingPreviews.splice(i, 1)[0]);
+          renderPhotoGrid();
+          CP.UI.toast('Cover photo updated.', 'success');
+        });
+      }
+      item.querySelector('.new-delete-btn').addEventListener('click', () => {
+        pendingFiles.splice(i, 1);
+        pendingPreviews.splice(i, 1);
+        renderPhotoGrid();
+      });
+      grid.appendChild(item);
+    });
+  }
+
+  function addPhotoPreview(src, file) {
+    pendingPreviews.push(src);
+    renderPhotoGrid();
+  }
+
+  // ── Step navigation ───────────────────────────────────
+  function goTo(step) {
+    document.querySelector(`#step${currentStep}`).classList.remove('active');
+    document.querySelector(`#step${step}`).classList.add('active');
+
+    // Update step indicators
+    document.querySelectorAll('.listing-step').forEach(s => {
+      const n = parseInt(s.dataset.step);
+      s.classList.remove('active', 'completed');
+      if (n === step) s.classList.add('active');
+      else if (n < step) s.classList.add('completed');
+    });
+
+    if (step === 6) buildReview();
+    // I-019: geocodeAddress() is now triggered by field change listeners — no longer needed here
+    currentStep = step;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ── Validation ────────────────────────────────────────
+  function validate1() {
+    if (!v('title')) return err('Please enter a listing title.');
+    if (v('title').length > 120) return err('Title must be 120 characters or less.');
+    if (!v('propertyType')) return err('Please select a property type.');
+    if (!v('address')) return err('Please enter the property address.');
+    if (!v('city'))    return err('Please enter the city.');
+    if (!v('state'))   return err('Please select a state.');
+    if (!v('zip'))     return err('Please enter the ZIP code.');
+    if (!/^\d{5}(-\d{4})?$/.test(v('zip'))) return err('Please enter a valid ZIP code (e.g. 90210).');
+    return true;
+  }
+
+  function validate2() {
+    if (!v('bedrooms')) return err('Please select number of bedrooms.');
+    if (!v('bathrooms')) return err('Please select number of bathrooms.');
+    if (!v('rent') || parseInt(v('rent')) < 1) return err('Please enter a valid monthly rent.');
+    if (parseInt(v('rent')) > 50000) return err('Monthly rent looks too high — please double-check.');
+    return true;
+  }
+
+  function validate3() {
+    const petsAllowed = document.querySelector('input[name="pets"]:checked')?.value === 'true';
+    if (petsAllowed && !v('petDetails')) return err('Please describe your pet policy (breeds, weight limits, deposit, etc.).');
+    return true;
+  }
+
+  function validatePhotos() {
+    if (pendingFiles.length < 3) return err('Please upload at least 3 photos.');
+    return true;
+  }
+
+  function validate5() {
+    if (!v('description') || v('description').length < 50)
+      return err('Please write a description of at least 50 characters.');
+    if (v('description').length > 2000)
+      return err('Description must be 2000 characters or fewer.');
+    return true;
+  }
+
+  function v(id) { return document.getElementById(id)?.value?.trim(); }
+  function err(msg) { CP.UI.toast(msg, 'error'); return false; }
+
+  // ── Build review summary ──────────────────────────────
+  function buildReview() {
+    const leaseTerms  = [...document.querySelectorAll('#step2 .checkbox-group input[type=checkbox]:checked')].map(c => c.value);
+    const utilities   = [...document.querySelectorAll('#utilitiesGroup input:checked')].map(c => c.value);
+    const amenities   = [...document.querySelectorAll('#amenitiesGroup input:checked')].map(c => c.value);
+    const petsAllowed = document.querySelector('input[name="pets"]:checked')?.value === 'true';
+    const appFee      = parseInt(v('appFee')) || 0;
+
+    const row = (label, val) => val ? `
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--slate-pale);font-size:14px;gap:var(--s-4)">
+        <span style="color:var(--slate);flex-shrink:0">${label}</span>
+        <span style="font-weight:600;color:#0e0e0f;text-align:right">${val}</span>
+      </div>` : '';
+
+    const section = (title) => `
+      <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#8892a2;padding:14px 0 4px;margin-top:4px">${title}</div>`;
+
+    document.getElementById('reviewSummary').innerHTML = `
+      ${section('Property')}
+      ${row('Title',        v('title'))}
+      ${row('Type',         v('propertyType') ? v('propertyType').charAt(0).toUpperCase() + v('propertyType').slice(1) : null)}
+      ${row('Address',      `${v('address')}, ${v('city')}, ${v('state')} ${v('zip')}`)}
+
+      ${section('Details & Pricing')}
+      ${row('Bedrooms',     v('bedrooms') === '0' ? 'Studio' : v('bedrooms'))}
+      ${row('Bathrooms',    v('bathrooms'))}
+      ${row('Sq. Footage',  v('sqft') ? `${parseInt(v('sqft')).toLocaleString()} sqft` : null)}
+      ${row('Monthly Rent', `$${parseInt(v('rent')).toLocaleString()}`)}
+      ${row('Deposit',      v('deposit') ? `$${parseInt(v('deposit')).toLocaleString()}` : 'Not specified')}
+      ${row('Available',    v('availDate') || 'Immediately')}
+      ${row('Lease Terms',  leaseTerms.length ? leaseTerms.join(', ') : null)}
+      ${row('App. Fee',     appFee > 0 ? `$${appFee}` : 'Free — No fee')}
+
+      ${section('Features & Policies')}
+      ${row('Pets',         petsAllowed ? (v('petDetails') || 'Allowed') : 'No Pets')}
+      ${row('Parking',      v('parking') || null)}
+      ${row('Utilities',    utilities.length ? utilities.join(', ') : 'None included')}
+      ${row('Amenities',    amenities.length ? amenities.join(', ') : null)}
+
+      ${section('Photos & Description')}
+      ${row('Photos',       `${pendingFiles.length} photo${pendingFiles.length !== 1 ? 's' : ''} ready to upload`)}
+      ${row('Showing',      v('showingInstructions') || null)}
+    `;
+  }
+
+  // ── Submit ────────────────────────────────────────────
+  async function submitListing() {
+    const btn = document.getElementById('submitBtn');
+    // I-027: Disable immediately — before any async work — to close the double-submit window.
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Checking…';
+
+    // 0a. Ensure geocoding has finished before we read lat/lng.
+    //     geocodeAddress() fires when the landlord leaves step 1 — it may still
+    //     be in flight if they move quickly. Awaiting the stored promise here
+    //     closes the race condition without slowing down the common case where
+    //     geocoding already resolved long before submit.
+    if (_geocodePromise) await _geocodePromise;
+
+    // 0. Resolve propId — generated server-side at submit time (not page load).
+    //    Cached in localStorage so a retry after a failed DB insert reuses the
+    //    same ID and ImageKit folder, avoiding orphaned photos.
+    if (!propId) propId = localStorage.getItem('cp_draft_propid');
+    if (!propId) {
+      const { data: rpcId, error: rpcErr } = await CP.sb().rpc('generate_property_id');
+      if (rpcErr || !rpcId) {
+        CP.UI.toast('Failed to initialize listing. Please refresh and try again.', 'error');
+        btn.disabled  = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Listing';
+        return;
+      }
+      propId = rpcId;
+      localStorage.setItem('cp_draft_propid', propId);
+    }
+
+    // I-040: Duplicate detection runs BEFORE photo uploads so we don't waste
+    // upload bandwidth if the landlord decides not to proceed.
+    // I-020: This is an intentional SOFT guard — the landlord can dismiss the
+    // modal and proceed. It is not enforced server-side.
+    const { data: dupes } = await CP.sb()
+      .from('properties')
+      .select('id, title, status')
+      .eq('landlord_id', profile.id)
+      .ilike('address', v('address'))
+      .ilike('city', v('city'))
+      .not('status', 'eq', 'archived')
+      .limit(1);
+
+    if (dupes && dupes.length > 0) {
+      const existing = dupes[0];
+      // I-037: Use CP.UI.cpConfirm() instead of window.confirm()
+      const proceed = await CP.UI.cpConfirm(
+        `A listing for this address already exists: "${existing.title}" (${existing.status}). Do you want to create another listing at the same address?`
+      );
+      if (!proceed) {
+        btn.disabled  = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Listing';
+        return;
+      }
+    }
+
+    // 1. Upload photos to ImageKit via Edge Function
+    // propId is stable for this submit attempt — reusing it on retry means photos
+    // already uploaded go to the same ImageKit folder instead of being orphaned.
+    const photoUrls    = [];
+    const photoFileIds = []; // I-028: parallel fileId array for CDN deletion (I-015)
+
+    if (pendingFiles.length) {
+      // Pre-flight: confirm photo service is configured before attempting upload.
+      // If Supabase secrets are missing the request will fail with HTTP 401 which
+      // was previously (incorrectly) reported as "session expired".
+      if (!CONFIG.SUPABASE_URL || !CONFIG.SUPABASE_ANON_KEY) {
+        CP.UI.toast('Photo uploads are not configured yet. Add your SUPABASE_URL and SUPABASE_ANON_KEY secrets and restart the app.', 'error');
+        btn.disabled  = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Listing';
+        return;
+      }
+
+      // Pre-flight: get a guaranteed-fresh access token before starting uploads.
+      // getAccessToken() tries the cached session first, then does an explicit
+      // refresh if needed (covers slow-3G cases where auto-refresh timed out).
+      btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Verifying session…';
+      const accessToken = await window.CP?.Auth?.getAccessToken?.();
+      if (!accessToken) {
+        CP.UI.toast('Session invalid — your draft is saved. Taking you to login now…', 'error');
+        btn.disabled  = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Listing';
+        setTimeout(() => { window.location.href = '/landlord/login.html'; }, 1500);
+        return;
+      }
+
+      btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Uploading photos…';
+      const bar    = document.getElementById('uploadBar');
+      const txt    = document.getElementById('uploadStatusText');
+      const pctLbl = document.getElementById('uploadPct');
+      document.getElementById('uploadProgress').style.display = '';
+
+      try {
+        let doneCount = 0; // I-016: tracks completed uploads for progress text
+        const results = await uploadMultipleToImageKit(pendingFiles, {
+          folder:           `/properties/${propId}`,
+          supabaseUrl:      CONFIG.SUPABASE_URL,
+          anonKey:          CONFIG.SUPABASE_ANON_KEY,
+          userToken:        accessToken,
+          onFileProgress:   (fileIdx, pct) => {
+            if (pct === 100) doneCount++;
+            txt.textContent = `Uploading photos… (${doneCount} of ${pendingFiles.length} done)`;
+          },
+          onTotalProgress:  (overall) => {
+            bar.style.width    = overall + '%';
+            pctLbl.textContent = overall + '%';
+          },
+        });
+
+        // I-050: Separate successes from failures — one bad photo must not
+        // discard the entire batch. Collect the good ones and warn about failures.
+        const failed = results.filter(r => r?.error);
+        for (const r of results) {
+          if (r?.url) {
+            photoUrls.push(r.url);
+            photoFileIds.push(r.fileId ?? null);
+          }
+        }
+
+        if (failed.length > 0 && photoUrls.length === 0) {
+          // Every photo failed — surface the actual reason from the first failure
+          const firstError = failed[0]?.error || 'Unknown error';
+          // Distinguish session errors (401, JWT rejected) from configuration errors
+          // (secrets missing) and ImageKit-side failures. Session errors are checked
+          // first — a 401 always means auth failure, never a missing config.
+          const isSessionError  = /\b401\b|unauthorized|session expired|jwt/i.test(firstError);
+          const isConfigError   = /not configured/i.test(firstError);
+          const isImageKitError = /imagekit|502|credentials/i.test(firstError);
+          let reason;
+          if (isSessionError) {
+            reason = 'Your session expired — please refresh the page, log back in, and try again.';
+          } else if (isConfigError) {
+            reason = 'The photo upload service is not fully configured. Check that your Supabase secrets are set and the imagekit-upload Edge Function is deployed.';
+          } else if (isImageKitError) {
+            reason = 'Photo storage service error — please try again in a moment.';
+          } else {
+            reason = `Upload error: ${firstError}`;
+          }
+          CP.UI.toast(`Photos could not be uploaded. ${reason}`, 'error');
+          btn.disabled  = false;
+          btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Listing';
+          document.getElementById('uploadProgress').style.display = 'none';
+          return;
+        }
+
+        if (failed.length > 0) {
+          // Some photos failed but others succeeded — warn and continue
+          const names = failed.map(f => `"${f.fileName}"`).join(', ');
+          CP.UI.toast(`${failed.length} photo(s) could not be uploaded and were skipped: ${names}. You can add them later from Edit Listing.`, 'info');
+        }
+
+      } catch (uploadErr) {
+        CP.UI.toast('Photo upload failed: ' + uploadErr.message, 'error');
+        btn.disabled  = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Listing';
+        document.getElementById('uploadProgress').style.display = 'none';
+        return;
+      }
+
+      document.getElementById('uploadProgress').style.display = 'none';
+    }
+
+    btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Saving listing…';
+
+    // 2. Collect form data
+    const getChecked = (groupId) =>
+      [...document.querySelectorAll(`#${groupId} input:checked`)].map(c => c.value);
+
+    const leaseTerms = [...document.querySelectorAll('#step2 .checkbox-group input:checked')].map(c => c.value);
+
+    const listingData = {
+      id               : propId,
+      landlord_id      : profile.id,
+      status           : 'active',
+      title            : v('title'),
+      property_type    : v('propertyType'),
+      address          : v('address'),
+      city             : v('city'),
+      state            : v('state'),
+      zip              : v('zip'),
+      lat              : geocodedLat,
+      lng              : geocodedLng,
+      bedrooms         : v('bedrooms') ? parseInt(v('bedrooms')) : null,
+      bathrooms        : v('bathrooms') ? parseFloat(v('bathrooms')) : null,
+      square_footage   : v('sqft') ? parseInt(v('sqft')) : null,
+      monthly_rent     : parseInt(v('rent')),
+      security_deposit : v('deposit') ? parseInt(v('deposit')) : null,
+      available_date   : v('availDate') || null,
+      application_fee  : v('appFee') !== null && v('appFee') !== '' ? parseInt(v('appFee')) : 0,
+      lease_terms      : leaseTerms,
+      pets_allowed     : document.querySelector('input[name="pets"]:checked')?.value === 'true',
+      pet_details      : v('petDetails') || null,
+      parking          : v('parking') || null,
+      utilities_included: getChecked('utilitiesGroup'),
+      amenities        : getChecked('amenitiesGroup'),
+      photo_urls       : photoUrls,
+      photo_file_ids   : photoFileIds, // I-028: persist fileIds for CDN deletion
+      description      : v('description'),
+      showing_instructions : v('showingInstructions') || null,
+    };
+
+    // I-069: Validate array sync before insert — prevents index misalignment on deletion
+    if (photoUrls.length !== photoFileIds.length) {
+      CP.UI.toast('Internal error: photo data is corrupted. Please refresh and try again.', 'error');
+      console.error('INVARIANT VIOLATION: photo arrays out of sync', { photoUrls, photoFileIds });
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Listing';
+      return;
+    }
+
+    const { error } = await CP.sb().from('properties').insert(listingData);
+
+    if (error) {
+      // If this is a primary key conflict, the propId is already in the database
+      // (e.g. from a previous session that crashed after insert but before cleanup).
+      // Clear the stale draft ID so a fresh one is generated on next attempt.
+      if (error.code === '23505') {
+        localStorage.removeItem('cp_draft_propid');
+        localStorage.removeItem('cp_draft_s1');
+        CP.UI.toast('A conflict was detected. Please refresh the page and resubmit.', 'error');
+      } else {
+        CP.UI.toast('Failed to save listing. Please try again.', 'error');
+      }
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Listing';
+      return;
+    }
+
+    // Success screen
+    document.querySelector('.listing-form-card').innerHTML = `
+      <div style="text-align:center;padding:var(--s-12) var(--s-6)">
+        <div style="width:80px;height:80px;background:#f0fdf4;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto var(--s-5);font-size:32px;color:#16a34a">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <h2 style="font-family:var(--font-display);font-size:30px;color:#0e0e0f;margin-bottom:var(--s-3)">
+          Your Listing is Live!
+        </h2>
+        <p style="color:var(--slate);font-size:15px;max-width:420px;margin:0 auto var(--s-4);line-height:1.65">
+          <strong>${v('title')}</strong> is now <strong>active</strong> and immediately visible to renters searching on Choice Properties.
+        </p>
+
+        <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:var(--s-5);max-width:440px;margin:0 auto var(--s-6);text-align:left">
+          <div style="font-weight:700;font-size:14px;color:#166534;margin-bottom:10px"><i class="fas fa-check-circle" style="margin-right:6px"></i>What happens next</div>
+          <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;color:#14532d">
+            <div style="display:flex;gap:10px">
+              <div style="width:22px;height:22px;background:#16a34a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0">1</div>
+              <span>Your listing is <strong>live now</strong> and appearing in search results on Choice Properties</span>
+            </div>
+            <div style="display:flex;gap:10px">
+              <div style="width:22px;height:22px;background:#16a34a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0">2</div>
+              <span>Interested tenants can send <strong>inquiries</strong> or <strong>submit applications</strong> right away</span>
+            </div>
+            <div style="display:flex;gap:10px">
+              <div style="width:22px;height:22px;background:#16a34a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0">3</div>
+              <span>Manage your listing and review applications from your <strong>Landlord Dashboard</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <p style="font-size:12px;color:#8892a2;margin-bottom:var(--s-6)">
+          Listing ID: <strong style="font-family:monospace">${propId}</strong>
+        </p>
+        <div style="display:flex;gap:var(--s-3);justify-content:center;flex-wrap:wrap">
+          <a href="/landlord/dashboard.html" class="btn btn-dark" id="successDashBtn">← Back to Dashboard</a>
+          <a href="/landlord/new-listing.html" class="btn btn-outline" id="successNewBtn">Add Another Listing</a>
+        </div>
+      </div>`;
+
+    // Clear draft session data now that listing is submitted
+    _draftDirty = false;
+    localStorage.removeItem('cp_draft_propid');
+    localStorage.removeItem('cp_draft_s1');
+    sessionStorage.removeItem('cp_listing_preview');
+
+    // Auto-redirect to dashboard after 8 seconds (cancel if user clicks a button)
+    let redirectTimer = setTimeout(() => { window.location.href = '/landlord/dashboard.html'; }, 8000);
+    document.getElementById('successDashBtn')?.addEventListener('click', () => clearTimeout(redirectTimer));
+    document.getElementById('successNewBtn')?.addEventListener('click', () => clearTimeout(redirectTimer));
+  }
+</script>
+
+<!-- Mobile Bottom Nav (landlord portal) -->
+
+<nav class="mobile-bottom-nav" id="mobileBottomNav">
+  <a href="/landlord/dashboard.html" class="mobile-bottom-nav-item "><i class="fas fa-th-large"></i>Dashboard</a>
+  <a href="/landlord/applications.html" class="mobile-bottom-nav-item "><i class="fas fa-file-alt"></i>Apps</a>
+  <a href="/landlord/inquiries.html" class="mobile-bottom-nav-item "><i class="fas fa-envelope"></i>Inquiries</a>
+  <a href="/landlord/new-listing.html" class="mobile-bottom-nav-item active"><i class="fas fa-plus-circle"></i>New</a>
+  <a href="/landlord/settings.html" class="mobile-bottom-nav-item "><i class="fas fa-cog"></i>Settings</a>
+</nav>
+<script>
+  const mn = document.getElementById('mainNav') || document.querySelector('.nav');
+  if (mn) window.addEventListener('scroll', () => mn.classList.toggle('scrolled', window.scrollY > 20), { passive: true });
+</script>
+</body>
+</html>
