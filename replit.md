@@ -26,21 +26,23 @@ The server:
 
 ## Environment Variables
 
-Set in Replit's environment:
+All environment variables and secrets are stored in Replit's Secrets / Environment panel (not hardcoded in any file).
 
-| Variable | Purpose |
-|---|---|
-| `SUPABASE_URL` | Supabase project URL |
-| `SUPABASE_ANON_KEY` | Supabase anonymous key (public) |
-| `IMAGEKIT_URL` | ImageKit CDN base URL |
-| `IMAGEKIT_PUBLIC_KEY` | ImageKit public upload key |
-| `GEOAPIFY_API_KEY` | Address autocomplete API key |
-| `COMPANY_NAME` | Displayed company name |
-| `COMPANY_EMAIL` | Company contact email |
-| `COMPANY_PHONE` | Company phone number |
-| `COMPANY_ADDRESS` | Company address |
-| `SITE_URL` | Canonical site URL |
-| `PORT` | Server port (default: 5000) |
+| Variable | Type | Purpose |
+|---|---|---|
+| `SUPABASE_URL` | Env var | Supabase project URL |
+| `SUPABASE_ANON_KEY` | **Secret** | Supabase anonymous key (public JWT, kept as secret) |
+| `IMAGEKIT_URL` | Env var | ImageKit CDN base URL |
+| `IMAGEKIT_PUBLIC_KEY` | Env var | ImageKit public upload key |
+| `GEOAPIFY_API_KEY` | Env var | Address autocomplete API key |
+| `COMPANY_NAME` | Env var | Displayed company name |
+| `COMPANY_EMAIL` | Env var | Company contact email |
+| `COMPANY_PHONE` | Env var | Company phone number |
+| `COMPANY_ADDRESS` | Env var | Company address |
+| `COMPANY_TAGLINE` | Env var | Company tagline |
+| `SITE_URL` | Env var | Canonical site URL |
+| `ADMIN_EMAILS` | Env var | Admin notification email(s) |
+| `PORT` | Env var | Server port (default: 5000) |
 
 ## Key Files
 
@@ -75,3 +77,10 @@ The backend logic lives in `supabase/functions/`. These are deployed to Supabase
 - `/landlord/` — Landlord portal (login-protected)
 - `/apply/lease.html` — Tenant lease signing
 - `/apply/success.html` — Application success page
+
+## Important Notes
+
+- The Replit PostgreSQL database (auto-created) is **not used** — Supabase is the database
+- Supabase Edge Functions are deployed to Supabase cloud, not hosted on Replit
+- This project does not require `npm install` — no dependencies beyond built-in Node.js modules
+- For deployment to production, use Cloudflare Pages (not Replit Deploy)
