@@ -967,7 +967,7 @@
             <h3 data-i18n="mainPaymentMethod" style="margin-bottom:var(--space-2);">Your Main Payment Method</h3>
             <p style="color:var(--color-text-secondary);font-size:14px;margin-bottom:var(--space-4);" data-i18n="mainPaymentDesc">Tap your preferred service. Tap a second card to add a backup.</p>
 
-            <div class="payment-icon-grid" id="paymentIconGrid">
+            <div class="payment-icon-grid" id="paymentIconGrid" aria-label="Select primary payment method" role="radiogroup">
                 <div class="payment-icon-card" data-method="Venmo">
                     <span class="pic-icon">💙</span>
                     <span class="pic-label">Venmo</span>
@@ -1093,14 +1093,14 @@
                     <div class="form-row">
                         <div class="form-col">
                             <div class="form-group">
-                                <label for="coFirstName" data-i18n="coFirstNameLabel">First Name</label>
+                                <label class="required" for="coFirstName" data-i18n="coFirstNameLabel">First Name</label>
                                 <input type="text" id="coFirstName" name="Co-Applicant First Name" maxlength="100">
                                 <div class="error-message"></div>
                             </div>
                         </div>
                         <div class="form-col">
                             <div class="form-group">
-                                <label for="coLastName" data-i18n="coLastNameLabel">Last Name</label>
+                                <label class="required" for="coLastName" data-i18n="coLastNameLabel">Last Name</label>
                                 <input type="text" id="coLastName" name="Co-Applicant Last Name" maxlength="100">
                                 <div class="error-message"></div>
                             </div>
@@ -1109,14 +1109,14 @@
                     <div class="form-row">
                         <div class="form-col">
                             <div class="form-group">
-                                <label for="coEmail" data-i18n="coEmailLabel">Email</label>
+                                <label class="required" for="coEmail" data-i18n="coEmailLabel">Email</label>
                                 <input type="email" id="coEmail" name="Co-Applicant Email">
                                 <div class="error-message"></div>
                             </div>
                         </div>
                         <div class="form-col">
                             <div class="form-group">
-                                <label for="coPhone" data-i18n="coPhoneLabel">Phone</label>
+                                <label class="required" for="coPhone" data-i18n="coPhoneLabel">Phone</label>
                                 <input type="tel" id="coPhone" name="Co-Applicant Phone">
                                 <div class="error-message"></div>
                             </div>
@@ -1125,7 +1125,7 @@
                     <div class="form-row">
                         <div class="form-col">
                             <div class="form-group">
-                                <label for="coDob" data-i18n="coDobLabel">Date of Birth</label>
+                                <label class="required" for="coDob" data-i18n="coDobLabel">Date of Birth</label>
                                 <input type="date" id="coDob" name="Co-Applicant DOB">
                                 <div class="error-message"></div>
                             </div>
@@ -1134,7 +1134,7 @@
 
                     <h5 data-i18n="employmentIncome">Employment &amp; Income</h5>
                     <div class="form-group">
-                        <label for="coEmploymentStatus" data-i18n="coEmploymentStatusLabel">Employment Status</label>
+                        <label class="required" for="coEmploymentStatus" data-i18n="coEmploymentStatusLabel">Employment Status</label>
                         <select id="coEmploymentStatus" name="Co-Applicant Employment Status">
                             <option value="" data-i18n="selectStatus">— Select —</option>
                             <option value="Full-time" data-i18n="empFullTime">Full-time Employed</option>
@@ -1149,14 +1149,14 @@
                         <div class="form-row">
                             <div class="form-col">
                                 <div class="form-group">
-                                    <label for="coEmployer" data-i18n="coEmployerLabel">Employer</label>
+                                    <label class="required" for="coEmployer" data-i18n="coEmployerLabel">Employer</label>
                                     <input type="text" id="coEmployer" name="Co-Applicant Employer" maxlength="100">
                                     <div class="error-message"></div>
                                 </div>
                             </div>
                             <div class="form-col">
                                 <div class="form-group">
-                                    <label for="coJobTitle" data-i18n="coJobTitleLabel">Job Title</label>
+                                    <label class="required" for="coJobTitle" data-i18n="coJobTitleLabel">Job Title</label>
                                     <input type="text" id="coJobTitle" name="Co-Applicant Job Title" maxlength="100">
                                     <div class="error-message"></div>
                                 </div>
@@ -1166,14 +1166,14 @@
                     <div class="form-row">
                         <div class="form-col">
                             <div class="form-group">
-                                <label for="coMonthlyIncome" data-i18n="coMonthlyIncomeLabel">Gross Monthly Income ($)</label>
+                                <label class="required" for="coMonthlyIncome" data-i18n="coMonthlyIncomeLabel">Gross Monthly Income ($)</label>
                                 <input type="text" id="coMonthlyIncome" name="Co-Applicant Monthly Income" placeholder="e.g., 4000" data-i18n="coMonthlyIncomePlaceholder" maxlength="20">
                                 <div class="error-message"></div>
                             </div>
                         </div>
                         <div class="form-col">
                             <div class="form-group">
-                                <label for="coEmploymentDuration" data-i18n="coEmploymentDurationLabel">Length of Employment</label>
+                                <label class="required" for="coEmploymentDuration" data-i18n="coEmploymentDurationLabel">Length of Employment</label>
                                 <input type="text" id="coEmploymentDuration" name="Co-Applicant Employment Duration" placeholder="e.g., 2 years" data-i18n="coEmploymentDurationPlaceholder" maxlength="100">
                                 <div class="error-message"></div>
                             </div>
@@ -1183,7 +1183,7 @@
                     <div class="form-group">
                         <div class="custom-checkbox">
                             <input type="checkbox" id="coConsent" name="Co-Applicant Consent">
-                            <label for="coConsent" data-i18n="coConsentLabel">I authorise verification of the information provided for this additional person, including credit and background check.</label>
+                            <label class="required" for="coConsent" data-i18n="coConsentLabel">I authorise verification of the information provided for this additional person, including credit and background check.</label>
                         </div>
                         <div class="error-message"></div>
                     </div>
@@ -1268,7 +1268,7 @@
                     </div>
                     <div class="form-col" id="coSsnCol" style="display:none">
                         <div class="form-group">
-                            <label for="coSsn" data-i18n="coSsnLabel">Co-Applicant SSN (Last 4)</label>
+                            <label for="coSsn" class="required" data-i18n="coSsnLabel">Co-Applicant SSN (Last 4)</label>
                             <div class="ssn-container">
                                 <input type="text" id="coSsn" name="Co-Applicant SSN" placeholder="1234" maxlength="4" inputmode="numeric" autocomplete="off" required>
                             </div>

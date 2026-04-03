@@ -111,9 +111,16 @@ window.APPLY_VALIDATION = {
                 }
             } else if (field.type === 'tel') {
                 const phoneDigits = field.value.replace(/\D/g, '');
-                isValid = phoneDigits.length >= 10;
+                isValid = phoneDigits.length === 10;
                 if (!isValid) {
                     errorMessage = this.t('errPhoneInvalid');
+                } else {
+                    // Check for valid US phone format: (XXX) XXX-XXXX or XXX-XXX-XXXX or XXX XXX XXXX
+                    const phoneRegex = /^(\(\d{3}\)\s?|\d{3}-?)\d{3}-?\d{4}$/;
+                    isValid = phoneRegex.test(field.value.replace(/\s/g, ''));
+                    if (!isValid) {
+                        errorMessage = 'Please enter a valid US phone number format (e.g., (123) 456-7890)';
+                    }
                 }
             }
         }
@@ -270,8 +277,13 @@ window.APPLY_VALIDATION = {
         const primaryInput = document.getElementById('primaryPayment');
         const primaryVal   = primaryInput ? primaryInput.value : '';
         const errEl        = document.getElementById('primaryPaymentError');
+        const validMethods = ['Cash', 'Check', 'Money Order', 'ACH/eCheck', 'Zelle', 'Venmo', 'PayPal', 'Other'];
         if (!primaryVal) {
             if (errEl) { errEl.style.display = 'block'; errEl.textContent = 'Please select a payment method.'; }
+            return false;
+        }
+        if (!validMethods.includes(primaryVal)) {
+            if (errEl) { errEl.style.display = 'block'; errEl.textContent = 'Please select a valid payment method.'; }
             return false;
         }
         if (errEl) errEl.style.display = 'none';
@@ -290,9 +302,9 @@ window.APPLY_VALIDATION = {
     setupCharacterCounters() {
         const form = document.getElementById('rentalApplication');
         if (!form) return;
-        const textareas = form.querySelectorAll('textarea[data-maxlength]');
+        const textareas = form.querySelectorAll('textarea[maxlength]');
         textareas.forEach(textarea => {
-            const maxLength = parseInt(textarea.getAttribute('data-maxlength'), 10);
+            const maxLength = parseInt(textarea.getAttribute('maxlength'), 10);
             if (!maxLength || maxLength <= 0) return;
 
             // Find or create character counter element
